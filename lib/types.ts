@@ -228,4 +228,5 @@ export interface SystemMapData {
   routeNames: string[];
   stationNamesAndIds: string[];
   stationNameToId: Record<string, string>;
+  stationIdToName: Record<string, string>;
 }

@@ -18,17 +18,19 @@ import {
   DialogActions,
   MessageBar,
   MessageBarBody,
-  Badge,
   Spinner,
+  Tooltip,
 } from "@fluentui/react-components";
 import {
   SaveRegular,
   DeleteRegular,
   ArrowUpRegular,
   ChevronDownRegular,
+  MapRegular,
 } from "@fluentui/react-icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
 import {
   useUpdateQuestStatusMutation,
   usePromoteQuestMutation,
@@ -38,6 +40,8 @@ import { usePermissions } from "@/lib/hooks/usePermissions";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { Quest } from "@/lib/types";
+import type { RootState, AppDispatch } from "@/lib/store";
+import { fetchSystemMap } from "@/lib/store/systemMapSlice";
 
 interface QuestToolbarProps {
   quest: Quest | null;
@@ -45,6 +49,7 @@ interface QuestToolbarProps {
   isSaving: boolean;
   onSave: () => void;
   canSave: boolean;
+  onNavigateToReview?: () => void;
 }
 
 export function QuestToolbar({
@@ -53,15 +58,33 @@ export function QuestToolbar({
   isSaving,
   onSave,
   canSave,
+  onNavigateToReview,
 }: QuestToolbarProps) {
   const router = useRouter();
   const toast = useAppToast();
+  const dispatch = useDispatch<AppDispatch>();
   const permissions = usePermissions(quest);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
+
+  const systemMap = useSelector((state: RootState) => state.systemMap);
 
   const [updateStatus] = useUpdateQuestStatusMutation();
   const [promote] = usePromoteQuestMutation();
   const [deleteQuest, { isLoading: isDeleting }] = useDeleteQuestMutation();
+
+  const handleRefreshSystemMap = async () => {
+    if (!systemMap.baseUrl) {
+      toast.warning("No System Map URL", "Configure the System Map API URL in Settings first.");
+      return;
+    }
+    try {
+      const data = await dispatch(fetchSystemMap(systemMap.baseUrl)).unwrap();
+      toast.success("System map refreshed", `${data.stationNames.length} stations, ${data.routeNames.length} routes.`);
+    } catch (err) {
+      toast.error("Failed to refresh", String(err));
+    }
+  };
 
   const handleStatusChange = async (newStatus: string) => {
     if (!quest) return;
@@ -83,6 +106,7 @@ export function QuestToolbar({
       const { title, body } = extractApiError(err);
       toast.error(title, body);
     }
+    setPromoteDialogOpen(false);
   };
 
   const handleDelete = async () => {
@@ -90,7 +114,7 @@ export function QuestToolbar({
     try {
       await deleteQuest(quest.id).unwrap();
       toast.success("Quest deleted");
-      router.replace("/");
+      router.replace("/quests");
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -105,8 +129,8 @@ export function QuestToolbar({
     : [];
 
   return (
-    <div className="border-b">
-      <Toolbar size="small" className="px-4 py-1">
+    <div className="border-b border-gray-200">
+      <Toolbar className="px-4 py-1">
         <ToolbarButton
           appearance="primary"
           icon={isSaving ? <Spinner size="tiny" /> : <SaveRegular />}
@@ -160,7 +184,7 @@ export function QuestToolbar({
                 <ToolbarDivider />
                 <ToolbarButton
                   icon={<ArrowUpRegular />}
-                  onClick={handlePromote}
+                  onClick={() => setPromoteDialogOpen(true)}
                 >
                   Promote Draft
                 </ToolbarButton>
@@ -180,19 +204,63 @@ export function QuestToolbar({
             )}
           </>
         )}
+        
+        <ToolbarDivider />
+        <Tooltip content={systemMap.data
+          ? `${systemMap.data.stationNames.length} stations, ${systemMap.data.routeNames.length} routes loaded`
+          : "No station data loaded — click to fetch"} relationship="description">
+          <ToolbarButton
+            icon={systemMap.loading ? <Spinner size="tiny" /> : <MapRegular />}
+            onClick={handleRefreshSystemMap}
+            disabled={systemMap.loading}
+          >
+            {systemMap.data ? "Reload MTR Data" : "Load MTR Data"}
+          </ToolbarButton>
+        </Tooltip>
       </Toolbar>
 
       {quest?.hasPendingDraft && quest.status === "PUBLIC" && (
         <MessageBar intent="warning" className="rounded-none">
-          <MessageBarBody>
-            This quest has pending draft changes that differ from the live
-            version.{" "}
-            {permissions.isAdmin
-              ? "You can promote the draft to make it live."
-              : "An admin needs to approve the changes."}
+          <MessageBarBody className="flex items-center gap-2 flex-wrap">
+            <span>
+              {permissions.isAdmin
+                ? "This quest has pending draft changes. You can review and promote them to make them live."
+                : "This quest has pending game logic changes awaiting admin review. Metadata changes are already live."}
+            </span>
+            {quest.dataPublic && onNavigateToReview && (
+              <Button
+                appearance="transparent"
+                size="small"
+                onClick={onNavigateToReview}
+                style={{ minWidth: 0, textDecoration: "underline" }}
+              >
+                Review Changes
+              </Button>
+            )}
           </MessageBarBody>
         </MessageBar>
       )}
+
+      <Dialog open={promoteDialogOpen} onOpenChange={(_, d) => setPromoteDialogOpen(d.open)}>
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle>Promote Draft to Live</DialogTitle>
+            <DialogContent>
+              Are you sure you want to promote the draft changes to the live
+              version? This will make the draft game logic immediately available
+              to all players.
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setPromoteDialogOpen(false)} appearance="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handlePromote} appearance="primary">
+                Promote to Live
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={(_, d) => setDeleteDialogOpen(d.open)}>
         <DialogSurface>

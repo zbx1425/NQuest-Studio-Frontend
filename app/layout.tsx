@@ -32,7 +32,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex flex-col h-screen">
             <NavBar />
-            <main className="flex-1 overflow-auto">{children}</main>
+            <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
           </div>
         </Providers>
       </body>

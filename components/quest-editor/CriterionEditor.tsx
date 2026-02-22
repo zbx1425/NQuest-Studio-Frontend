@@ -43,8 +43,9 @@ export function CriterionEditor({
   const systemMap = useSelector((state: RootState) => state.systemMap.data);
   const stationItems = systemMap?.stationNamesAndIds ?? [];
   const routeItems = systemMap?.routeNames ?? [];
+  const stationDisplayMap = systemMap?.stationIdToName ?? {};
 
-  // Auto-resolve station names to IDs
+  // Auto-resolve station names to IDs when the user picks from autocomplete
   useEffect(() => {
     if (!systemMap) return;
     if (
@@ -58,7 +59,8 @@ export function CriterionEditor({
         onChange({ ...value, stationName: resolved });
       }
     }
-  }, [value.type]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when the station value itself changes
+  }, [value.type === "VisitStationCriterion" || value.type === "RideToStationCriterion" || value.type === "RideLineToStationCriterion" ? value.stationName : null, systemMap]);
 
   const handleTypeChange = useCallback(
     (newType: string) => {
@@ -117,6 +119,7 @@ export function CriterionEditor({
           onChange={(v) => update({ stationName: v })}
           items={stationItems}
           placeholder="Select a station"
+          displayMap={stationDisplayMap}
         />
       )}
 
@@ -127,6 +130,7 @@ export function CriterionEditor({
           onChange={(v) => update({ stationName: v })}
           items={stationItems}
           placeholder="Select a station"
+          displayMap={stationDisplayMap}
         />
       )}
 
@@ -155,6 +159,7 @@ export function CriterionEditor({
             onChange={(v) => update({ stationName: v })}
             items={stationItems}
             placeholder="Select a station"
+            displayMap={stationDisplayMap}
           />
         </div>
       )}

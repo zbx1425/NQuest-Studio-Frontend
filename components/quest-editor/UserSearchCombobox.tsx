@@ -38,10 +38,9 @@ export function UserSearchCombobox({
 
   return (
     <div className="flex flex-col gap-1">
-      {label && <Label size="small">{label}</Label>}
+      {label && <Label>{label}</Label>}
       <Combobox
         freeform
-        size="small"
         placeholder="Type username or Discord ID..."
         value={query}
         onInput={(e) => setQuery((e.target as HTMLInputElement).value)}

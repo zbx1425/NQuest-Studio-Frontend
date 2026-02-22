@@ -6,10 +6,21 @@ import {
   FluentProvider,
   webLightTheme,
   Spinner,
+  RendererProvider,
+  createDOMRenderer,
+  renderToStyleElements,
 } from "@fluentui/react-components";
 import { store, persistor } from "@/lib/store";
+import { useServerInsertedHTML } from "next/navigation";
+import { useState } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [renderer] = useState(() => createDOMRenderer());
+
+  useServerInsertedHTML(() => {
+    return <>{renderToStyleElements(renderer)}</>;
+  });
+  
   return (
     <Provider store={store}>
       <PersistGate
@@ -20,9 +31,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }
         persistor={persistor}
       >
-        <FluentProvider theme={webLightTheme} className="min-h-screen">
-          {children}
-        </FluentProvider>
+        <RendererProvider renderer={renderer}>
+          <FluentProvider theme={webLightTheme}>
+            {children}
+          </FluentProvider>
+        </RendererProvider>
       </PersistGate>
     </Provider>
   );

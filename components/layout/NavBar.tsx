@@ -27,7 +27,7 @@ export function NavBar() {
   const pathname = usePathname();
   const { user, isLoggedIn, isAdmin, isAuthor, login, logout } = useAuth();
   const tabs = [
-    { value: "/", label: "Quests" },
+    { value: "/quests", label: "Quests" },
     ...(isAdmin
       ? [{ value: "/categories", label: "Categories" }]
       : []),
@@ -36,71 +36,72 @@ export function NavBar() {
       : []),
   ];
 
-  const selectedTab = tabs.find((t) => pathname === t.value)?.value ?? "/";
+  const selectedTab = tabs.find((t) => pathname === t.value)?.value ?? "";
 
   return (
     <>
       <Toaster toasterId="global-toaster" position="top-end" />
-      <nav className="flex items-center border-b px-4 h-12 shrink-0">
-        <Link href="/" className="text-lg font-bold mr-6 no-underline text-inherit">
-          NQuest Studio
-        </Link>
+      <nav className="w-full border-b border-gray-200 shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
+          <Link href="/" className="text-lg font-bold mr-6 no-underline text-inherit">
+            NQuest Studio
+          </Link>
 
-        <TabList
-          selectedValue={selectedTab}
-          size="small"
-          className="flex-1"
-        >
-          {tabs.map((tab) => (
-            <Link key={tab.value} href={tab.value} className="no-underline">
-              <Tab value={tab.value}>{tab.label}</Tab>
-            </Link>
-          ))}
-        </TabList>
+          <TabList
+            selectedValue={selectedTab}
+            className="flex-1"
+          >
+            {tabs.map((tab) => (
+              <Link key={tab.value} href={tab.value} className="no-underline">
+                <Tab value={tab.value}>{tab.label}</Tab>
+              </Link>
+            ))}
+          </TabList>
 
-        <div className="flex items-center gap-2 ml-auto">
-          {isLoggedIn && user ? (
-            <Menu>
-              <MenuTrigger disableButtonEnhancement>
-                <Tooltip content={user.username} relationship="label">
-                  <Button
-                    appearance="subtle"
-                    icon={<Avatar name={user.username} size={24} />}
-                  >
-                    {user.username}
-                    {isAdmin && (
-                      <Badge appearance="filled" color="danger" size="small" className="ml-1.5">
-                        Admin
-                      </Badge>
-                    )}
-                    {!isAdmin && isAuthor && (
-                      <Badge appearance="filled" color="brand" size="small" className="ml-1.5">
-                        Author
-                      </Badge>
-                    )}
-                  </Button>
-                </Tooltip>
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  <Link href="/settings" className="no-underline">
-                    <MenuItem icon={<SettingsRegular />}>Settings</MenuItem>
-                  </Link>
-                  <MenuItem icon={<SignOutRegular />} onClick={logout}>
-                    Logout
-                  </MenuItem>
-                </MenuList>
-              </MenuPopover>
-            </Menu>
-          ) : (
-            <Button
-              appearance="primary"
-              icon={<PersonRegular />}
-              onClick={login}
-            >
-              Login with Discord
-            </Button>
-          )}
+          <div className="flex items-center gap-2 ml-auto">
+            {isLoggedIn && user ? (
+              <Menu>
+                <MenuTrigger disableButtonEnhancement>
+                  <Tooltip content={user.username} relationship="label">
+                    <Button
+                      appearance="subtle"
+                      icon={<Avatar name={user.username} size={24} />}
+                    >
+                      {user.username}
+                      {isAdmin && (
+                        <Badge appearance="filled" color="danger" size="small" className="ml-1.5">
+                          Admin
+                        </Badge>
+                      )}
+                      {!isAdmin && isAuthor && (
+                        <Badge appearance="filled" color="brand" size="small" className="ml-1.5">
+                          Author
+                        </Badge>
+                      )}
+                    </Button>
+                  </Tooltip>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <Link href="/settings" className="no-underline">
+                      <MenuItem icon={<SettingsRegular />}>Settings</MenuItem>
+                    </Link>
+                    <MenuItem icon={<SignOutRegular />} onClick={logout}>
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            ) : (
+              <Button
+                appearance="primary"
+                icon={<PersonRegular />}
+                onClick={login}
+              >
+                Login with Discord
+              </Button>
+            )}
+          </div>
         </div>
       </nav>
     </>

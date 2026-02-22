@@ -74,7 +74,7 @@ export default function CategoriesPage() {
 
   if (!isAdmin) {
     return (
-      <div className="p-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
           <MessageBarBody>Only admins can manage categories.</MessageBarBody>
         </MessageBar>
@@ -172,14 +172,13 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-4 mb-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex items-center gap-4 mb-6">
         <h1 className="text-xl font-bold">Categories</h1>
         <Button
           appearance="primary"
           icon={<AddRegular />}
           onClick={openCreate}
-          size="small"
         >
           New Category
         </Button>
@@ -188,10 +187,10 @@ export default function CategoriesPage() {
       {isLoading ? (
         <Spinner label="Loading categories..." />
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50">
+              <tr className="border-b border-gray-200 bg-gray-50/60">
                 <th className="text-left p-3 font-semibold">ID</th>
                 <th className="text-left p-3 font-semibold">Name</th>
                 <th className="text-left p-3 font-semibold">Icon</th>
@@ -209,7 +208,7 @@ export default function CategoriesPage() {
                 </tr>
               )}
               {categoryEntries.map(([id, cat]) => (
-                <tr key={id} className="border-b hover:bg-gray-50">
+                <tr key={id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
                   <td className="p-3 font-mono text-xs">{id}</td>
                   <td className="p-3 font-medium">{cat.name}</td>
                   <td className="p-3 text-xs text-gray-500">{cat.icon}</td>
@@ -231,13 +230,11 @@ export default function CategoriesPage() {
                       <Button
                         appearance="subtle"
                         icon={<EditRegular />}
-                        size="small"
                         onClick={() => openEdit(id, cat)}
                       />
                       <Button
                         appearance="subtle"
                         icon={<DeleteRegular />}
-                        size="small"
                         onClick={() => {
                           setDeletingId(id);
                           setDeleteDialogOpen(true);
@@ -314,19 +311,18 @@ export default function CategoriesPage() {
                 {/* Tiers */}
                 <div>
                   <Label className="font-semibold">Tiers</Label>
-                  <div className="space-y-1 mt-1">
+                  <div className="space-y-2 mt-2">
                     {Object.entries(form.tiers)
                       .sort(([, a], [, b]) => a.order - b.order)
                       .map(([tierId, tier]) => (
                         <div
                           key={tierId}
-                          className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1"
+                          className="flex items-center gap-2 bg-gray-50 rounded-md px-3 py-2"
                         >
                           <Text size={200} className="font-mono w-24">
                             {tierId}
                           </Text>
                           <Input
-                            size="small"
                             value={tier.name}
                             onChange={(_, d) =>
                               setForm({
@@ -340,7 +336,6 @@ export default function CategoriesPage() {
                             className="flex-1"
                           />
                           <Input
-                            size="small"
                             value={tier.icon}
                             onChange={(_, d) =>
                               setForm({
@@ -351,39 +346,35 @@ export default function CategoriesPage() {
                                 },
                               })
                             }
-                            className="w-40"
+                            className="w-48"
                             placeholder="Icon"
                           />
                           <Button
                             appearance="subtle"
                             icon={<DismissRegular />}
-                            size="small"
                             onClick={() => removeTier(tierId)}
                           />
                         </div>
                       ))}
                   </div>
-                  <div className="flex items-end gap-2 mt-2">
-                    <div className="flex flex-col gap-0.5">
-                      <Label size="small">Tier ID</Label>
+                  <div className="flex items-end gap-3 mt-3">
+                    <div className="flex flex-col gap-1">
+                      <Label>Tier ID</Label>
                       <Input
-                        size="small"
                         value={newTierId}
                         onChange={(_, d) => setNewTierId(d.value)}
                         placeholder="e.g., easy"
                       />
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <Label size="small">Name</Label>
+                    <div className="flex flex-col gap-1">
+                      <Label>Name</Label>
                       <Input
-                        size="small"
                         value={newTierName}
                         onChange={(_, d) => setNewTierName(d.value)}
                         placeholder="e.g., Easy"
                       />
                     </div>
                     <Button
-                      size="small"
                       icon={<AddRegular />}
                       onClick={addTier}
                       disabled={!newTierId}

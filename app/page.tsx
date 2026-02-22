@@ -1,214 +1,108 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { Button, Badge } from "@fluentui/react-components";
 import {
-  Button,
-  Tab,
-  TabList,
-  Dropdown,
-  Option,
-  Spinner,
-  Badge,
-  Text,
-} from "@fluentui/react-components";
-import {
-  AddRegular,
   EditRegular,
-  ChevronLeftRegular,
-  ChevronRightRegular,
+  PersonRegular,
+  ShieldKeyholeRegular,
+  LayerRegular,
+  ArrowRightRegular,
 } from "@fluentui/react-icons";
-import { useGetQuestsQuery, useGetCategoriesQuery } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDistanceToNow } from "date-fns";
 
-type StatusFilter = "" | "PRIVATE" | "STAGING" | "PUBLIC";
+const FEATURES = [
+  {
+    icon: <EditRegular className="text-2xl" />,
+    title: "Visual Quest Editor",
+    desc: "Build multi-step quests with a recursive criterion editor — no JSON wrangling needed.",
+  },
+  {
+    icon: <ShieldKeyholeRegular className="text-2xl" />,
+    title: "Draft & Review Workflow",
+    desc: "Edit freely in drafts. Admins review and promote changes to the live server.",
+  },
+  {
+    icon: <LayerRegular className="text-2xl" />,
+    title: "Categories & Tiers",
+    desc: "Organize quests into categories with customizable difficulty tiers and point values.",
+  },
+];
 
-export default function QuestListPage() {
-  const { isLoggedIn, isAuthor } = useAuth();
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
-  const [page, setPage] = useState(1);
-  const pageSize = 20;
-
-  const { data: categories } = useGetCategoriesQuery();
-  const { data, isLoading, isFetching } = useGetQuestsQuery({
-    status: statusFilter || undefined,
-    category: categoryFilter || undefined,
-    page,
-    size: pageSize,
-  });
-
-  const categoryEntries = categories
-    ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
-    : [];
-
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
+export default function LandingPage() {
+  const { isLoggedIn, login } = useAuth();
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Toolbar */}
-      <div className="flex items-center gap-4 mb-4 flex-wrap">
-        {isLoggedIn && isAuthor && (
-          <Link href="/editor">
-            <Button appearance="primary" icon={<AddRegular />}>
-              New Quest
-            </Button>
-          </Link>
-        )}
+    <div className="flex flex-col min-h-full">
+      {/* Hero */}
+      <section className="flex-1 flex items-center justify-center px-6 py-20">
+        <div className="max-w-2xl text-center space-y-6">
+          <Badge appearance="outline" color="brand" size="large">
+            Quest Management for Minecraft Transit Railway
+          </Badge>
 
-        <TabList
-          selectedValue={statusFilter}
-          onTabSelect={(_, d) => {
-            setStatusFilter(d.value as StatusFilter);
-            setPage(1);
-          }}
-          size="small"
-        >
-          <Tab value="">All</Tab>
-          <Tab value="PRIVATE">Private</Tab>
-          <Tab value="STAGING">Staging</Tab>
-          <Tab value="PUBLIC">Public</Tab>
-        </TabList>
+          <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
+            Create, Edit &amp; Publish
+            <br />
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Server Quests
+            </span>
+          </h1>
 
-        <Dropdown
-          placeholder="All Categories"
-          value={
-            categoryFilter
-              ? categories?.[categoryFilter]?.name ?? categoryFilter
-              : "All Categories"
-          }
-          onOptionSelect={(_, d) => {
-            setCategoryFilter(d.optionValue === "__all__" ? "" : (d.optionValue ?? ""));
-            setPage(1);
-          }}
-          size="small"
-          className="min-w-[160px]"
-        >
-          <Option value="__all__">All Categories</Option>
-          {categoryEntries.map(([id, cat]) => (
-            <Option key={id} value={id}>
-              {cat.name}
-            </Option>
-          ))}
-        </Dropdown>
-      </div>
+          <p className="text-lg text-gray-500 max-w-lg mx-auto">
+            NQuest Studio gives quest authors a modern visual editor, collaborative access control, and a safe draft-to-live publishing pipeline. Actually this is pure AI slop
+          </p>
 
-      {/* Table */}
-      {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner size="large" label="Loading quests..." />
-        </div>
-      ) : (
-        <>
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="text-left p-3 font-semibold">Name</th>
-                  <th className="text-left p-3 font-semibold w-24">Status</th>
-                  <th className="text-left p-3 font-semibold">Category</th>
-                  <th className="text-right p-3 font-semibold w-16">Pts</th>
-                  <th className="text-left p-3 font-semibold w-24">Draft</th>
-                  <th className="text-left p-3 font-semibold w-32">Modified</th>
-                  <th className="text-center p-3 font-semibold w-16"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {data?.items.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="text-center py-12 text-gray-500">
-                      No quests found.
-                    </td>
-                  </tr>
-                )}
-                {data?.items.map((quest) => {
-                  const catName = quest.category && categories
-                    ? categories[quest.category]?.name ?? quest.category
-                    : "—";
-                  const tierName =
-                    quest.tier && quest.category && categories
-                      ? categories[quest.category]?.tiers[quest.tier]?.name ?? quest.tier
-                      : quest.tier ?? "";
-
-                  return (
-                    <tr
-                      key={quest.id}
-                      className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <td className="p-3">
-                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`} className="block">
-                          <div className="font-medium">{quest.name}</div>
-                          <Text size={200} className="text-gray-500">
-                            {quest.id}
-                          </Text>
-                        </Link>
-                      </td>
-                      <td className="p-3">
-                        <StatusBadge status={quest.status} />
-                      </td>
-                      <td className="p-3">
-                        <span>{catName}</span>
-                        {tierName && (
-                          <Text size={200} className="text-gray-500 ml-2">
-                            {tierName}
-                          </Text>
-                        )}
-                      </td>
-                      <td className="p-3 text-right">{quest.questPoints}</td>
-                      <td className="p-3">
-                        {quest.hasPendingDraft && (
-                          <Badge appearance="filled" color="warning" size="small">
-                            Pending
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="p-3 text-gray-500">
-                        {formatDistanceToNow(new Date(quest.lastModifiedAt), {
-                          addSuffix: true,
-                        })}
-                      </td>
-                      <td className="p-3 text-center">
-                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`}>
-                          <Button
-                            appearance="subtle"
-                            icon={<EditRegular />}
-                            size="small"
-                          />
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            {isLoggedIn ? (
+              <Link href="/quests">
+                <Button
+                  appearance="primary"
+                  size="large"
+                  icon={<ArrowRightRegular />}
+                  iconPosition="after"
+                >
+                  Go to Quests
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                appearance="primary"
+                size="large"
+                icon={<PersonRegular />}
+                onClick={login}
+              >
+                Login with Discord
+              </Button>
+            )}
+            <Link href="/quests">
+              <Button appearance="outline" size="large">
+                Browse Quests
+              </Button>
+            </Link>
           </div>
+        </div>
+      </section>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Button
-                appearance="subtle"
-                icon={<ChevronLeftRegular />}
-                disabled={page <= 1 || isFetching}
-                onClick={() => setPage((p) => p - 1)}
-                size="small"
-              />
-              <Text size={300}>
-                Page {page} of {totalPages} ({data?.total} quests)
-              </Text>
-              <Button
-                appearance="subtle"
-                icon={<ChevronRightRegular />}
-                disabled={page >= totalPages || isFetching}
-                onClick={() => setPage((p) => p + 1)}
-                size="small"
-              />
+      {/* Features */}
+      <section className="border-t border-gray-200 bg-gray-50/60 px-6 py-16">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                {f.icon}
+              </div>
+              <h3 className="font-semibold text-base">{f.title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
             </div>
-          )}
-        </>
-      )}
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 px-6 py-4 text-center text-xs text-gray-400">
+        NQuest Studio &middot; Built for the Minecraft Transit Railway community
+      </footer>
     </div>
   );
 }

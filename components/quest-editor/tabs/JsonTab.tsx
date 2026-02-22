@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Textarea, Text } from "@fluentui/react-components";
+import { Button, Textarea } from "@fluentui/react-components";
 import {
   ArrowImportRegular,
   CopyRegular,
@@ -82,8 +82,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
           appearance="secondary"
           icon={<CopyRegular />}
           onClick={handleCopy}
-          className="mt-2"
-          size="small"
+          className="mt-3"
         >
           Copy to Clipboard
         </Button>
@@ -95,9 +94,9 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
           <ArrowImportRegular />
           <h2 className="text-lg font-semibold">Import</h2>
         </div>
-        <Text size={200} className="text-gray-500 mb-2 block">
+        <p className="text-xs text-gray-500 mb-2">
           Paste quest JSON below. This will overwrite the current editor state.
-        </Text>
+        </p>
         <Textarea
           value={importText}
           onChange={(_, d) => setImportText(d.value)}
@@ -111,8 +110,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
           icon={<ArrowImportRegular />}
           onClick={handleImport}
           disabled={!importText.trim()}
-          className="mt-2"
-          size="small"
+          className="mt-3"
         >
           Import
         </Button>

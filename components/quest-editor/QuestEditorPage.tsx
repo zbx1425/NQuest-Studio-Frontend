@@ -15,6 +15,7 @@ import {
   InfoRegular,
   PeopleRegular,
   CodeRegular,
+  DocumentSearchRegular,
 } from "@fluentui/react-icons";
 import {
   useGetQuestQuery,
@@ -31,6 +32,7 @@ import { StepsTab } from "./tabs/StepsTab";
 import { InfoTab } from "./tabs/InfoTab";
 import { AclTab } from "./tabs/AclTab";
 import { JsonTab } from "./tabs/JsonTab";
+import { ReviewTab } from "./tabs/ReviewTab";
 
 export interface QuestFormState {
   id: string;
@@ -90,7 +92,7 @@ export function QuestEditorPage() {
   const [updateQuest, { isLoading: isUpdating }] = useUpdateQuestMutation();
 
   const [form, setForm] = useState<QuestFormState>(createNewFormState);
-  const [activeTab, setActiveTab] = useState("steps");
+  const [activeTab, setActiveTab] = useState("info");
   const [initialized, setInitialized] = useState(isNew);
 
   const permissions = usePermissions(questData);
@@ -170,24 +172,47 @@ export function QuestEditorPage() {
   }
 
   return (
-    <div className="flex h-full">
-      {/* Left sidebar tabs */}
-      <div className="border-r flex flex-col shrink-0">
-        <TabList
-          vertical
-          selectedValue={activeTab}
-          onTabSelect={(_, d) => setActiveTab(d.value as string)}
-          size="small"
-          className="p-2"
-        >
-          <Tab value="steps" icon={<ListRegular />}>Steps</Tab>
-          <Tab value="info" icon={<InfoRegular />}>Info</Tab>
-          {permissions.canManageAcl && (
-            <Tab value="acl" icon={<PeopleRegular />}>ACL</Tab>
-          )}
-          <Tab value="json" icon={<CodeRegular />}>JSON</Tab>
-        </TabList>
-      </div>
+    <div className="flex flex-1 min-h-0 max-w-7xl mx-auto px-4 py-4">
+      {/* Sidebar */}
+      <aside className="w-56 shrink-0 border-r border-gray-200 flex flex-col">
+        <div className="px-4 pt-6 pb-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Quest Editor
+          </p>
+          {isNew ? (
+            <p className="font-semibold mt-2">New Quest</p>
+          ) : questData ? (
+            <div className="mt-2">
+              <p className="font-semibold truncate">
+                {form.name || questData.name}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {questId}
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <nav className="flex-1 px-2">
+          <TabList
+            vertical
+            selectedValue={activeTab}
+            onTabSelect={(_, d) => setActiveTab(d.value as string)}
+            size="large"
+            appearance="subtle"
+          >
+            <Tab value="info" icon={<InfoRegular />}>Info</Tab>
+            <Tab value="steps" icon={<ListRegular />}>Steps</Tab>
+            {permissions.canManageAcl && (
+              <Tab value="acl" icon={<PeopleRegular />}>ACL</Tab>
+            )}
+            <Tab value="json" icon={<CodeRegular />}>JSON</Tab>
+            {questData?.hasPendingDraft && questData.status === "PUBLIC" && questData.dataPublic && (
+              <Tab value="review" icon={<DocumentSearchRegular />}>Review</Tab>
+            )}
+          </TabList>
+        </nav>
+      </aside>
 
       {/* Content area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -197,9 +222,10 @@ export function QuestEditorPage() {
           isSaving={isSaving}
           onSave={handleSave}
           canSave={isLoggedIn && (isNew || permissions.canEdit)}
+          onNavigateToReview={() => setActiveTab("review")}
         />
 
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-6">
           {activeTab === "steps" && (
             <StepsTab form={form} updateForm={updateForm} />
           )}
@@ -216,6 +242,9 @@ export function QuestEditorPage() {
           )}
           {activeTab === "json" && (
             <JsonTab form={form} setForm={setForm} />
+          )}
+          {activeTab === "review" && questData && (
+            <ReviewTab quest={questData} />
           )}
         </div>
       </div>

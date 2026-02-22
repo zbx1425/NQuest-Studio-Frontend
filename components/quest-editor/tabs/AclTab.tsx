@@ -121,7 +121,6 @@ export function AclTab({ quest }: AclTabProps) {
           <Button
             appearance="primary"
             icon={<SaveRegular />}
-            size="small"
             onClick={handleSave}
             disabled={isSaving}
           >
@@ -131,14 +130,14 @@ export function AclTab({ quest }: AclTabProps) {
       </div>
 
       {/* Member table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-gray-50">
-              <th className="text-left p-2 font-semibold">User</th>
-              <th className="text-left p-2 font-semibold w-20">Discord ID</th>
-              <th className="text-left p-2 font-semibold w-32">Role</th>
-              <th className="w-10" />
+            <tr className="border-b border-gray-200 bg-gray-50/60">
+              <th className="text-left p-3 font-semibold">User</th>
+              <th className="text-left p-3 font-semibold w-20">Discord ID</th>
+              <th className="text-left p-3 font-semibold w-40">Role</th>
+              <th className="w-12" />
             </tr>
           </thead>
           <tbody>
@@ -146,8 +145,8 @@ export function AclTab({ quest }: AclTabProps) {
               const isSelf = entry.discordUserId === user?.discordUserId;
               const isLastOwner = entry.role === "OWNER" && ownerCount <= 1;
               return (
-                <tr key={entry.discordUserId} className="border-b">
-                  <td className="p-2">
+                <tr key={entry.discordUserId} className="border-b border-gray-100 last:border-b-0">
+                  <td className="p-3">
                     {entry.discordUsername ?? (
                       <Text className="text-gray-400 italic">Unknown</Text>
                     )}
@@ -157,14 +156,13 @@ export function AclTab({ quest }: AclTabProps) {
                       </Text>
                     )}
                   </td>
-                  <td className="p-2">
+                  <td className="p-3">
                     <Text size={200} className="font-mono">
                       {entry.discordUserId}
                     </Text>
                   </td>
-                  <td className="p-2">
+                  <td className="p-3">
                     <Dropdown
-                      size="small"
                       value={entry.role}
                       selectedOptions={[entry.role]}
                       onOptionSelect={(_, d) =>
@@ -179,11 +177,10 @@ export function AclTab({ quest }: AclTabProps) {
                       <Option value="EDITOR">Editor</Option>
                     </Dropdown>
                   </td>
-                  <td className="p-2">
+                  <td className="p-3">
                     <Button
                       appearance="subtle"
                       icon={<DeleteRegular />}
-                      size="small"
                       onClick={() => handleRemove(index)}
                       disabled={
                         (isLastOwner && entry.role === "OWNER") ||

@@ -29,7 +29,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Quest-wide failure condition */}
       <section>
         {form.defaultCriteria ? (
@@ -63,7 +63,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
       </section>
 
       {/* Steps */}
-      <section className="space-y-3">
+      <section className="space-y-4">
         <h2 className="text-lg font-semibold">
           Steps ({form.steps.length})
         </h2>

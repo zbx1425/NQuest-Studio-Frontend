@@ -76,9 +76,13 @@ export async function fetchSystemMapData(
     {} as Record<string, string>
   );
 
+  const stationIdToName: Record<string, string> = {};
+  for (const [name, id] of Object.entries(stationNameToId)) {
+    stationIdToName[id] = name;
+  }
+
   const stationNamesAndIds = [
-    ...stationNames,
-    ...Object.values(stationNameToId),
+    ...new Set(Object.values(stationNameToId)),
   ];
 
   return {
@@ -86,5 +90,6 @@ export async function fetchSystemMapData(
     routeNames: [...new Set(routeNames)],
     stationNamesAndIds: [...new Set(stationNamesAndIds)],
     stationNameToId,
+    stationIdToName,
   };
 }

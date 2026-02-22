@@ -17,7 +17,7 @@ export function StatusBadge({ status }: { status: string }) {
     label: status,
   };
   return (
-    <Badge appearance="filled" color={config.color} size="small">
+    <Badge appearance="filled" color={config.color}>
       {config.label}
     </Badge>
   );

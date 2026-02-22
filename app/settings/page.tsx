@@ -7,7 +7,6 @@ import {
   Input,
   Label,
   Badge,
-  Text,
   Spinner,
   MessageBar,
   MessageBarBody,
@@ -38,7 +37,7 @@ export default function SettingsPage() {
 
   if (!isLoggedIn || !user) {
     return (
-      <div className="p-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
           <MessageBarBody>Please log in to access settings.</MessageBarBody>
         </MessageBar>
@@ -77,13 +76,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* User Info */}
       <section>
         <h2 className="text-lg font-semibold mb-3">User Information</h2>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Text weight="semibold">{user.username}</Text>
+            <span className="font-semibold">{user.username}</span>
             {isAdmin && (
               <Badge appearance="filled" color="danger" size="small">
                 Admin
@@ -95,9 +94,9 @@ export default function SettingsPage() {
               </Badge>
             )}
           </div>
-          <Text size={200} className="text-gray-500 block">
+          <p className="text-xs text-gray-500">
             Discord ID: {user.discordUserId}
-          </Text>
+          </p>
         </div>
       </section>
 
@@ -112,25 +111,24 @@ export default function SettingsPage() {
               <Badge appearance="outline" color="success" size="small">
                 Linked
               </Badge>
-              <Text className="font-mono text-sm">{user.mcUuid}</Text>
+              <span className="font-mono text-sm">{user.mcUuid}</span>
             </div>
             <Button
               appearance="secondary"
               icon={<LinkDismissRegular />}
               onClick={handleUnbind}
               disabled={isUnbinding}
-              size="small"
             >
               {isUnbinding ? "Unlinking..." : "Unlink Minecraft Account"}
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
-            <Text size={300} className="text-gray-600 block">
+            <p className="text-sm text-gray-600">
               To link your Minecraft account, run{" "}
               <code className="bg-gray-100 px-1 rounded">/nquest bind</code> on
               the Minecraft server to get a token, then paste it below.
-            </Text>
+            </p>
             <div className="flex items-end gap-2">
               <div className="flex-1 flex flex-col gap-1">
                 <Label htmlFor="mc-token">Binding Token</Label>
@@ -160,10 +158,10 @@ export default function SettingsPage() {
       {/* System Map API */}
       <section>
         <h2 className="text-lg font-semibold mb-3">System Map API</h2>
-        <Text size={300} className="text-gray-600 block mb-3">
+        <p className="text-sm text-gray-600 mb-3">
           Configure the MTR System Map API to enable station and route
           autocomplete in the quest editor.
-        </Text>
+        </p>
         <div className="space-y-3">
           <div className="flex flex-col gap-1">
             <Label htmlFor="sysmap-url">API Base URL</Label>
@@ -196,10 +194,10 @@ export default function SettingsPage() {
           )}
 
           {systemMap.data && (
-            <Text size={200} className="text-gray-500 block">
+            <p className="text-xs text-gray-500 mt-2">
               Loaded {systemMap.data.stationNames.length} stations and{" "}
               {systemMap.data.routeNames.length} routes.
-            </Text>
+            </p>
           )}
         </div>
       </section>

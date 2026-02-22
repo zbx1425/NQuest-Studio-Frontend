@@ -5,6 +5,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--colorNeutralStroke2, #e5e7eb);
+  }
+}
+
 body {
   margin: 0;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
@@ -13,4 +22,17 @@ body {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Prevent Fluent UI portal wrapper from covering page content */
+.fui-FluentProvider .fui-FluentProvider {
+  background-color: transparent !important;
+}
+
+/* Diff view */
+.diff-added {
+  background-color: color-mix(in srgb, #22c55e 12%, transparent);
+}
+.diff-removed {
+  background-color: color-mix(in srgb, #ef4444 12%, transparent);
 }
