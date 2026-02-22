@@ -11,6 +11,8 @@ import {
   Spinner,
   Badge,
   Text,
+  Input,
+  Checkbox,
 } from "@fluentui/react-components";
 import {
   AddRegular,
@@ -18,10 +20,11 @@ import {
   ChevronLeftRegular,
   ChevronRightRegular,
   WarningRegular,
+  SearchRegular,
+  DismissRegular,
 } from "@fluentui/react-icons";
 import { useGetQuestsQuery, useGetCategoriesQuery } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { Checkbox } from "@fluentui/react-components";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDistanceToNow } from "date-fns";
 
@@ -32,6 +35,7 @@ export default function QuestListPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
@@ -47,16 +51,27 @@ export default function QuestListPage() {
     ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
     : [];
 
-  const filteredItems = pendingOnly
-    ? data?.items.filter((q) => q.hasPendingDraft) ?? []
-    : data?.items ?? [];
-  const totalItems = pendingOnly ? filteredItems.length : (data?.total ?? 0);
+  let filteredItems = data?.items ?? [];
+  if (pendingOnly) {
+    filteredItems = filteredItems.filter((q) => q.hasPendingDraft);
+  }
+  if (searchQuery.trim()) {
+    const query = searchQuery.trim().toLowerCase();
+    filteredItems = filteredItems.filter(
+      (q) =>
+        q.name.toLowerCase().includes(query) ||
+        q.id.toLowerCase().includes(query)
+    );
+  }
+  const isClientFiltered = pendingOnly || !!searchQuery.trim();
+  const totalItems = isClientFiltered ? filteredItems.length : (data?.total ?? 0);
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Toolbar */}
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Quests</h1>
         {isLoggedIn && isAuthor && (
           <Link href="/editor">
             <Button appearance="primary" icon={<AddRegular />}>
@@ -64,6 +79,29 @@ export default function QuestListPage() {
             </Button>
           </Link>
         )}
+      </div>
+
+      {/* Filters */}
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <Input
+          placeholder="Search by name or ID..."
+          contentBefore={<SearchRegular />}
+          contentAfter={
+            searchQuery ? (
+              <Button
+                appearance="transparent"
+                size="small"
+                icon={<DismissRegular />}
+                onClick={() => setSearchQuery("")}
+              />
+            ) : undefined
+          }
+          value={searchQuery}
+          onChange={(_, d) => setSearchQuery(d.value)}
+          className="w-64"
+        />
+
+        <div className="self-stretch w-px bg-gray-200" />
 
         <TabList
           selectedValue={statusFilter}
@@ -71,6 +109,7 @@ export default function QuestListPage() {
             setStatusFilter(d.value as StatusFilter);
             setPage(1);
           }}
+          size="small"
         >
           <Tab value="">All</Tab>
           <Tab value="PRIVATE">Private</Tab>
@@ -78,16 +117,7 @@ export default function QuestListPage() {
           <Tab value="PUBLIC">Public</Tab>
         </TabList>
 
-        {isAdmin && (
-          <Checkbox
-            label="Pending review only"
-            checked={pendingOnly}
-            onChange={(_, d) => {
-              setPendingOnly(!!d.checked);
-              setPage(1);
-            }}
-          />
-        )}
+        <div className="self-stretch w-px bg-gray-200" />
 
         <Dropdown
           placeholder="All Categories"
@@ -109,6 +139,20 @@ export default function QuestListPage() {
             </Option>
           ))}
         </Dropdown>
+
+        {isAdmin && (
+          <>
+            <div className="self-stretch w-px bg-gray-200" />
+            <Checkbox
+              label="Pending review only"
+              checked={pendingOnly}
+              onChange={(_, d) => {
+                setPendingOnly(!!d.checked);
+                setPage(1);
+              }}
+            />
+          </>
+        )}
       </div>
 
       {/* Table */}
@@ -135,7 +179,11 @@ export default function QuestListPage() {
                 {filteredItems.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-gray-500">
-                      {pendingOnly ? "No quests pending review." : "No quests found."}
+                      {searchQuery.trim()
+                        ? "No quests matching your search."
+                        : pendingOnly
+                          ? "No quests pending review."
+                          : "No quests found."}
                     </td>
                   </tr>
                 )}
