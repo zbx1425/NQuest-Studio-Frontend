@@ -22,6 +22,7 @@ import { useBindMcMutation, useUnbindMcMutation } from "@/lib/store/api";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import type { RootState, AppDispatch } from "@/lib/store";
 import { setBaseUrl, fetchSystemMap } from "@/lib/store/systemMapSlice";
+import { useMinecraftProfile } from "@/lib/hooks/useMinecraftProfile";
 
 export default function SettingsPage() {
   const { user, isLoggedIn, isAdmin, isAuthor } = useAuth();
@@ -32,6 +33,7 @@ export default function SettingsPage() {
 
   const [bindMc, { isLoading: isBinding }] = useBindMcMutation();
   const [unbindMc, { isLoading: isUnbinding }] = useUnbindMcMutation();
+  const mcProfile = useMinecraftProfile(user?.mcUuid);
 
   const [mcToken, setMcToken] = useState("");
 
@@ -106,12 +108,34 @@ export default function SettingsPage() {
       <section>
         <h2 className="text-lg font-semibold mb-3">Minecraft Account</h2>
         {user.mcUuid ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge appearance="outline" color="success" size="small">
-                Linked
-              </Badge>
-              <span className="font-mono text-sm">{user.mcUuid}</span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              {mcProfile.avatarUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={mcProfile.avatarUrl}
+                  alt="Minecraft avatar"
+                  className="w-10 h-10 rounded [image-rendering:pixelated]"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <Badge appearance="outline" color="success" size="small">
+                    Linked
+                  </Badge>
+                  {mcProfile.loading ? (
+                    <Spinner size="tiny" />
+                  ) : mcProfile.username ? (
+                    <span className="font-semibold">{mcProfile.username}</span>
+                  ) : null}
+                </div>
+                <p className="font-mono text-xs text-gray-500 truncate">
+                  {user.mcUuid}
+                </p>
+              </div>
             </div>
             <Button
               appearance="secondary"
@@ -126,7 +150,7 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <p className="text-sm text-gray-600">
               To link your Minecraft account, run{" "}
-              <code className="bg-gray-100 px-1 rounded">/nquest bind</code> on
+              <code className="bg-gray-100 px-1 rounded">/idtoken</code> on
               the Minecraft server to get a token, then paste it below.
             </p>
             <div className="flex items-end gap-2">

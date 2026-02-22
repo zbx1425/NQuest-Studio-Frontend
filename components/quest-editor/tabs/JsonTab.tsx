@@ -27,8 +27,10 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
       category: form.category || undefined,
       tier: form.tier || undefined,
       questPoints: form.questPoints,
+      defaultCriteria: form.defaultCriteria
+        ? { failureCriteria: form.defaultCriteria }
+        : undefined,
       steps: form.steps,
-      defaultCriteria: form.defaultCriteria,
     },
     null,
     2
@@ -45,7 +47,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
         tier: parsed.tier ?? "",
         questPoints: parsed.questPoints ?? 0,
         steps: parsed.steps ?? [],
-        defaultCriteria: parsed.defaultCriteria ?? null,
+        defaultCriteria: parsed.defaultCriteria?.failureCriteria ?? null,
       });
       toast.success("Quest imported from JSON");
       setImportText("");

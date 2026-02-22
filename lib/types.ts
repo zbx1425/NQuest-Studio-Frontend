@@ -150,9 +150,13 @@ export interface Step {
   failureCriteria?: Criterion;
 }
 
+export interface DefaultCriteria {
+  failureCriteria: Criterion;
+}
+
 export interface QuestData {
   steps: Step[];
-  defaultCriteria: Criterion | null;
+  defaultCriteria: DefaultCriteria | null;
 }
 
 export interface Quest {
@@ -207,6 +211,7 @@ export interface QuestCategory {
   description: string;
   icon: string;
   order: number;
+  hidden: boolean;
   tiers: Record<string, QuestTier>;
 }
 

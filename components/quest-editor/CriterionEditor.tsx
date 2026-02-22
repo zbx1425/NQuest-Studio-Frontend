@@ -166,14 +166,36 @@ export function CriterionEditor({
 
       {value.type === "InBoundsCriterion" && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-2"
+            onBlur={(e) => {
+              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+              const { min, max } = value;
+              const nMin = {
+                x: Math.min(min.x, max.x),
+                y: Math.min(min.y, max.y),
+                z: Math.min(min.z, max.z),
+              };
+              const nMax = {
+                x: Math.max(min.x, max.x),
+                y: Math.max(min.y, max.y),
+                z: Math.max(min.z, max.z),
+              };
+              if (
+                nMin.x !== min.x || nMin.y !== min.y || nMin.z !== min.z ||
+                nMax.x !== max.x || nMax.y !== max.y || nMax.z !== max.z
+              ) {
+                onChange({ ...value, min: nMin, max: nMax });
+              }
+            }}
+          >
             <Vec3dInput
-              label="Minimum Coordinates"
+              label="Corner 1"
               value={value.min}
               onChange={(v) => update({ min: v })}
             />
             <Vec3dInput
-              label="Maximum Coordinates"
+              label="Corner 2"
               value={value.max}
               onChange={(v) => update({ max: v })}
             />
@@ -205,7 +227,7 @@ export function CriterionEditor({
 
       {value.type === "TeleportDetectCriterion" && (
         <Text size={200} className="text-gray-500">
-          Triggered when a player moves more than 166 meters in one second (~600km/h).
+          Triggered when a player warps or uses tpa.
         </Text>
       )}
 

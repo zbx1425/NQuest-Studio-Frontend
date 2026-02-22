@@ -14,7 +14,7 @@ import {
   DialogContent,
   DialogActions,
   Text,
-  SpinButton,
+  Switch,
   MessageBar,
   MessageBarBody,
 } from "@fluentui/react-components";
@@ -24,6 +24,8 @@ import {
   DeleteRegular,
   SaveRegular,
   DismissRegular,
+  ArrowUpRegular,
+  ArrowDownRegular,
 } from "@fluentui/react-icons";
 import {
   useGetCategoriesQuery,
@@ -41,6 +43,7 @@ interface CategoryFormData {
   description: string;
   icon: string;
   order: number;
+  hidden: boolean;
   tiers: Record<string, QuestTier>;
 }
 
@@ -50,6 +53,7 @@ const emptyForm: CategoryFormData = {
   description: "",
   icon: "minecraft:book",
   order: 0,
+  hidden: false,
   tiers: {},
 };
 
@@ -99,6 +103,7 @@ export default function CategoriesPage() {
       description: cat.description,
       icon: cat.icon,
       order: cat.order,
+      hidden: cat.hidden ?? false,
       tiers: { ...cat.tiers },
     });
     setEditingId(id);
@@ -106,6 +111,13 @@ export default function CategoriesPage() {
   };
 
   const handleSave = async () => {
+    const normalizedTiers: Record<string, QuestTier> = {};
+    Object.entries(form.tiers)
+      .sort(([, a], [, b]) => a.order - b.order)
+      .forEach(([id, tier], i) => {
+        normalizedTiers[id] = { ...tier, order: i };
+      });
+
     try {
       if (editingId) {
         await updateCategory({
@@ -114,7 +126,8 @@ export default function CategoriesPage() {
           description: form.description,
           icon: form.icon,
           order: form.order,
-          tiers: form.tiers,
+          hidden: form.hidden,
+          tiers: normalizedTiers,
         }).unwrap();
         toast.success("Category updated");
       } else {
@@ -124,7 +137,8 @@ export default function CategoriesPage() {
           description: form.description,
           icon: form.icon,
           order: form.order,
-          tiers: form.tiers,
+          hidden: form.hidden,
+          tiers: normalizedTiers,
         }).unwrap();
         toast.success("Category created");
       }
@@ -171,10 +185,26 @@ export default function CategoriesPage() {
     setForm({ ...form, tiers: rest });
   };
 
+  const moveTier = (tierId: string, direction: "up" | "down") => {
+    const sorted = Object.entries(form.tiers).sort(
+      ([, a], [, b]) => a.order - b.order
+    );
+    const idx = sorted.findIndex(([id]) => id === tierId);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    const newTiers = { ...form.tiers };
+    const [currentId] = sorted[idx];
+    const [swapId] = sorted[swapIdx];
+    const currentOrder = newTiers[currentId].order;
+    newTiers[currentId] = { ...newTiers[currentId], order: newTiers[swapId].order };
+    newTiers[swapId] = { ...newTiers[swapId], order: currentOrder };
+    setForm({ ...form, tiers: newTiers });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center gap-4 mb-6">
-        <h1 className="text-xl font-bold">Categories</h1>
         <Button
           appearance="primary"
           icon={<AddRegular />}
@@ -196,13 +226,14 @@ export default function CategoriesPage() {
                 <th className="text-left p-3 font-semibold">Icon</th>
                 <th className="text-left p-3 font-semibold">Tiers</th>
                 <th className="text-right p-3 font-semibold w-16">Order</th>
+                <th className="text-center p-3 font-semibold w-16">Hidden</th>
                 <th className="w-20" />
               </tr>
             </thead>
             <tbody>
               {categoryEntries.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-500">
+                  <td colSpan={7} className="text-center py-8 text-gray-500">
                     No categories yet.
                   </td>
                 </tr>
@@ -225,6 +256,9 @@ export default function CategoriesPage() {
                       ))}
                   </td>
                   <td className="p-3 text-right">{cat.order}</td>
+                  <td className="p-3 text-center text-xs text-gray-500">
+                    {cat.hidden ? "Yes" : ""}
+                  </td>
                   <td className="p-3">
                     <div className="flex gap-1">
                       <Button
@@ -299,13 +333,26 @@ export default function CategoriesPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label>Order</Label>
-                    <SpinButton
-                      value={form.order}
+                    <Input
+                      type="number"
+                      value={String(form.order)}
                       onChange={(_, d) =>
-                        setForm({ ...form, order: d.value ?? 0 })
+                        setForm({
+                          ...form,
+                          order: d.value === "" ? 0 : parseInt(d.value, 10) || 0,
+                        })
                       }
                     />
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.hidden}
+                    onChange={(_, d) =>
+                      setForm({ ...form, hidden: d.checked })
+                    }
+                    label="Hidden"
+                  />
                 </div>
 
                 {/* Tiers */}
@@ -314,11 +361,27 @@ export default function CategoriesPage() {
                   <div className="space-y-2 mt-2">
                     {Object.entries(form.tiers)
                       .sort(([, a], [, b]) => a.order - b.order)
-                      .map(([tierId, tier]) => (
+                      .map(([tierId, tier], idx, arr) => (
                         <div
                           key={tierId}
                           className="flex items-center gap-2 bg-gray-50 rounded-md px-3 py-2"
                         >
+                          <div className="flex flex-col">
+                            <Button
+                              appearance="subtle"
+                              size="small"
+                              icon={<ArrowUpRegular />}
+                              disabled={idx === 0}
+                              onClick={() => moveTier(tierId, "up")}
+                            />
+                            <Button
+                              appearance="subtle"
+                              size="small"
+                              icon={<ArrowDownRegular />}
+                              disabled={idx === arr.length - 1}
+                              onClick={() => moveTier(tierId, "down")}
+                            />
+                          </div>
                           <Text size={200} className="font-mono w-24">
                             {tierId}
                           </Text>

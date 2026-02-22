@@ -37,10 +37,6 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="flex-1 flex items-center justify-center px-6 py-20">
         <div className="max-w-2xl text-center space-y-6">
-          <Badge appearance="outline" color="brand" size="large">
-            Quest Management for Minecraft Transit Railway
-          </Badge>
-
           <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
             Create, Edit &amp; Publish
             <br />

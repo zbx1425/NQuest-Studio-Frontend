@@ -55,7 +55,7 @@ function questToForm(quest: Quest): QuestFormState {
     questPoints: quest.questPoints,
     steps: structuredClone(quest.dataDraft.steps),
     defaultCriteria: quest.dataDraft.defaultCriteria
-      ? structuredClone(quest.dataDraft.defaultCriteria)
+      ? structuredClone(quest.dataDraft.defaultCriteria.failureCriteria)
       : null,
   };
 }
@@ -122,7 +122,9 @@ export function QuestEditorPage() {
           tier: form.tier || undefined,
           questPoints: form.questPoints,
           steps: form.steps,
-          defaultCriteria: form.defaultCriteria,
+          defaultCriteria: form.defaultCriteria
+            ? { failureCriteria: form.defaultCriteria }
+            : null,
         }).unwrap();
         toast.success("Quest created", `Quest "${result.name}" has been created.`);
         router.replace(`/editor?id=${encodeURIComponent(result.id)}`);
@@ -135,7 +137,9 @@ export function QuestEditorPage() {
           tier: form.tier || null,
           questPoints: form.questPoints,
           steps: form.steps,
-          defaultCriteria: form.defaultCriteria,
+          defaultCriteria: form.defaultCriteria
+            ? { failureCriteria: form.defaultCriteria }
+            : null,
         }).unwrap();
         setForm(questToForm(result));
         toast.success("Quest saved", result.hasPendingDraft
@@ -172,9 +176,9 @@ export function QuestEditorPage() {
   }
 
   return (
-    <div className="flex flex-1 min-h-0 max-w-7xl mx-auto px-4 py-4">
+    <div className="flex h-full max-w-7xl mx-auto px-4 py-4">
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-r border-gray-200 flex flex-col">
+      <aside className="w-56 shrink-0 border-r border-gray-200 flex flex-col overflow-y-auto">
         <div className="px-4 pt-6 pb-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
             Quest Editor
@@ -215,7 +219,7 @@ export function QuestEditorPage() {
       </aside>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <QuestToolbar
           quest={questData ?? null}
           isNew={isNew}

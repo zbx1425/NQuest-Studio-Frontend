@@ -101,6 +101,7 @@ export function AclTab({ quest }: AclTabProps) {
         questId: quest.id,
         acl: acl.map((e) => ({
           discordUserId: e.discordUserId,
+          discordUsername: e.discordUsername,
           role: e.role,
         })),
       }).unwrap();
@@ -128,6 +129,10 @@ export function AclTab({ quest }: AclTabProps) {
           </Button>
         )}
       </div>
+      
+      <p className="text-sm text-gray-500 -mt-4">
+        By adding members to the ACL, you can collaborate on quests with your team.
+      </p>
 
       {/* Member table */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
