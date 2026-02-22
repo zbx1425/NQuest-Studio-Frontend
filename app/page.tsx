@@ -1,65 +1,214 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Button,
+  Tab,
+  TabList,
+  Dropdown,
+  Option,
+  Spinner,
+  Badge,
+  Text,
+} from "@fluentui/react-components";
+import {
+  AddRegular,
+  EditRegular,
+  ChevronLeftRegular,
+  ChevronRightRegular,
+} from "@fluentui/react-icons";
+import { useGetQuestsQuery, useGetCategoriesQuery } from "@/lib/store/api";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { formatDistanceToNow } from "date-fns";
+
+type StatusFilter = "" | "PRIVATE" | "STAGING" | "PUBLIC";
+
+export default function QuestListPage() {
+  const { isLoggedIn, isAuthor } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  const { data: categories } = useGetCategoriesQuery();
+  const { data, isLoading, isFetching } = useGetQuestsQuery({
+    status: statusFilter || undefined,
+    category: categoryFilter || undefined,
+    page,
+    size: pageSize,
+  });
+
+  const categoryEntries = categories
+    ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
+    : [];
+
+  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Toolbar */}
+      <div className="flex items-center gap-4 mb-4 flex-wrap">
+        {isLoggedIn && isAuthor && (
+          <Link href="/editor">
+            <Button appearance="primary" icon={<AddRegular />}>
+              New Quest
+            </Button>
+          </Link>
+        )}
+
+        <TabList
+          selectedValue={statusFilter}
+          onTabSelect={(_, d) => {
+            setStatusFilter(d.value as StatusFilter);
+            setPage(1);
+          }}
+          size="small"
+        >
+          <Tab value="">All</Tab>
+          <Tab value="PRIVATE">Private</Tab>
+          <Tab value="STAGING">Staging</Tab>
+          <Tab value="PUBLIC">Public</Tab>
+        </TabList>
+
+        <Dropdown
+          placeholder="All Categories"
+          value={
+            categoryFilter
+              ? categories?.[categoryFilter]?.name ?? categoryFilter
+              : "All Categories"
+          }
+          onOptionSelect={(_, d) => {
+            setCategoryFilter(d.optionValue === "__all__" ? "" : (d.optionValue ?? ""));
+            setPage(1);
+          }}
+          size="small"
+          className="min-w-[160px]"
+        >
+          <Option value="__all__">All Categories</Option>
+          {categoryEntries.map(([id, cat]) => (
+            <Option key={id} value={id}>
+              {cat.name}
+            </Option>
+          ))}
+        </Dropdown>
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="flex justify-center py-16">
+          <Spinner size="large" label="Loading quests..." />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      ) : (
+        <>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="text-left p-3 font-semibold">Name</th>
+                  <th className="text-left p-3 font-semibold w-24">Status</th>
+                  <th className="text-left p-3 font-semibold">Category</th>
+                  <th className="text-right p-3 font-semibold w-16">Pts</th>
+                  <th className="text-left p-3 font-semibold w-24">Draft</th>
+                  <th className="text-left p-3 font-semibold w-32">Modified</th>
+                  <th className="text-center p-3 font-semibold w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.items.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-gray-500">
+                      No quests found.
+                    </td>
+                  </tr>
+                )}
+                {data?.items.map((quest) => {
+                  const catName = quest.category && categories
+                    ? categories[quest.category]?.name ?? quest.category
+                    : "—";
+                  const tierName =
+                    quest.tier && quest.category && categories
+                      ? categories[quest.category]?.tiers[quest.tier]?.name ?? quest.tier
+                      : quest.tier ?? "";
+
+                  return (
+                    <tr
+                      key={quest.id}
+                      className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <td className="p-3">
+                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`} className="block">
+                          <div className="font-medium">{quest.name}</div>
+                          <Text size={200} className="text-gray-500">
+                            {quest.id}
+                          </Text>
+                        </Link>
+                      </td>
+                      <td className="p-3">
+                        <StatusBadge status={quest.status} />
+                      </td>
+                      <td className="p-3">
+                        <span>{catName}</span>
+                        {tierName && (
+                          <Text size={200} className="text-gray-500 ml-2">
+                            {tierName}
+                          </Text>
+                        )}
+                      </td>
+                      <td className="p-3 text-right">{quest.questPoints}</td>
+                      <td className="p-3">
+                        {quest.hasPendingDraft && (
+                          <Badge appearance="filled" color="warning" size="small">
+                            Pending
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="p-3 text-gray-500">
+                        {formatDistanceToNow(new Date(quest.lastModifiedAt), {
+                          addSuffix: true,
+                        })}
+                      </td>
+                      <td className="p-3 text-center">
+                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`}>
+                          <Button
+                            appearance="subtle"
+                            icon={<EditRegular />}
+                            size="small"
+                          />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <Button
+                appearance="subtle"
+                icon={<ChevronLeftRegular />}
+                disabled={page <= 1 || isFetching}
+                onClick={() => setPage((p) => p - 1)}
+                size="small"
+              />
+              <Text size={300}>
+                Page {page} of {totalPages} ({data?.total} quests)
+              </Text>
+              <Button
+                appearance="subtle"
+                icon={<ChevronRightRegular />}
+                disabled={page >= totalPages || isFetching}
+                onClick={() => setPage((p) => p + 1)}
+                size="small"
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
