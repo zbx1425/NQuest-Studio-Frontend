@@ -16,6 +16,8 @@ import {
   PeopleRegular,
   CodeRegular,
   DocumentSearchRegular,
+  DataBarVerticalRegular,
+  CurrencyDollarEuroRegular,
 } from "@fluentui/react-icons";
 import {
   useGetQuestQuery,
@@ -24,6 +26,8 @@ import {
 } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { usePermissions } from "@/lib/hooks/usePermissions";
+import { StatsTab } from "./tabs/StatsTab";
+import { QpAdjustmentTab } from "./tabs/QpAdjustmentTab";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import { createDefaultStep } from "@/lib/criterion";
 import type { Quest, Step, Criterion } from "@/lib/types";
@@ -214,6 +218,12 @@ export function QuestEditorPage() {
             {questData?.hasPendingDraft && questData.status === "PUBLIC" && questData.dataPublic && (
               <Tab value="review" icon={<DocumentSearchRegular />}>Review</Tab>
             )}
+            {!isNew && questId && (
+              <Tab value="stats" icon={<DataBarVerticalRegular />}>Stats</Tab>
+            )}
+            {!isNew && questData && permissions.canEdit && (
+              <Tab value="qp-adjust" icon={<CurrencyDollarEuroRegular />}>QP Adjustment</Tab>
+            )}
           </TabList>
         </nav>
       </aside>
@@ -249,6 +259,12 @@ export function QuestEditorPage() {
           )}
           {activeTab === "review" && questData && (
             <ReviewTab quest={questData} />
+          )}
+          {activeTab === "stats" && questId && (
+            <StatsTab questId={questId} />
+          )}
+          {activeTab === "qp-adjust" && questData && (
+            <QpAdjustmentTab quest={questData} />
           )}
         </div>
       </div>

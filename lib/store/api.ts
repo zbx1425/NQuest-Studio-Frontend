@@ -8,6 +8,9 @@ import type {
   AclEntry,
   MeResponse,
   UserRef,
+  AdjustQpResponse,
+  JobStatusResponse,
+  QuestStatsResponse,
 } from "../types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api/v1";
@@ -132,6 +135,11 @@ export const api = createApi({
       ],
     }),
 
+    getQuestStats: builder.query<QuestStatsResponse, string>({
+      query: (questId) =>
+        `/quests/${encodeURIComponent(questId)}/stats`,
+    }),
+
     // ─── ACL ───
     getAcl: builder.query<AclEntry[], string>({
       query: (questId) =>
@@ -199,6 +207,24 @@ export const api = createApi({
       query: (params) => ({ url: "/users/search", params }),
       keepUnusedDataFor: 30,
     }),
+
+    // ─── Admin: QP Adjustment ───
+    adjustQuestQp: builder.mutation<
+      AdjustQpResponse,
+      { questId: string; newQuestPoints: number; reason: string }
+    >({
+      query: ({ questId, ...body }) => ({
+        url: `/admin/quests/${encodeURIComponent(questId)}/adjust-qp`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { questId }) => [
+        { type: "Quest", id: questId },
+      ],
+    }),
+    getJobStatus: builder.query<JobStatusResponse, string>({
+      query: (jobId) => `/admin/jobs/${encodeURIComponent(jobId)}`,
+    }),
   }),
 });
 
@@ -220,4 +246,7 @@ export const {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useLazySearchUsersQuery,
+  useGetQuestStatsQuery,
+  useAdjustQuestQpMutation,
+  useLazyGetJobStatusQuery,
 } = api;

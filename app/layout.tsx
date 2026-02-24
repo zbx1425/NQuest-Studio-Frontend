@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { NavBar } from "@/components/layout/NavBar";
+import { DevRoleToolbar } from "@/components/dev/DevRoleToolbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
             <NavBar />
             <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
           </div>
+          <DevRoleToolbar />
         </Providers>
       </body>
     </html>

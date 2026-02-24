@@ -10,6 +10,7 @@ import {
   RocketRegular,
   BookQuestionMarkRegular,
   BugRegular,
+  TrophyRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
 
@@ -41,7 +42,8 @@ const WORKFLOW_STEPS = [
 ];
 
 export default function LandingPage() {
-  const { isLoggedIn, login } = useAuth();
+  const { isLoggedIn, isAuthor, login } = useAuth();
+  const questsHref = isAuthor ? "/author/quests" : "/quests";
 
   return (
     <div className="flex flex-col min-h-full py-6">
@@ -67,50 +69,60 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-base text-gray-500 max-w-md leading-relaxed">
-            NQuest Studio gives quest authors a visual editor, collaborative access control, and a publishing pipeline.
+              Browse public quests, compete on leaderboards, and track your speedrun records. Quest authors can also create and publish quests with a visual editor.
             </p>
 
-            {isLoggedIn ? (
-              <div className="space-y-4 pt-1">
-                <div className="flex items-center gap-3">
-                  <Link href="/author/quests">
-                    <Button
-                      appearance="primary"
-                      size="large"
-                      icon={<ArrowRightRegular />}
-                      iconPosition="after"
-                    >
-                      Go to Quests
-                    </Button>
-                  </Link>
-                </div>
+            <div className="space-y-4 pt-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link href={questsHref}>
+                  <Button
+                    appearance="primary"
+                    size="large"
+                    icon={<ArrowRightRegular />}
+                    iconPosition="after"
+                  >
+                    Browse Quests
+                  </Button>
+                </Link>
+                <Link href="/ranking">
+                  <Button
+                    appearance="secondary"
+                    size="large"
+                    icon={<TrophyRegular />}
+                  >
+                    Leaderboards
+                  </Button>
+                </Link>
+              </div>
 
-                <Link href="/guide" className="block">
+              {isAuthor && (
+                <Link href="/author/guide" className="block">
                   <div className="inline-flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 transition-colors hover:bg-blue-100/60">
                     <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                       <BookQuestionMarkRegular className="text-lg" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-blue-700">
-                        New here? Read the workflow guide
+                        Quest author? Read the workflow guide
                       </p>
                     </div>
                     <ArrowRightRegular className="text-blue-400 ml-1" />
                   </div>
                 </Link>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 pt-1">
-                <Button
-                  appearance="primary"
-                  size="large"
-                  icon={<PersonRegular />}
-                  onClick={login}
-                >
-                  Login with Discord
-                </Button>
-              </div>
-            )}
+              )}
+              {!isLoggedIn && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    appearance="subtle"
+                    icon={<PersonRegular />}
+                    onClick={login}
+                  >
+                    Login with Discord
+                  </Button>
+                  <span className="text-sm text-gray-400">to track stats</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right — Workflow preview */}

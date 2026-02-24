@@ -13,11 +13,13 @@ import storage from "redux-persist/lib/storage";
 import authReducer from "./authSlice";
 import systemMapReducer from "./systemMapSlice";
 import { api } from "./api";
+import { rankingApi } from "./rankingApi";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   systemMap: systemMapReducer,
   [api.reducerPath]: api.reducer,
+  [rankingApi.reducerPath]: rankingApi.reducer,
 });
 
 const persistConfig = {
@@ -35,7 +37,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(api.middleware),
+    }).concat(api.middleware, rankingApi.middleware),
 });
 
 export const persistor = persistStore(store);

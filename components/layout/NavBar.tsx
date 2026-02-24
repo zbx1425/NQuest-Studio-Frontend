@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Tab,
@@ -25,23 +25,28 @@ import { useAuth } from "@/lib/hooks/useAuth";
 
 export function NavBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isLoggedIn, isAdmin, isAuthor, login, logout } = useAuth();
   const tabs = [
-    ...(isLoggedIn
-      ? [{ value: "/author/quests", label: "Quests" }]
-      : []),
+    { value: "/ranking", label: "Leaderboards" },
+    { value: isAuthor ? "/author/quests" : "/quests", label: "Quests" },
     ...(isAdmin
       ? [{ value: "/admin/categories", label: "Categories" }]
       : []),
     ...(isLoggedIn
-      ? [
-          { value: "/settings", label: "Settings" },
-          { value: "/author/guide", label: "Guide" },
-        ]
+      ? [{ value: "/settings", label: "Settings" }]
+      : []),
+    ...(isAuthor
+      ? [{ value: "/author/guide", label: "Guide" }]
       : []),
   ];
 
-  const selectedTab = tabs.find((t) => pathname === t.value)?.value ?? "";
+  const selectedTab =
+    tabs.find((t) => pathname === t.value)?.value ??
+    (pathname === "/quests" || pathname === "/author/quests"
+      ? tabs.find((t) => t.label === "Quests")?.value
+      : "") ??
+    "";
 
   return (
     <>
@@ -91,7 +96,7 @@ export function NavBar() {
                     <Link href="/settings" className="no-underline">
                       <MenuItem icon={<SettingsRegular />}>Settings</MenuItem>
                     </Link>
-                    <MenuItem icon={<SignOutRegular />} onClick={logout}>
+                    <MenuItem icon={<SignOutRegular />} onClick={() => { logout(); router.push("/"); }}>
                       Logout
                     </MenuItem>
                   </MenuList>

@@ -235,3 +235,215 @@ export interface SystemMapData {
   stationNameToId: Record<string, string>;
   stationIdToName: Record<string, string>;
 }
+
+// ─── Search (public) ───
+
+export interface PlayerSearchResult {
+  playerUuid: string;
+  playerName: string;
+}
+
+export interface PlayerSearchResponse {
+  results: PlayerSearchResult[];
+}
+
+export interface PublicQuestListItem {
+  id: string;
+  name: string;
+  questPoints: number;
+  description?: string | null;
+  category?: string | null;
+  tier?: string | null;
+  totalRuns?: number;
+  uniqueRunners?: number;
+}
+
+export interface PublicQuestListResponse {
+  items: PublicQuestListItem[];
+  total: number;
+}
+
+// ─── Ranking & Stats ───
+
+export type TimePeriod = "all_time" | "monthly" | "weekly";
+export type SpeedrunMode = "personal_best" | "all_runs";
+export type TransactionType =
+  | "QUEST_COMPLETION"
+  | "QP_ADJUSTMENT"
+  | "SPEND"
+  | "ADMIN_GRANT"
+  | "ADMIN_DEDUCT";
+
+export interface ActivityEntry {
+  playerUuid: string;
+  playerName: string;
+  questId: string;
+  questName: string;
+  durationMillis: number;
+  completionTime: number;
+  questPoints: number;
+  isPersonalBest: boolean;
+  isWorldRecord: boolean;
+}
+
+export interface ActivityResponse {
+  entries: ActivityEntry[];
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  playerUuid: string;
+  playerName: string;
+  value: number;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+  total: number;
+  period: TimePeriod;
+}
+
+export interface LeaderboardParams {
+  period?: TimePeriod;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SpeedrunEntry {
+  rank: number;
+  playerUuid: string;
+  playerName: string;
+  durationMillis: number;
+  completionTime: number;
+  completionId: number;
+  isWorldRecord: boolean;
+  stepDurations: Record<string, number> | null;
+}
+
+export interface SpeedrunResponse {
+  entries: SpeedrunEntry[];
+  total: number;
+  quest: { id: string; name: string; questPoints: number };
+}
+
+export interface SpeedrunParams {
+  questId: string;
+  period?: TimePeriod;
+  mode?: SpeedrunMode;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PlayerProfile {
+  playerUuid: string;
+  playerName: string;
+  qpBalance: number;
+  totalQpEarned: number;
+  totalQpSpent: number;
+  totalQuestCompletions: number;
+  personalBestCount: number;
+  worldRecordCount: number;
+  firstCompletionTime: number | null;
+  recentActivity: {
+    questId: string;
+    questName: string;
+    durationMillis: number;
+    completionTime: number;
+    isPersonalBest: boolean;
+  }[];
+}
+
+export interface PlayerHistoryEntry {
+  completionId: number;
+  questId: string;
+  questName: string;
+  completionTime: number;
+  durationMillis: number;
+  questPoints: number;
+  stepDurations: Record<string, number> | null;
+  isPersonalBest: boolean;
+}
+
+export interface PlayerHistoryResponse {
+  player: { playerUuid: string; playerName: string };
+  entries: PlayerHistoryEntry[];
+  total: number;
+}
+
+export interface PlayerHistoryParams {
+  uuid: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PersonalBestEntry {
+  questId: string;
+  questName: string;
+  durationMillis: number;
+  completionTime: number;
+  rank: number;
+}
+
+export interface PersonalBestsResponse {
+  entries: PersonalBestEntry[];
+}
+
+export interface TransactionEntry {
+  id: number;
+  type: TransactionType;
+  amount: number;
+  description: string;
+  questId: string | null;
+  completionId: number | null;
+  createdAt: number;
+}
+
+export interface TransactionsResponse {
+  entries: TransactionEntry[];
+  total: number;
+}
+
+export interface TransactionParams {
+  uuid: string;
+  type?: TransactionType;
+  limit?: number;
+  offset?: number;
+}
+
+export interface StepAnalytic {
+  stepIndex: number;
+  avgDurationMillis: number;
+  medianDurationMillis: number;
+}
+
+export interface QuestStatsResponse {
+  questId: string;
+  questName: string;
+  totalRuns: number;
+  uniqueRunners: number;
+  averageDurationMillis: number;
+  medianDurationMillis: number;
+  worldRecord: {
+    playerUuid: string;
+    playerName: string;
+    durationMillis: number;
+    completionTime: number;
+  } | null;
+  stepAnalytics: StepAnalytic[];
+}
+
+export interface AdjustQpResponse {
+  jobId: string;
+  affectedCompletions: number;
+  qpDeltaPerCompletion: number;
+  status: string;
+}
+
+export interface JobStatusResponse {
+  jobId: string;
+  type: string;
+  status: "PROCESSING" | "COMPLETED" | "FAILED";
+  progress: { processed: number; total: number };
+  createdAt: number;
+  completedAt: number | null;
+}

@@ -41,39 +41,56 @@ export default function QuestListPage() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const { data: categories } = useGetCategoriesQuery();
-  const { data, isLoading, isFetching } = useGetQuestsQuery({
-    status: statusFilter || undefined,
-    category: categoryFilter || undefined,
-    page,
-    size: pageSize,
+  useEffect(() => {
+    if (!isAuthor) {
+      router.replace("/quests");
+    }
+  }, [isAuthor, router]);
+
+  const { data: categories } = useGetCategoriesQuery(undefined, {
+    skip: !isAuthor,
   });
 
-  useEffect(() => {
-    if (!isLoggedIn) router.replace("/");
-  }, [isLoggedIn, router]);
+  const {
+    data: authData,
+    isLoading: authLoading,
+    isFetching: authFetching,
+  } = useGetQuestsQuery(
+    {
+      status: statusFilter || undefined,
+      category: categoryFilter || undefined,
+      page,
+      size: pageSize,
+    },
+    { skip: !isAuthor }
+  );
 
-  if (!isLoggedIn) return null;
+  const isLoading = authLoading;
+  const isFetching = authFetching;
 
   const categoryEntries = categories
     ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
     : [];
 
-  let filteredItems = data?.items ?? [];
+  let authItems = authData?.items ?? [];
   if (pendingOnly) {
-    filteredItems = filteredItems.filter((q) => q.hasPendingDraft);
+    authItems = authItems.filter((q) => q.hasPendingDraft);
   }
   if (searchQuery.trim()) {
     const query = searchQuery.trim().toLowerCase();
-    filteredItems = filteredItems.filter(
+    authItems = authItems.filter(
       (q) =>
         q.name.toLowerCase().includes(query) ||
         q.id.toLowerCase().includes(query)
     );
   }
   const isClientFiltered = pendingOnly || !!searchQuery.trim();
-  const totalItems = isClientFiltered ? filteredItems.length : (data?.total ?? 0);
+  const totalItems = isClientFiltered
+    ? authItems.length
+    : (authData?.total ?? 0);
   const totalPages = Math.ceil(totalItems / pageSize);
+
+  if (!isAuthor) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -92,7 +109,7 @@ export default function QuestListPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <Input
-          placeholder="Search by name or ID..."
+          placeholder="Search by name..."
           contentBefore={<SearchRegular />}
           contentAfter={
             searchQuery ? (
@@ -105,7 +122,7 @@ export default function QuestListPage() {
             ) : undefined
           }
           value={searchQuery}
-          onChange={(_, d) => setSearchQuery(d.value)}
+          onChange={(_, d) => { setSearchQuery(d.value); setPage(1); }}
           className="w-64"
         />
 
@@ -184,7 +201,7 @@ export default function QuestListPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.length === 0 && (
+                {authItems.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-gray-500">
                       {searchQuery.trim()
@@ -195,7 +212,7 @@ export default function QuestListPage() {
                     </td>
                   </tr>
                 )}
-                {filteredItems.map((quest) => {
+                {authItems.map((quest) => {
                   const catName = quest.category && categories
                     ? categories[quest.category]?.name ?? quest.category
                     : "—";
@@ -261,7 +278,6 @@ export default function QuestListPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4">
               <Button

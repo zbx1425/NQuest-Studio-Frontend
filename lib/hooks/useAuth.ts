@@ -3,6 +3,7 @@ import type { RootState, AppDispatch } from "../store";
 import { setToken, setUser, logout as logoutAction } from "../store/authSlice";
 import { useGetMeQuery } from "../store/api";
 import { useEffect } from "react";
+import { useDevRole } from "./useDevRole";
 
 export function useAuth() {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,9 +31,35 @@ export function useAuth() {
     dispatch(logoutAction());
   };
 
-  const isLoggedIn = !!token && !!user;
-  const isAdmin = user?.roles.includes("ADMIN") ?? false;
-  const isAuthor = isAdmin || (user?.roles.includes("AUTHOR") ?? false);
+  let isLoggedIn = !!token && !!user;
+  let isAdmin = user?.roles.includes("ADMIN") ?? false;
+  let isAuthor = isAdmin || (user?.roles.includes("AUTHOR") ?? false);
+
+  const devRole = useDevRole();
+  if (process.env.NODE_ENV === "development" && devRole !== "real") {
+    switch (devRole) {
+      case "admin":
+        isLoggedIn = true;
+        isAdmin = true;
+        isAuthor = true;
+        break;
+      case "author":
+        isLoggedIn = true;
+        isAdmin = false;
+        isAuthor = true;
+        break;
+      case "user":
+        isLoggedIn = true;
+        isAdmin = false;
+        isAuthor = false;
+        break;
+      case "guest":
+        isLoggedIn = false;
+        isAdmin = false;
+        isAuthor = false;
+        break;
+    }
+  }
 
   return { token, user, isLoggedIn, isAdmin, isAuthor, login, logout, setToken: (t: string) => dispatch(setToken(t)) };
 }

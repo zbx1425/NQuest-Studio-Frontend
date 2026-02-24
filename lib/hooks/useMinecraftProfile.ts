@@ -57,7 +57,7 @@ export function useMinecraftProfile(uuid: string | null | undefined): MinecraftP
   }, [uuid]);
 
   const avatarUrl = useMemo(
-    () => (uuid ? `https://crafatar.com/avatars/${uuid}?overlay&size=64` : null),
+    () => (uuid ? `https://vzge.me/face/256/${uuid}` : null),
     [uuid]
   );
 

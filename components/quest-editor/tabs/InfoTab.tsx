@@ -69,12 +69,21 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="quest-points">Quest Points</Label>
-            <SpinButton
-              id="quest-points"
-              value={form.questPoints}
-              onChange={(_, d) => updateForm({ questPoints: d.value ?? 0 })}
-              min={0}
-            />
+            {isNew ? (
+              <SpinButton
+                id="quest-points"
+                value={form.questPoints}
+                onChange={(_, d) => updateForm({ questPoints: d.value ?? 0 })}
+                min={0}
+              />
+            ) : (
+              <div>
+                <span className="text-lg font-semibold me-2">{form.questPoints}</span>
+                <span className="text-xs text-gray-500 mt-0.5">
+                  Use &quot;QP Adjustment&quot; tab
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">
