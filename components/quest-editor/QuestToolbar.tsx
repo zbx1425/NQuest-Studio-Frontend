@@ -114,7 +114,7 @@ export function QuestToolbar({
     try {
       await deleteQuest(quest.id).unwrap();
       toast.success("Quest deleted");
-      router.replace("/quests");
+      router.replace("/author/quests");
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);

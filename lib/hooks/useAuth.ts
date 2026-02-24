@@ -22,7 +22,7 @@ export function useAuth() {
   }, [error, dispatch]);
 
   const login = () => {
-    const redirect = window.location.origin + "/auth/callback";
+    const redirect = window.location.origin + (process.env.NEXT_PUBLIC_BASE_PATH ?? "") + "/auth/callback";
     window.location.href = `${process.env.NEXT_PUBLIC_API_BASE ?? "/api/v1"}/auth/discord?redirect=${encodeURIComponent(redirect)}`;
   };
 

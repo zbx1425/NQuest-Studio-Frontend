@@ -80,7 +80,7 @@ export default function CategoriesPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
-          <MessageBarBody>Only admins can manage categories.</MessageBarBody>
+          <MessageBarBody>Only staff members can manage categories.</MessageBarBody>
         </MessageBar>
       </div>
     );

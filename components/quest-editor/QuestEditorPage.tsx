@@ -127,7 +127,7 @@ export function QuestEditorPage() {
             : null,
         }).unwrap();
         toast.success("Quest created", `Quest "${result.name}" has been created.`);
-        router.replace(`/editor?id=${encodeURIComponent(result.id)}`);
+        router.replace(`/author/editor?id=${encodeURIComponent(result.id)}`);
       } else {
         const result = await updateQuest({
           id: questId,
@@ -143,7 +143,7 @@ export function QuestEditorPage() {
         }).unwrap();
         setForm(questToForm(result));
         toast.success("Quest saved", result.hasPendingDraft
-          ? "Saved. There are pending draft changes awaiting admin approval."
+          ? "Saved. There are pending draft changes awaiting staff approval."
           : "All changes saved successfully.");
       }
     } catch (err) {

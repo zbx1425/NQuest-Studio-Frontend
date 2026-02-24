@@ -27,12 +27,17 @@ export function NavBar() {
   const pathname = usePathname();
   const { user, isLoggedIn, isAdmin, isAuthor, login, logout } = useAuth();
   const tabs = [
-    { value: "/quests", label: "Quests" },
+    ...(isLoggedIn
+      ? [{ value: "/author/quests", label: "Quests" }]
+      : []),
     ...(isAdmin
-      ? [{ value: "/categories", label: "Categories" }]
+      ? [{ value: "/admin/categories", label: "Categories" }]
       : []),
     ...(isLoggedIn
-      ? [{ value: "/settings", label: "Settings" }]
+      ? [
+          { value: "/settings", label: "Settings" },
+          { value: "/author/guide", label: "Guide" },
+        ]
       : []),
   ];
 

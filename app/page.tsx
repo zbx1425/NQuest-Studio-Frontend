@@ -1,31 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { Button, Badge } from "@fluentui/react-components";
+import { Button } from "@fluentui/react-components";
 import {
-  EditRegular,
   PersonRegular,
-  ShieldKeyholeRegular,
-  LayerRegular,
   ArrowRightRegular,
+  EditRegular,
+  ShieldKeyholeRegular,
+  RocketRegular,
+  BookQuestionMarkRegular,
+  BugRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
 
-const FEATURES = [
+const WORKFLOW_STEPS = [
   {
-    icon: <EditRegular className="text-2xl" />,
-    title: "Visual Quest Editor",
-    desc: "Build multi-step quests with a recursive criterion editor — no JSON wrangling needed.",
+    icon: <EditRegular className="text-lg" />,
+    label: "Create & Edit",
+    desc: "Build quests visually with the step editor",
+    color: "bg-blue-500",
   },
   {
-    icon: <ShieldKeyholeRegular className="text-2xl" />,
-    title: "Draft & Review Workflow",
-    desc: "Edit freely in drafts. Admins review and promote changes to the live server.",
+    icon: <BugRegular className="text-lg" />,
+    label: "Test in-Game",
+    desc: "Test the quest in-game with debug mode enabled",
+    color: "bg-violet-500",
   },
   {
-    icon: <LayerRegular className="text-2xl" />,
-    title: "Categories & Tiers",
-    desc: "Organize quests into categories with customizable difficulty tiers and point values.",
+    icon: <ShieldKeyholeRegular className="text-lg" />,
+    label: "Review",
+    desc: "LPS Staff reviews the quest and approves it for publishing",
+    color: "bg-amber-500",
+  },
+  {
+    icon: <RocketRegular className="text-lg" />,
+    label: "Publish",
+    desc: "Go live for all players on the server",
+    color: "bg-emerald-500",
   },
 ];
 
@@ -33,72 +44,114 @@ export default function LandingPage() {
   const { isLoggedIn, login } = useAuth();
 
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Hero */}
-      <section className="flex-1 flex items-center justify-center px-6 py-20">
-        <div className="max-w-2xl text-center space-y-6">
-          <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
-            Create, Edit &amp; Publish
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Server Quests
-            </span>
-          </h1>
+    <div className="flex flex-col min-h-full py-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:py-0">
+        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left — Branding & CTA */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                N
+              </div>
+              <span className="text-sm font-semibold tracking-wide text-gray-400 uppercase">
+                NQuest Studio
+              </span>
+            </div>
 
-          <p className="text-lg text-gray-500 max-w-lg mx-auto">
-            NQuest Studio gives quest authors a modern visual editor, collaborative access control, and a safe draft-to-live publishing pipeline. Actually this is pure AI slop
-          </p>
+            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15]">
+              Quest Management
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Made Simple
+              </span>
+            </h1>
 
-          <div className="flex items-center justify-center gap-3 pt-2">
+            <p className="text-base text-gray-500 max-w-md leading-relaxed">
+            NQuest Studio gives quest authors a visual editor, collaborative access control, and a publishing pipeline.
+            </p>
+
             {isLoggedIn ? (
-              <Link href="/quests">
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center gap-3">
+                  <Link href="/author/quests">
+                    <Button
+                      appearance="primary"
+                      size="large"
+                      icon={<ArrowRightRegular />}
+                      iconPosition="after"
+                    >
+                      Go to Quests
+                    </Button>
+                  </Link>
+                </div>
+
+                <Link href="/guide" className="block">
+                  <div className="inline-flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 transition-colors hover:bg-blue-100/60">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <BookQuestionMarkRegular className="text-lg" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-blue-700">
+                        New here? Read the workflow guide
+                      </p>
+                    </div>
+                    <ArrowRightRegular className="text-blue-400 ml-1" />
+                  </div>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 pt-1">
                 <Button
                   appearance="primary"
                   size="large"
-                  icon={<ArrowRightRegular />}
-                  iconPosition="after"
+                  icon={<PersonRegular />}
+                  onClick={login}
                 >
-                  Go to Quests
+                  Login with Discord
                 </Button>
-              </Link>
-            ) : (
-              <Button
-                appearance="primary"
-                size="large"
-                icon={<PersonRegular />}
-                onClick={login}
-              >
-                Login with Discord
-              </Button>
+              </div>
             )}
-            <Link href="/quests">
-              <Button appearance="outline" size="large">
-                Browse Quests
-              </Button>
-            </Link>
+          </div>
+
+          {/* Right — Workflow preview */}
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+              <div className="py-4 px-6">
+                {WORKFLOW_STEPS.map((step, i) => (
+                  <div key={step.label} className="flex items-start gap-4">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-8 h-8 rounded-full ${step.color} flex items-center justify-center text-white shrink-0`}
+                      >
+                        {step.icon}
+                      </div>
+                      {i < WORKFLOW_STEPS.length - 1 && (
+                        <div className="w-px h-6 bg-gray-200 mt-1" />
+                      )}
+                    </div>
+                    <div className="pt-0.5">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {step.label}
+                      </p>
+                      <p className="text-sm text-gray-500">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5">
+              <p className="text-xs font-bold tracking-wider text-gray-600 mb-2">
+                ALL RIGHTS RESERVED <br/>
+                Copyright (C) 2026-present Zbx1425
+              </p>
+              <p className="text-[0.625rem] text-gray-500 leading-relaxed">
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+              </p>
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-t border-gray-200 bg-gray-50/60 px-6 py-16">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="space-y-2">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                {f.icon}
-              </div>
-              <h3 className="font-semibold text-base">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 px-6 py-4 text-center text-xs text-gray-400">
-        NQuest Studio &middot; Built for the Minecraft Transit Railway community
-      </footer>
+      </div>
     </div>
   );
 }

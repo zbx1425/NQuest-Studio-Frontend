@@ -55,7 +55,7 @@ export function AclTab({ quest }: AclTabProps) {
       entry.discordUserId === user?.discordUserId &&
       role === "EDITOR"
     ) {
-      toast.warning("Cannot downgrade yourself", "Non-admin users cannot demote themselves from OWNER.");
+      toast.warning("Cannot downgrade yourself", "Non-staff users cannot demote themselves from OWNER.");
       return;
     }
     const updated = [...acl];
@@ -67,7 +67,7 @@ export function AclTab({ quest }: AclTabProps) {
   const handleRemove = (index: number) => {
     const entry = acl[index];
     if (!isAdmin && entry.discordUserId === user?.discordUserId) {
-      toast.warning("Cannot remove yourself", "Non-admin users cannot remove themselves from the ACL.");
+      toast.warning("Cannot remove yourself", "Non-staff users cannot remove themselves from the ACL.");
       return;
     }
     setAcl(acl.filter((_, i) => i !== index));

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Tab,
@@ -31,6 +32,7 @@ import { formatDistanceToNow } from "date-fns";
 type StatusFilter = "" | "PRIVATE" | "STAGING" | "PUBLIC";
 
 export default function QuestListPage() {
+  const router = useRouter();
   const { isLoggedIn, isAuthor, isAdmin } = useAuth();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
@@ -46,6 +48,12 @@ export default function QuestListPage() {
     page,
     size: pageSize,
   });
+
+  useEffect(() => {
+    if (!isLoggedIn) router.replace("/");
+  }, [isLoggedIn, router]);
+
+  if (!isLoggedIn) return null;
 
   const categoryEntries = categories
     ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
@@ -73,7 +81,7 @@ export default function QuestListPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Quests</h1>
         {isLoggedIn && isAuthor && (
-          <Link href="/editor">
+          <Link href="/author/editor">
             <Button appearance="primary" icon={<AddRegular />}>
               New Quest
             </Button>
@@ -202,7 +210,7 @@ export default function QuestListPage() {
                       className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <td className="p-3">
-                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`} className="block">
+                        <Link href={`/author/editor?id=${encodeURIComponent(quest.id)}`} className="block">
                           <div className="font-medium flex items-center gap-1.5">
                             {quest.hasPendingDraft && (
                               <WarningRegular className="text-amber-500" style={{ fontSize: 14 }} />
@@ -229,7 +237,7 @@ export default function QuestListPage() {
                       <td className="p-3">
                         {quest.hasPendingDraft && (
                           <Badge appearance="filled" color="warning" size="small">
-                            {isAdmin ? "Needs Review" : "Pending"}
+                            Pending
                           </Badge>
                         )}
                       </td>
@@ -239,7 +247,7 @@ export default function QuestListPage() {
                         })}
                       </td>
                       <td className="p-3 text-center">
-                        <Link href={`/editor?id=${encodeURIComponent(quest.id)}`}>
+                        <Link href={`/author/editor?id=${encodeURIComponent(quest.id)}`}>
                           <Button
                             appearance="subtle"
                             icon={<EditRegular />}
