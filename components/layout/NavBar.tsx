@@ -34,6 +34,7 @@ const LOCALE_LABELS: Record<AppLocale, string> = {
   "zh-CN": "简体中文",
   zh: "繁體中文",
   ja: "日本語",
+  ko: "한국어",
 };
 
 export function NavBar() {

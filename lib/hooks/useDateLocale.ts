@@ -1,11 +1,12 @@
 import { useLocale } from "next-intl";
-import { enUS, zhCN, zhTW, ja } from "date-fns/locale";
+import { enUS, zhCN, zhTW, ja, ko } from "date-fns/locale";
 
 const localeMap: Record<string, typeof enUS> = {
   en: enUS,
   "zh-CN": zhCN,
   zh: zhTW,
   ja,
+  ko,
 };
 
 export function useDateLocale() {
