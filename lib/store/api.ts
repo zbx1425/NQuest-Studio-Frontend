@@ -11,6 +11,8 @@ import type {
   AdjustQpResponse,
   JobStatusResponse,
   QuestStatsResponse,
+  DisqualifyResponse,
+  QpOperationResponse,
 } from "../types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api/v1";
@@ -225,6 +227,38 @@ export const api = createApi({
     getJobStatus: builder.query<JobStatusResponse, string>({
       query: (jobId) => `/admin/jobs/${encodeURIComponent(jobId)}`,
     }),
+
+    // ─── Admin: Disqualify / Grant / Deduct ───
+    disqualifyCompletion: builder.mutation<
+      DisqualifyResponse,
+      { completionId: number; reason: string }
+    >({
+      query: ({ completionId, reason }) => ({
+        url: `/admin/completions/${completionId}/disqualify`,
+        method: "POST",
+        body: { reason },
+      }),
+    }),
+    adminGrantQp: builder.mutation<
+      QpOperationResponse,
+      { uuid: string; amount: number; reason: string }
+    >({
+      query: ({ uuid, ...body }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/grant`,
+        method: "POST",
+        body,
+      }),
+    }),
+    adminDeductQp: builder.mutation<
+      QpOperationResponse,
+      { uuid: string; amount: number; reason: string }
+    >({
+      query: ({ uuid, ...body }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/deduct`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -249,4 +283,7 @@ export const {
   useGetQuestStatsQuery,
   useAdjustQuestQpMutation,
   useLazyGetJobStatusQuery,
+  useDisqualifyCompletionMutation,
+  useAdminGrantQpMutation,
+  useAdminDeductQpMutation,
 } = api;

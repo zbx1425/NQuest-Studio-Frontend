@@ -45,7 +45,7 @@ export function StatsTab({ questId }: StatsTabProps) {
   if (!stats) return null;
 
   const maxStepDuration = Math.max(
-    ...stats.stepAnalytics.map((s) => s.avgDurationMillis),
+    ...stats.stepAnalytics.map((s) => s.avgDurationMillis ?? 0),
     1
   );
 
@@ -117,12 +117,13 @@ export function StatsTab({ questId }: StatsTabProps) {
           </p>
           <div className="space-y-3">
             {stats.stepAnalytics.map((step) => {
-              const pct = (step.avgDurationMillis / maxStepDuration) * 100;
+              const avg = step.avgDurationMillis ?? 0;
+              const pct = (avg / maxStepDuration) * 100;
               return (
                 <div key={step.stepIndex} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-gray-700">
-                      Step {step.stepIndex + 1}
+                      {step.description ?? `Step ${step.stepIndex + 1}`}
                     </span>
                     <div className="flex gap-4 text-xs text-gray-500">
                       <span>

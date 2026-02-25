@@ -263,6 +263,14 @@ export interface PublicQuestListResponse {
   total: number;
 }
 
+// ─── Step Detail ───
+
+export interface StepDetail {
+  durationMillis: number;
+  description: string | null;
+  linesRidden: string[];
+}
+
 // ─── Ranking & Stats ───
 
 export type TimePeriod = "all_time" | "monthly" | "weekly";
@@ -272,7 +280,21 @@ export type TransactionType =
   | "QP_ADJUSTMENT"
   | "SPEND"
   | "ADMIN_GRANT"
-  | "ADMIN_DEDUCT";
+  | "ADMIN_DEDUCT"
+  | "EARN"
+  | "DISQUALIFY";
+
+export interface DisqualifyResponse {
+  completionId: number;
+  playerUuid: string;
+  qpDeducted: number;
+  newBalance: number;
+}
+
+export interface QpOperationResponse {
+  transactionId: number;
+  newBalance: number;
+}
 
 export interface ActivityEntry {
   playerUuid: string;
@@ -317,7 +339,7 @@ export interface SpeedrunEntry {
   completionTime: number;
   completionId: number;
   isWorldRecord: boolean;
-  stepDurations: Record<string, number> | null;
+  stepDetails: Record<string, StepDetail> | null;
 }
 
 export interface SpeedrunResponse {
@@ -360,8 +382,9 @@ export interface PlayerHistoryEntry {
   completionTime: number;
   durationMillis: number;
   questPoints: number;
-  stepDurations: Record<string, number> | null;
+  stepDetails: Record<string, StepDetail> | null;
   isPersonalBest: boolean;
+  disqualified: boolean;
 }
 
 export interface PlayerHistoryResponse {
@@ -412,8 +435,9 @@ export interface TransactionParams {
 
 export interface StepAnalytic {
   stepIndex: number;
-  avgDurationMillis: number;
-  medianDurationMillis: number;
+  description: string | null;
+  avgDurationMillis: number | null;
+  medianDurationMillis: number | null;
 }
 
 export interface QuestStatsResponse {
@@ -421,8 +445,8 @@ export interface QuestStatsResponse {
   questName: string;
   totalRuns: number;
   uniqueRunners: number;
-  averageDurationMillis: number;
-  medianDurationMillis: number;
+  averageDurationMillis: number | null;
+  medianDurationMillis: number | null;
   worldRecord: {
     playerUuid: string;
     playerName: string;

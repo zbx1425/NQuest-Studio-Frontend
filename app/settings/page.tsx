@@ -52,8 +52,10 @@ const TX_PAGE_SIZE = 20;
 const TX_TYPE_LABELS: Record<TransactionType | "ALL", string> = {
   ALL: "All Types",
   QUEST_COMPLETION: "Quest Completion",
-  QP_ADJUSTMENT: "QP Adjustment",
   SPEND: "Spend",
+  EARN: "Earn",
+  QP_ADJUSTMENT: "QP Adjustment",
+  DISQUALIFY: "Disqualify",
   ADMIN_GRANT: "Admin Grant",
   ADMIN_DEDUCT: "Admin Deduct",
 };
@@ -63,6 +65,8 @@ const TX_TYPE_COLORS: Record<string, "brand" | "danger" | "success" | "warning" 
   QP_ADJUSTMENT: "warning",
   ADMIN_GRANT: "brand",
   ADMIN_DEDUCT: "danger",
+  EARN: "success",
+  DISQUALIFY: "danger",
 };
 
 function NeedsMcUuid() {
@@ -298,6 +302,7 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
           value={profile.qpBalance.toLocaleString()}
           label="QP Balance"
           iconBg="bg-amber-100 text-amber-600"
+          valueClassName={profile.qpBalance < 0 ? "text-red-600" : undefined}
         />
         <StatCard
           icon={<CheckmarkCircleRegular />}
@@ -355,6 +360,7 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
   const [offset, setOffset] = useState(0);
   const [typeFilter, setTypeFilter] = useState<TransactionType | "ALL">("ALL");
 
+  const { data: profile } = useGetPlayerProfileQuery(mcUuid!, { skip: !mcUuid });
   const { data, isLoading } = useGetPlayerTransactionsQuery(
     {
       uuid: mcUuid!,
@@ -381,6 +387,31 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
   return (
     <div className="max-w-3xl space-y-4">
       <h2 className="text-lg font-semibold">QP Transactions</h2>
+
+      {profile && (
+        <div className="flex items-baseline gap-6 rounded-lg border border-gray-200 bg-white px-5 py-3">
+          <div>
+            <p className={`text-2xl font-bold ${profile.qpBalance < 0 ? "text-red-600" : ""}`}>
+              {profile.qpBalance.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500">Balance</p>
+          </div>
+          <div className="h-8 w-px bg-gray-200" />
+          <div>
+            <p className="text-base font-semibold text-green-600">
+              +{profile.totalQpEarned.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500">Earned</p>
+          </div>
+          <div className="h-8 w-px bg-gray-200" />
+          <div>
+            <p className="text-base font-semibold text-red-600">
+              -{profile.totalQpSpent.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500">Spent</p>
+          </div>
+        </div>
+      )}
 
       <Dropdown
         value={TX_TYPE_LABELS[typeFilter]}

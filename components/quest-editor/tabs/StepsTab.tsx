@@ -28,6 +28,20 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
     updateForm({ steps: [...form.steps, createDefaultStep()] });
   };
 
+  const handleMoveStep = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= form.steps.length) return;
+    const updated = [...form.steps];
+    [updated[index], updated[target]] = [updated[target], updated[index]];
+    updateForm({ steps: updated });
+  };
+
+  const handleInsertStep = (atIndex: number) => {
+    const updated = [...form.steps];
+    updated.splice(atIndex, 0, createDefaultStep());
+    updateForm({ steps: updated });
+  };
+
   return (
     <div className="space-y-6">
       {/* Quest-wide failure condition */}
@@ -75,6 +89,11 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
             index={index}
             onChange={(s) => handleStepChange(index, s)}
             onDelete={() => handleStepDelete(index)}
+            onInsertAbove={() => handleInsertStep(index)}
+            onMoveUp={() => handleMoveStep(index, -1)}
+            onMoveDown={() => handleMoveStep(index, 1)}
+            isFirst={index === 0}
+            isLast={index === form.steps.length - 1}
           />
         ))}
 

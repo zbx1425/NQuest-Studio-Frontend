@@ -17,6 +17,7 @@ import {
   TimerRegular,
   SearchRegular,
   PersonRegular,
+  ShieldDismissRegular,
 } from "@fluentui/react-icons";
 import { StepDurationsDetail } from "@/components/ranking/StepDurationsDetail";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -38,6 +39,7 @@ import {
 } from "@/components/ranking/LeaderboardTable";
 import { QuestLink } from "@/components/ranking/QuestLink";
 import { DurationDisplay } from "@/components/ranking/DurationDisplay";
+import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
 import type { TimePeriod, SpeedrunMode } from "@/lib/types";
 
 const PAGE_SIZE = 50;
@@ -121,19 +123,22 @@ function CompletionsTab({
 function SpeedrunTab({
   period,
   highlightUuid,
+  isAdmin,
 }: {
   period: TimePeriod;
   highlightUuid?: string | null;
+  isAdmin: boolean;
 }) {
   const [searchText, setSearchText] = useState("");
   const [selectedQuestId, setSelectedQuestId] = useState("");
   const [selectedQuestName, setSelectedQuestName] = useState("");
   const [mode, setMode] = useState<SpeedrunMode>("personal_best");
   const [offset, setOffset] = useState(0);
+  const [dqTarget, setDqTarget] = useState<number | null>(null);
 
   const { data: allQuestsData } = useGetPublicQuestsQuery({ size: 9999 });
 
-  const { data, isLoading } = useGetSpeedrunLeaderboardQuery(
+  const { data, isLoading, refetch } = useGetSpeedrunLeaderboardQuery(
     { questId: selectedQuestId, period, mode, limit: PAGE_SIZE, offset },
     { skip: !selectedQuestId }
   );
@@ -170,12 +175,33 @@ function SpeedrunTab({
         </Badge>
       ) : null,
     ],
-    expandContent: e.stepDurations ? (
-      <StepDurationsDetail
-        stepDurations={e.stepDurations}
-        totalDuration={e.durationMillis}
-      />
-    ) : undefined,
+    expandContent:
+      e.stepDetails || isAdmin ? (
+        <div className="space-y-3">
+          {e.stepDetails && (
+            <StepDurationsDetail
+              stepDetails={e.stepDetails}
+              totalDuration={e.durationMillis}
+            />
+          )}
+          {isAdmin && (
+            <div className="flex justify-end">
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<ShieldDismissRegular />}
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  setDqTarget(e.completionId);
+                }}
+                className="!text-red-600 hover:!bg-red-50"
+              >
+                Disqualify
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : undefined,
   }));
 
   return (
@@ -258,6 +284,15 @@ function SpeedrunTab({
           Search for a quest above to view its speedrun leaderboard.
         </p>
       )}
+
+      {dqTarget !== null && (
+        <DisqualifyDialog
+          completionId={dqTarget}
+          open
+          onClose={() => setDqTarget(null)}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   );
 }
@@ -317,7 +352,7 @@ function PlayerSearch() {
 }
 
 export default function RankingPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const mcProfile = useMinecraftProfile(user?.mcUuid);
   const [activeTab, setActiveTab] = useState("qp");
   const [period, setPeriod] = useState<TimePeriod>("all_time");
@@ -359,7 +394,7 @@ export default function RankingPage() {
               <CompletionsTab period={period} highlightUuid={user?.mcUuid} />
             )}
             {activeTab === "speedrun" && (
-              <SpeedrunTab period={period} highlightUuid={user?.mcUuid} />
+              <SpeedrunTab period={period} highlightUuid={user?.mcUuid} isAdmin={isAdmin} />
             )}
           </div>
         </div>

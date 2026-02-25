@@ -1,4 +1,5 @@
-export function formatDuration(ms: number): string {
+export function formatDuration(ms: number | null | undefined): string {
+  if (ms == null) return "-";
   const totalSeconds = Math.floor(ms / 1000);
   const tenths = Math.floor((ms % 1000) / 100);
   const hours = Math.floor(totalSeconds / 3600);

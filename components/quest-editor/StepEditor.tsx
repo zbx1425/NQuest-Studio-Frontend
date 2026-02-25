@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Label, Text, Card, CardHeader } from "@fluentui/react-components";
-import { DeleteRegular, AddRegular } from "@fluentui/react-icons";
+import { DeleteRegular, AddRegular, ArrowUpRegular, ArrowDownRegular } from "@fluentui/react-icons";
 import type { Step } from "@/lib/types";
 import { createDefaultCriterion } from "@/lib/criterion";
 import { CriterionEditor } from "./CriterionEditor";
@@ -11,21 +11,51 @@ interface StepEditorProps {
   index: number;
   onChange: (step: Step) => void;
   onDelete: () => void;
+  onInsertAbove?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export function StepEditor({ step, index, onChange, onDelete }: StepEditorProps) {
+export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onMoveUp, onMoveDown, isFirst, isLast }: StepEditorProps) {
   return (
     <Card appearance="outline" size="small">
       <CardHeader
         header={<Text weight="semibold" size={300}>Step {index + 1}</Text>}
         action={
-          <Button
-            appearance="subtle"
-            icon={<DeleteRegular />}
-            size="small"
-            onClick={onDelete}
-            title="Remove step"
-          />
+          <div className="flex items-center">
+            <Button
+              appearance="subtle"
+              icon={<AddRegular />}
+              size="small"
+              onClick={onInsertAbove}
+              title="Insert step above"
+            />
+            <Button
+              appearance="subtle"
+              icon={<ArrowUpRegular />}
+              size="small"
+              onClick={onMoveUp}
+              disabled={isFirst}
+              title="Move step up"
+            />
+            <Button
+              appearance="subtle"
+              icon={<ArrowDownRegular />}
+              size="small"
+              onClick={onMoveDown}
+              disabled={isLast}
+              title="Move step down"
+            />
+            <Button
+              appearance="subtle"
+              icon={<DeleteRegular />}
+              size="small"
+              onClick={onDelete}
+              title="Remove step"
+            />
+          </div>
         }
       />
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Badge,
+  Button,
   MessageBar,
   MessageBarBody,
 } from "@fluentui/react-components";
@@ -15,6 +16,7 @@ import {
   TrophyRegular,
   PersonRegular,
   TagRegular,
+  ShieldDismissRegular,
 } from "@fluentui/react-icons";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -33,6 +35,7 @@ import {
   type ColumnDef,
 } from "@/components/ranking/LeaderboardTable";
 import { StepDurationsDetail } from "@/components/ranking/StepDurationsDetail";
+import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
 import { formatDuration } from "@/lib/utils/duration";
 import type { TimePeriod, SpeedrunMode } from "@/lib/types";
 
@@ -41,11 +44,12 @@ const PAGE_SIZE = 50;
 export default function QuestLeaderboardPage() {
   const searchParams = useSearchParams();
   const questId = searchParams.get("id") ?? "";
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const [period, setPeriod] = useState<TimePeriod>("all_time");
   const [mode, setMode] = useState<SpeedrunMode>("personal_best");
   const [offset, setOffset] = useState(0);
+  const [dqTarget, setDqTarget] = useState<number | null>(null);
 
   const { data: quest, isLoading: questLoading } = useGetQuestDetailQuery(
     questId,
@@ -55,7 +59,7 @@ export default function QuestLeaderboardPage() {
     questId,
     { skip: !questId }
   );
-  const { data: lb, isLoading: lbLoading } = useGetSpeedrunLeaderboardQuery(
+  const { data: lb, isLoading: lbLoading, refetch: refetchLb } = useGetSpeedrunLeaderboardQuery(
     { questId, period, mode, limit: PAGE_SIZE, offset },
     { skip: !questId }
   );
@@ -91,12 +95,33 @@ export default function QuestLeaderboardPage() {
         </Badge>
       ) : null,
     ],
-    expandContent: e.stepDurations ? (
-      <StepDurationsDetail
-        stepDurations={e.stepDurations}
-        totalDuration={e.durationMillis}
-      />
-    ) : undefined,
+    expandContent:
+      e.stepDetails || isAdmin ? (
+        <div className="space-y-3">
+          {e.stepDetails && (
+            <StepDurationsDetail
+              stepDetails={e.stepDetails}
+              totalDuration={e.durationMillis}
+            />
+          )}
+          {isAdmin && (
+            <div className="flex justify-end">
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<ShieldDismissRegular />}
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  setDqTarget(e.completionId);
+                }}
+                className="!text-red-600 hover:!bg-red-50"
+              >
+                Disqualify
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : undefined,
   }));
 
   return (
@@ -258,6 +283,15 @@ export default function QuestLeaderboardPage() {
           emptyMessage="No speedrun data for this quest yet."
         />
       </div>
+
+      {dqTarget !== null && (
+        <DisqualifyDialog
+          completionId={dqTarget}
+          open
+          onClose={() => setDqTarget(null)}
+          onSuccess={() => refetchLb()}
+        />
+      )}
     </div>
   );
 }

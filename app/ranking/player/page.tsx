@@ -22,6 +22,9 @@ import {
   ChevronRightRegular,
   ChevronDownRegular,
   ChevronUpRegular,
+  ShieldDismissRegular,
+  ArrowUpRegular,
+  ArrowDownRegular,
 } from "@fluentui/react-icons";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -29,10 +32,13 @@ import {
   useGetPlayerHistoryQuery,
   useGetPlayerPersonalBestsQuery,
 } from "@/lib/store/rankingApi";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { StatCard } from "@/components/ranking/StatCard";
 import { QuestLink } from "@/components/ranking/QuestLink";
 import { DurationDisplay } from "@/components/ranking/DurationDisplay";
 import { StepDurationsDetail } from "@/components/ranking/StepDurationsDetail";
+import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
+import { QpGrantDeductDialog } from "@/components/ranking/QpGrantDeductDialog";
 import { formatDurationShort } from "@/lib/utils/duration";
 
 const HISTORY_PAGE_SIZE = 20;
@@ -70,10 +76,11 @@ function OverviewSection({ uuid }: { uuid: string }) {
   );
 }
 
-function HistorySection({ uuid }: { uuid: string }) {
+function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
   const [offset, setOffset] = useState(0);
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const { data, isLoading } = useGetPlayerHistoryQuery({
+  const [dqTarget, setDqTarget] = useState<number | null>(null);
+  const { data, isLoading, refetch } = useGetPlayerHistoryQuery({
     uuid,
     limit: HISTORY_PAGE_SIZE,
     offset,
@@ -105,13 +112,13 @@ function HistorySection({ uuid }: { uuid: string }) {
         </thead>
         <tbody>
           {data.entries.map((e) => {
-            const hasSteps = !!e.stepDurations;
+            const canExpand = (!!e.stepDetails || isAdmin) && !e.disqualified;
             const isExpanded = expandedId === e.completionId;
             return (
               <HistoryRowGroup key={e.completionId}>
                 <tr
-                  className={`border-b border-gray-100 hover:bg-gray-50/80 transition-colors ${hasSteps ? "cursor-pointer" : ""}`}
-                  onClick={hasSteps ? () => setExpandedId(isExpanded ? null : e.completionId) : undefined}
+                  className={`border-b border-gray-100 transition-colors ${canExpand ? "cursor-pointer hover:bg-gray-50/80" : ""} ${e.disqualified ? "opacity-60" : "hover:bg-gray-50/80"}`}
+                  onClick={canExpand ? () => setExpandedId(isExpanded ? null : e.completionId) : undefined}
                 >
                   <td className="py-2.5 px-3">
                     <QuestLink questId={e.questId} questName={e.questName} />
@@ -123,26 +130,47 @@ function HistorySection({ uuid }: { uuid: string }) {
                   <td className="py-2.5 px-3 text-xs text-gray-500">
                     {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true })}
                   </td>
-                  <td className="py-2.5 px-3">
-                    {e.isPersonalBest && (
+                  <td className="py-2.5 px-3 space-x-1">
+                    {e.disqualified && (
+                      <Badge appearance="tint" color="danger" size="small" icon={<ShieldDismissRegular />}>DQ</Badge>
+                    )}
+                    {(e.isPersonalBest && !e.disqualified) && (
                       <Badge appearance="tint" color="brand" size="small">PB</Badge>
                     )}
                   </td>
                   <td className="py-2.5 px-1">
-                    {hasSteps && (
+                    {canExpand && (
                       isExpanded
                         ? <ChevronUpRegular className="text-gray-400" />
                         : <ChevronDownRegular className="text-gray-400" />
                     )}
                   </td>
                 </tr>
-                {isExpanded && e.stepDurations && (
+                {isExpanded && (
                   <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <td colSpan={6} className="px-6 py-3">
-                      <StepDurationsDetail
-                        stepDurations={e.stepDurations}
-                        totalDuration={e.durationMillis}
-                      />
+                    <td colSpan={6} className="px-6 py-3 space-y-3">
+                      {e.stepDetails && (
+                        <StepDurationsDetail
+                          stepDetails={e.stepDetails}
+                          totalDuration={e.durationMillis}
+                        />
+                      )}
+                      {isAdmin && !e.disqualified && (
+                        <div className="flex justify-end">
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            icon={<ShieldDismissRegular />}
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              setDqTarget(e.completionId);
+                            }}
+                            className="!text-red-600 hover:!bg-red-50"
+                          >
+                            Disqualify
+                          </Button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}
@@ -164,6 +192,14 @@ function HistorySection({ uuid }: { uuid: string }) {
             Next
           </Button>
         </div>
+      )}
+      {dqTarget !== null && (
+        <DisqualifyDialog
+          completionId={dqTarget}
+          open
+          onClose={() => setDqTarget(null)}
+          onSuccess={() => refetch()}
+        />
       )}
     </div>
   );
@@ -224,8 +260,10 @@ export default function PlayerPage() {
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid") ?? "";
   const [activeTab, setActiveTab] = useState("overview");
+  const { isAdmin } = useAuth();
+  const [grantDeductMode, setGrantDeductMode] = useState<"grant" | "deduct" | null>(null);
 
-  const { data: profile, isLoading, error } = useGetPlayerProfileQuery(uuid, {
+  const { data: profile, isLoading, error, refetch } = useGetPlayerProfileQuery(uuid, {
     skip: !uuid,
   });
 
@@ -308,6 +346,7 @@ export default function PlayerPage() {
               value={profile.qpBalance.toLocaleString()}
               label="QP Balance"
               iconBg="bg-amber-100 text-amber-600"
+              valueClassName={profile.qpBalance < 0 ? "text-red-600" : undefined}
             />
             <StatCard
               icon={<CheckmarkCircleRegular />}
@@ -331,6 +370,35 @@ export default function PlayerPage() {
         ) : null}
       </div>
 
+      {/* Admin Action Bar */}
+      {!isLoading && profile && isAdmin && (
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Admin Actions
+          </span>
+          <div className="flex gap-2">
+            <Button
+              appearance="subtle"
+              size="small"
+              icon={<ArrowUpRegular />}
+              onClick={() => setGrantDeductMode("grant")}
+              className="!text-green-700"
+            >
+              Grant QP
+            </Button>
+            <Button
+              appearance="subtle"
+              size="small"
+              icon={<ArrowDownRegular />}
+              onClick={() => setGrantDeductMode("deduct")}
+              className="!text-red-600"
+            >
+              Deduct QP
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       {!isLoading && profile && (
         <>
@@ -345,10 +413,22 @@ export default function PlayerPage() {
 
           <div className="rounded-xl border border-gray-200 bg-white p-4">
             {activeTab === "overview" && <OverviewSection uuid={uuid} />}
-            {activeTab === "history" && <HistorySection uuid={uuid} />}
+            {activeTab === "history" && <HistorySection uuid={uuid} isAdmin={isAdmin} />}
             {activeTab === "pbs" && <PersonalBestsSection uuid={uuid} />}
           </div>
         </>
+      )}
+
+      {/* Grant / Deduct Dialog */}
+      {grantDeductMode && profile && (
+        <QpGrantDeductDialog
+          playerUuid={uuid}
+          playerName={profile.playerName}
+          mode={grantDeductMode}
+          open
+          onClose={() => setGrantDeductMode(null)}
+          onSuccess={() => refetch()}
+        />
       )}
     </div>
   );

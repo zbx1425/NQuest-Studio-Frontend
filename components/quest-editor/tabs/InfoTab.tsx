@@ -13,6 +13,7 @@ import { useGetCategoriesQuery } from "@/lib/store/api";
 import type { QuestFormState } from "../QuestEditorPage";
 import type { Quest } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
+import { MinecraftTooltipPreview } from "../MinecraftTooltipPreview";
 
 interface InfoTabProps {
   form: QuestFormState;
@@ -34,6 +35,8 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
         ([, a], [, b]) => a.order - b.order
       )
     : [];
+  const selectedTierName =
+    form.tier && selectedCategory?.tiers?.[form.tier]?.name || undefined;
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -140,6 +143,12 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
             rows={3}
           />
         </div>
+
+        <MinecraftTooltipPreview
+          name={form.name}
+          description={form.description}
+          tierName={selectedTierName}
+        />
       </section>
 
       {/* Quest info (read-only) */}

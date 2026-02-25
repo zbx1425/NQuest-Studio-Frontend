@@ -5,6 +5,7 @@ interface StatCardProps {
   value: string | number;
   label: string;
   iconBg?: string;
+  valueClassName?: string;
 }
 
 export function StatCard({
@@ -12,6 +13,7 @@ export function StatCard({
   value,
   label,
   iconBg = "bg-blue-100 text-blue-600",
+  valueClassName,
 }: StatCardProps) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col items-start gap-2">
@@ -21,7 +23,7 @@ export function StatCard({
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold leading-tight">{value}</p>
+        <p className={`text-2xl font-bold leading-tight ${valueClassName ?? ""}`}>{value}</p>
         <p className="text-xs text-gray-500 mt-0.5">{label}</p>
       </div>
     </div>
