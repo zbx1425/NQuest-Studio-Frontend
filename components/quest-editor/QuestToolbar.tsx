@@ -42,6 +42,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { Quest } from "@/lib/types";
 import type { RootState, AppDispatch } from "@/lib/store";
 import { fetchSystemMap } from "@/lib/store/systemMapSlice";
+import { useTranslations } from "next-intl";
 
 interface QuestToolbarProps {
   quest: Quest | null;
@@ -63,6 +64,8 @@ export function QuestToolbar({
   const router = useRouter();
   const toast = useAppToast();
   const dispatch = useDispatch<AppDispatch>();
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
   const permissions = usePermissions(quest);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
@@ -75,14 +78,14 @@ export function QuestToolbar({
 
   const handleRefreshSystemMap = async () => {
     if (!systemMap.baseUrl) {
-      toast.warning("No System Map URL", "Configure the System Map API URL in Settings first.");
+      toast.warning(t("noSystemMapUrl"), t("noSystemMapUrlBody"));
       return;
     }
     try {
       const data = await dispatch(fetchSystemMap(systemMap.baseUrl)).unwrap();
-      toast.success("System map refreshed", `${data.stationNames.length} stations, ${data.routeNames.length} routes.`);
+      toast.success(t("systemMapRefreshed"), t("systemMapRefreshedBody", { stations: data.stationNames.length, routes: data.routeNames.length }));
     } catch (err) {
-      toast.error("Failed to refresh", String(err));
+      toast.error(t("failedToRefresh"), String(err));
     }
   };
 
@@ -90,7 +93,7 @@ export function QuestToolbar({
     if (!quest) return;
     try {
       await updateStatus({ id: quest.id, status: newStatus }).unwrap();
-      toast.success("Status updated", `Quest is now ${newStatus}.`);
+      toast.success(t("statusUpdated"), t("statusUpdatedBody", { status: newStatus }));
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -101,7 +104,7 @@ export function QuestToolbar({
     if (!quest) return;
     try {
       await promote(quest.id).unwrap();
-      toast.success("Draft promoted", "Draft changes are now live.");
+      toast.success(t("draftPromoted"), t("draftPromotedBody"));
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -113,7 +116,7 @@ export function QuestToolbar({
     if (!quest) return;
     try {
       await deleteQuest(quest.id).unwrap();
-      toast.success("Quest deleted");
+      toast.success(t("questDeleted"));
       router.replace("/author/quests");
     } catch (err) {
       const { title, body } = extractApiError(err);
@@ -137,7 +140,7 @@ export function QuestToolbar({
           onClick={onSave}
           disabled={!canSave || isSaving}
         >
-          {isNew ? "Create" : "Save"}
+          {isNew ? t("create") : tc("save")}
         </ToolbarButton>
 
         {!isNew && quest && (
@@ -154,7 +157,7 @@ export function QuestToolbar({
                       icon={<ChevronDownRegular />}
                       iconPosition="after"
                     >
-                      Change
+                      {t("change")}
                     </Button>
                   </MenuTrigger>
                   <MenuPopover>
@@ -168,8 +171,8 @@ export function QuestToolbar({
                             onClick={() => handleStatusChange(s)}
                             disabled={disabled}
                           >
-                            Set to {s}
-                            {needsAdmin && !permissions.isAdmin && " (Admin only)"}
+                            {t("setTo", { status: s })}
+                            {needsAdmin && !permissions.isAdmin && t("adminOnly")}
                           </MenuItem>
                         );
                       })}
@@ -186,7 +189,7 @@ export function QuestToolbar({
                   icon={<ArrowUpRegular />}
                   onClick={() => setPromoteDialogOpen(true)}
                 >
-                  Promote Draft
+                  {t("promoteDraft")}
                 </ToolbarButton>
               </>
             )}
@@ -198,7 +201,7 @@ export function QuestToolbar({
                   icon={<DeleteRegular />}
                   onClick={() => setDeleteDialogOpen(true)}
                 >
-                  Delete
+                  {tc("delete")}
                 </ToolbarButton>
               </>
             )}
@@ -207,14 +210,14 @@ export function QuestToolbar({
         
         <ToolbarDivider />
         <Tooltip content={systemMap.data
-          ? `${systemMap.data.stationNames.length} stations, ${systemMap.data.routeNames.length} routes loaded`
-          : "No station data loaded — click to fetch"} relationship="description">
+          ? t("mtrDataTooltip", { stations: systemMap.data.stationNames.length, routes: systemMap.data.routeNames.length })
+          : t("mtrNoDataTooltip")} relationship="description">
           <ToolbarButton
             icon={systemMap.loading ? <Spinner size="tiny" /> : <MapRegular />}
             onClick={handleRefreshSystemMap}
             disabled={systemMap.loading}
           >
-            {systemMap.data ? "Reload MTR Data" : "Load MTR Data"}
+            {systemMap.data ? t("reloadMtrData") : t("loadMtrData")}
           </ToolbarButton>
         </Tooltip>
       </Toolbar>
@@ -224,8 +227,8 @@ export function QuestToolbar({
           <MessageBarBody className="flex items-center gap-2 flex-wrap">
             <span>
               {permissions.isAdmin
-                ? "This quest has pending draft changes. You can review and promote them to make them live."
-                : "This quest has pending game logic changes awaiting admin review. Metadata changes are already live."}
+                ? t("pendingDraftAdmin")
+                : t("pendingDraftAuthor")}
             </span>
             {quest.dataPublic && onNavigateToReview && (
               <Button
@@ -234,7 +237,7 @@ export function QuestToolbar({
                 onClick={onNavigateToReview}
                 style={{ minWidth: 0, textDecoration: "underline" }}
               >
-                Review Changes
+                {t("reviewChanges")}
               </Button>
             )}
           </MessageBarBody>
@@ -244,18 +247,16 @@ export function QuestToolbar({
       <Dialog open={promoteDialogOpen} onOpenChange={(_, d) => setPromoteDialogOpen(d.open)}>
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Promote Draft to Live</DialogTitle>
+            <DialogTitle>{t("promoteDraftToLive")}</DialogTitle>
             <DialogContent>
-              Are you sure you want to promote the draft changes to the live
-              version? This will make the draft game logic immediately available
-              to all players.
+              {t("promoteConfirmText")}
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setPromoteDialogOpen(false)} appearance="secondary">
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button onClick={handlePromote} appearance="primary">
-                Promote to Live
+                {t("promoteToLive")}
               </Button>
             </DialogActions>
           </DialogBody>
@@ -265,17 +266,17 @@ export function QuestToolbar({
       <Dialog open={deleteDialogOpen} onOpenChange={(_, d) => setDeleteDialogOpen(d.open)}>
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Delete Quest</DialogTitle>
+            <DialogTitle>{t("deleteQuest")}</DialogTitle>
             <DialogContent>
-              Are you sure you want to delete <strong>{quest?.name}</strong> ({quest?.id})? This action cannot be undone.
+              {t("deleteConfirmText", { name: quest?.name ?? "", id: quest?.id ?? "" })}
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setDeleteDialogOpen(false)} appearance="secondary">
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button onClick={handleDelete} appearance="primary" disabled={isDeleting}
                 style={{ backgroundColor: "var(--colorPaletteRedBackground3)" }}>
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting ? t("deleting") : tc("delete")}
               </Button>
             </DialogActions>
           </DialogBody>

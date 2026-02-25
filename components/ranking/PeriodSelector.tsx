@@ -1,11 +1,12 @@
 "use client";
 
 import type { TimePeriod } from "@/lib/types";
+import { useTranslations } from "next-intl";
 
-const PERIODS: { value: TimePeriod; label: string }[] = [
-  { value: "all_time", label: "All Time" },
-  { value: "monthly", label: "Monthly" },
-  { value: "weekly", label: "Weekly" },
+const PERIODS: { value: TimePeriod; key: "allTime" | "monthly" | "weekly" }[] = [
+  { value: "all_time", key: "allTime" },
+  { value: "monthly", key: "monthly" },
+  { value: "weekly", key: "weekly" },
 ];
 
 interface PeriodSelectorProps {
@@ -14,6 +15,7 @@ interface PeriodSelectorProps {
 }
 
 export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
+  const t = useTranslations("period");
   return (
     <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
       {PERIODS.map((p) => (
@@ -26,7 +28,7 @@ export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          {p.label}
+          {t(p.key)}
         </button>
       ))}
     </div>

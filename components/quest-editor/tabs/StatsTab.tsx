@@ -16,6 +16,8 @@ import { PlayerLink } from "@/components/ranking/PlayerLink";
 import { DurationDisplay } from "@/components/ranking/DurationDisplay";
 import { formatDuration } from "@/lib/utils/duration";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 
 interface StatsTabProps {
   questId: string;
@@ -23,11 +25,14 @@ interface StatsTabProps {
 
 export function StatsTab({ questId }: StatsTabProps) {
   const { data: stats, isLoading, error } = useGetQuestStatsQuery(questId);
+  const t = useTranslations("editor");
+  const tr = useTranslations("ranking");
+  const dateLocale = useDateLocale();
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner size="medium" label="Loading stats..." />
+        <Spinner size="medium" label={t("loadingStats")} />
       </div>
     );
   }
@@ -36,7 +41,7 @@ export function StatsTab({ questId }: StatsTabProps) {
     return (
       <MessageBar intent="warning">
         <MessageBarBody>
-          No stats available for this quest yet. Stats are generated after players complete the quest.
+          {t("noStats")}
         </MessageBarBody>
       </MessageBar>
     );
@@ -53,30 +58,30 @@ export function StatsTab({ questId }: StatsTabProps) {
     <div className="max-w-3xl space-y-6">
       {/* Overview */}
       <section>
-        <h2 className="text-lg font-semibold mb-3">Overview</h2>
+        <h2 className="text-lg font-semibold mb-3">{tr("overview")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard
             icon={<DataBarVerticalRegular />}
             value={stats.totalRuns.toLocaleString()}
-            label="Total Runs"
+            label={tr("totalRuns")}
             iconBg="bg-blue-100 text-blue-600"
           />
           <StatCard
             icon={<PeopleRegular />}
             value={stats.uniqueRunners.toLocaleString()}
-            label="Unique Runners"
+            label={tr("uniqueRunners")}
             iconBg="bg-purple-100 text-purple-600"
           />
           <StatCard
             icon={<TimerRegular />}
             value={formatDuration(stats.averageDurationMillis)}
-            label="Average Time"
+            label={tr("averageTime")}
             iconBg="bg-green-100 text-green-600"
           />
           <StatCard
             icon={<ArrowTrendingRegular />}
             value={formatDuration(stats.medianDurationMillis)}
-            label="Median Time"
+            label={tr("medianTime")}
             iconBg="bg-amber-100 text-amber-600"
           />
         </div>
@@ -85,7 +90,7 @@ export function StatsTab({ questId }: StatsTabProps) {
       {/* World Record */}
       {stats.worldRecord && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">World Record</h2>
+          <h2 className="text-lg font-semibold mb-3">{tr("worldRecord")}</h2>
           <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
             <div className="flex items-center gap-4">
               <TrophyRegular className="text-amber-600 text-xl" />
@@ -101,6 +106,7 @@ export function StatsTab({ questId }: StatsTabProps) {
               <span className="text-xs text-amber-600 ml-auto">
                 {formatDistanceToNow(new Date(stats.worldRecord.completionTime), {
                   addSuffix: true,
+                  locale: dateLocale,
                 })}
               </span>
             </div>
@@ -111,9 +117,9 @@ export function StatsTab({ questId }: StatsTabProps) {
       {/* Step Analytics */}
       {stats.stepAnalytics.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">Step Analytics</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("stepAnalytics")}</h2>
           <p className="text-sm text-gray-500 mb-4">
-            Average and median duration for each step. The bar width represents relative time compared to the slowest step.
+            {t("stepAnalyticsDesc")}
           </p>
           <div className="space-y-3">
             {stats.stepAnalytics.map((step) => {
@@ -123,14 +129,14 @@ export function StatsTab({ questId }: StatsTabProps) {
                 <div key={step.stepIndex} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-gray-700">
-                      {step.description ?? `Step ${step.stepIndex + 1}`}
+                      {step.description ?? tr("stepN", { n: step.stepIndex + 1 })}
                     </span>
                     <div className="flex gap-4 text-xs text-gray-500">
                       <span>
-                        Avg: <span className="font-mono">{formatDuration(step.avgDurationMillis)}</span>
+                        {tr("avg", { value: formatDuration(step.avgDurationMillis) })}
                       </span>
                       <span>
-                        Med: <span className="font-mono">{formatDuration(step.medianDurationMillis)}</span>
+                        {tr("med", { value: formatDuration(step.medianDurationMillis) })}
                       </span>
                     </div>
                   </div>
@@ -150,7 +156,7 @@ export function StatsTab({ questId }: StatsTabProps) {
       {/* Link to public leaderboard */}
       <Link href={`/ranking/quest?id=${encodeURIComponent(questId)}`}>
         <Button appearance="subtle" icon={<OpenRegular />}>
-          View Public Leaderboard
+          {t("viewPublicLeaderboard")}
         </Button>
       </Link>
     </div>

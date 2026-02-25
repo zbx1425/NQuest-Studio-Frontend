@@ -18,109 +18,9 @@ import {
   GlobeRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useTranslations } from "next-intl";
 
-const STATE_CARDS = [
-  {
-    name: "Private",
-    badge: "informative" as const,
-    icon: <LockClosedRegular className="text-2xl" />,
-    desc: "Only visible to the quest creator. This is the default state for new quests.",
-    detail: "Use this stage to draft and iterate without affecting anyone else.",
-    bg: "from-blue-50 to-blue-100/50",
-    border: "border-blue-200",
-    iconBg: "bg-blue-100 text-blue-600",
-  },
-  {
-    name: "Staging",
-    badge: "warning" as const,
-    icon: <PeopleRegular className="text-2xl" />,
-    desc: "Visible to all builders. Available for collaborative testing and peer review.",
-    detail: "Builders can access staging quests in-game with debug mode enabled.",
-    bg: "from-amber-50 to-amber-100/50",
-    border: "border-amber-200",
-    iconBg: "bg-amber-100 text-amber-600",
-  },
-  {
-    name: "Public",
-    badge: "success" as const,
-    icon: <GlobeRegular className="text-2xl" />,
-    desc: "Live for all players on the server. Only LPS staff can promote to this state.",
-    detail: "Once public, updates go through a separate review cycle.",
-    bg: "from-emerald-50 to-emerald-100/50",
-    border: "border-emerald-200",
-    iconBg: "bg-emerald-100 text-emerald-600",
-  },
-];
-
-const NEW_QUEST_STEPS = [
-  {
-    step: 1,
-    icon: <EditRegular />,
-    title: "Create & Edit Your Quest",
-    desc: "Use the visual quest editor to build your quest with steps and criteria. Your quest starts in Private state, visible only to you.",
-    color: "bg-blue-500",
-  },
-  {
-    step: 2,
-    icon: <PlayRegular />,
-    title: "Test In-Game",
-    desc: (
-      <>
-        Join the Minecraft server and use{" "}
-        <code className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">
-          /nquest debugMode
-        </code>{" "}
-        to preview your quest. Make sure to link your Minecraft account first
-        (see below).
-      </>
-    ),
-    color: "bg-violet-500",
-  },
-  {
-    step: 3,
-    icon: <ArrowRightRegular />,
-    title: "Promote to Staging",
-    desc: "When you are satisfied with your quest, promote it from Private to Staging. This makes it visible to all builders for peer testing. Then ask a staff member to review it.",
-    color: "bg-amber-500",
-  },
-  {
-    step: 4,
-    icon: <ShieldCheckmarkRegular />,
-    title: "Staff Review & Publish",
-    desc: "A staff member reviews your quest. Once approved, they promote it from Staging to Public, making it live for all players.",
-    color: "bg-emerald-500",
-  },
-];
-
-const UPDATE_STEPS = [
-  {
-    step: 5,
-    icon: <EditRegular />,
-    title: "Edit the Published Quest",
-    desc: "Make your changes to the quest steps. The quest will be marked as \"Pending Review\" automatically.",
-    color: "bg-blue-500",
-  },
-  {
-    step: 6,
-    icon: <EyeRegular />,
-    title: "Players Keep the Old Version",
-    desc: (
-      <>
-        While your changes are under review, players continue to see the
-        original published version. Builders with debug mode can preview the
-        updated version as a separate Staging quest.
-      </>
-    ),
-    color: "bg-amber-500",
-  },
-  {
-    step: 7,
-    icon: <CheckmarkCircleRegular />,
-    title: "Staff Approves the Update",
-    desc: "A staff member reviews your changes. Once approved, they promote the update, seamlessly replacing the old version for all players.",
-    color: "bg-emerald-500",
-  },
-];
+const CODE_CLASS = "px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono";
 
 function StepTimeline({
   steps,
@@ -137,7 +37,6 @@ function StepTimeline({
     <div className="space-y-0">
       {steps.map((s, i) => (
         <div key={s.step} className="flex gap-4">
-          {/* Vertical line & dot */}
           <div className="flex flex-col items-center">
             <div
               className={`w-9 h-9 rounded-full ${s.color} flex items-center justify-center text-white shrink-0 text-base shadow-sm`}
@@ -148,7 +47,6 @@ function StepTimeline({
               <div className="w-px flex-1 bg-gray-200 min-h-6" />
             )}
           </div>
-          {/* Content */}
           <div className="pb-8">
             <p className="text-sm font-bold text-gray-800 leading-9">
               {s.title}
@@ -164,6 +62,8 @@ function StepTimeline({
 export default function GuidePage() {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
+  const t = useTranslations("guide");
+  const tStatus = useTranslations("status");
 
   useEffect(() => {
     if (!isLoggedIn) router.replace("/");
@@ -171,17 +71,105 @@ export default function GuidePage() {
 
   if (!isLoggedIn) return null;
 
+  const stateCards = [
+    {
+      key: "private" as const,
+      badge: "informative" as const,
+      icon: <LockClosedRegular className="text-2xl" />,
+      bg: "from-blue-50 to-blue-100/50",
+      border: "border-blue-200",
+      iconBg: "bg-blue-100 text-blue-600",
+    },
+    {
+      key: "staging" as const,
+      badge: "warning" as const,
+      icon: <PeopleRegular className="text-2xl" />,
+      bg: "from-amber-50 to-amber-100/50",
+      border: "border-amber-200",
+      iconBg: "bg-amber-100 text-amber-600",
+    },
+    {
+      key: "public" as const,
+      badge: "success" as const,
+      icon: <GlobeRegular className="text-2xl" />,
+      bg: "from-emerald-50 to-emerald-100/50",
+      border: "border-emerald-200",
+      iconBg: "bg-emerald-100 text-emerald-600",
+    },
+  ];
+
+  const descKeys = {
+    private: { desc: "privateDesc", detail: "privateDetail" },
+    staging: { desc: "stagingDesc", detail: "stagingDetail" },
+    public: { desc: "publicDesc", detail: "publicDetail" },
+  } as const;
+
+  const newQuestSteps = [
+    {
+      step: 1,
+      icon: <EditRegular />,
+      title: t("step1Title"),
+      desc: t("step1Desc"),
+      color: "bg-blue-500",
+    },
+    {
+      step: 2,
+      icon: <PlayRegular />,
+      title: t("step2Title"),
+      desc: t.rich("step2Desc", {
+        command: (chunks) => <code className={CODE_CLASS}>{chunks}</code>,
+      }),
+      color: "bg-violet-500",
+    },
+    {
+      step: 3,
+      icon: <ArrowRightRegular />,
+      title: t("step3Title"),
+      desc: t("step3Desc"),
+      color: "bg-amber-500",
+    },
+    {
+      step: 4,
+      icon: <ShieldCheckmarkRegular />,
+      title: t("step4Title"),
+      desc: t("step4Desc"),
+      color: "bg-emerald-500",
+    },
+  ];
+
+  const updateSteps = [
+    {
+      step: 5,
+      icon: <EditRegular />,
+      title: t("step5Title"),
+      desc: t("step5Desc"),
+      color: "bg-blue-500",
+    },
+    {
+      step: 6,
+      icon: <EyeRegular />,
+      title: t("step6Title"),
+      desc: t("step6Desc"),
+      color: "bg-amber-500",
+    },
+    {
+      step: 7,
+      icon: <CheckmarkCircleRegular />,
+      title: t("step7Title"),
+      desc: t("step7Desc"),
+      color: "bg-emerald-500",
+    },
+  ];
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-12">
       {/* Page header */}
       <header className="space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight">
-          Workflow Guide
+          {t("title")}
         </h1>
         <p className="text-base text-gray-500 max-w-2xl">
-          NQuest Studio manages the full lifecycle of server quests, from
-          drafting to publishing. This guide walks you through how quests move
-          from your editor to the live game.
+          {t("description")}
         </p>
       </header>
 
@@ -191,18 +179,17 @@ export default function GuidePage() {
       <section className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-xl font-bold tracking-tight">
-            Quest States
+            {t("questStates")}
           </h2>
           <p className="text-sm text-gray-500">
-            Every quest exists in one of three visibility states. Understanding
-            them is key to the publishing workflow.
+            {t("questStatesDesc")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {STATE_CARDS.map((s) => (
+          {stateCards.map((s) => (
             <div
-              key={s.name}
+              key={s.key}
               className={`rounded-xl border ${s.border} bg-gradient-to-b ${s.bg} p-5 space-y-3`}
             >
               <div className="flex items-center justify-between">
@@ -212,11 +199,15 @@ export default function GuidePage() {
                   {s.icon}
                 </div>
                 <Badge appearance="filled" color={s.badge} size="medium">
-                  {s.name}
+                  {tStatus(s.key)}
                 </Badge>
               </div>
-              <p className="text-sm font-semibold text-gray-800">{s.desc}</p>
-              <p className="text-xs text-gray-500">{s.detail}</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {t(descKeys[s.key].desc)}
+              </p>
+              <p className="text-xs text-gray-500">
+                {t(descKeys[s.key].detail)}
+              </p>
             </div>
           ))}
         </div>
@@ -224,18 +215,18 @@ export default function GuidePage() {
         {/* State flow arrow */}
         <div className="flex items-center justify-center gap-3 py-2">
           <Badge appearance="filled" color="informative">
-            Private
+            {tStatus("private")}
           </Badge>
           <ArrowRightRegular className="text-gray-400" />
           <Badge appearance="filled" color="warning">
-            Staging
+            {tStatus("staging")}
           </Badge>
           <ArrowRightRegular className="text-gray-400" />
           <Badge appearance="filled" color="success">
-            Public
+            {tStatus("public")}
           </Badge>
           <span className="text-xs text-gray-400 ml-2">
-            (Only LPS staff can promote to Public)
+            {t("stateFlowNote")}
           </span>
         </div>
       </section>
@@ -246,13 +237,13 @@ export default function GuidePage() {
       <section className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-xl font-bold tracking-tight">
-            Creating a New Quest
+            {t("creatingNewQuest")}
           </h2>
           <p className="text-sm text-gray-500">
-            Follow these steps to create, test, and publish a brand-new quest.
+            {t("creatingNewQuestDesc")}
           </p>
         </div>
-        <StepTimeline steps={NEW_QUEST_STEPS} />
+        <StepTimeline steps={newQuestSteps} />
       </section>
 
       <Divider />
@@ -261,14 +252,13 @@ export default function GuidePage() {
       <section className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-xl font-bold tracking-tight">
-            Updating a Published Quest
+            {t("updatingPublishedQuest")}
           </h2>
           <p className="text-sm text-gray-500">
-            Already-published quests follow a safe update cycle so players are
-            never disrupted.
+            {t("updatingPublishedQuestDesc")}
           </p>
         </div>
-        <StepTimeline steps={UPDATE_STEPS} />
+        <StepTimeline steps={updateSteps} />
       </section>
 
       <Divider />
@@ -277,10 +267,10 @@ export default function GuidePage() {
       <section className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-xl font-bold tracking-tight">
-            Tips & Setup
+            {t("tipsSetup")}
           </h2>
           <p className="text-sm text-gray-500">
-            A few things to set up before you start building quests.
+            {t("tipsSetupDesc")}
           </p>
         </div>
 
@@ -290,17 +280,15 @@ export default function GuidePage() {
               <LinkRegular className="text-lg" />
             </div>
             <p className="text-sm font-bold text-gray-800">
-              Link Your Minecraft Account
+              {t("linkMcTitle")}
             </p>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Run{" "}
-              <code className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                /idtoken
-              </code>{" "}
-              in-game to get a token, then paste it in{" "}
-              <span className="font-medium text-gray-700">Settings</span> to
-              connect your Minecraft account. This is required for Private quest
-              testing.
+              {t.rich("linkMcDesc", {
+                command: (chunks) => <code className={CODE_CLASS}>{chunks}</code>,
+                settings: (chunks) => (
+                  <span className="font-medium text-gray-700">{chunks}</span>
+                ),
+              })}
             </p>
           </div>
 
@@ -308,15 +296,13 @@ export default function GuidePage() {
             <div className="w-9 h-9 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
               <PersonRegular className="text-lg" />
             </div>
-            <p className="text-sm font-bold text-gray-800">Debug Mode</p>
+            <p className="text-sm font-bold text-gray-800">
+              {t("debugModeTitle")}
+            </p>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Use{" "}
-              <code className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                /nquest debugMode
-              </code>{" "}
-              in-game to toggle debug mode. When active, you can see and test
-              quests in Private and Staging states without affecting the
-              experience for regular players.
+              {t.rich("debugModeDesc", {
+                command: (chunks) => <code className={CODE_CLASS}>{chunks}</code>,
+              })}
             </p>
           </div>
 
@@ -325,13 +311,10 @@ export default function GuidePage() {
               <ArrowSyncRegular className="text-lg" />
             </div>
             <p className="text-sm font-bold text-gray-800">
-              Live Sync with the Server
+              {t("liveSyncTitle")}
             </p>
             <p className="text-sm text-gray-500 leading-relaxed">
-              The Minecraft server automatically pulls quest data from NQuest
-              Studio. After you save changes in the editor, your quest becomes
-              available in-game within moments. No manual file transfers or JSON
-              wrangling needed.
+              {t("liveSyncDesc")}
             </p>
           </div>
         </div>

@@ -1,24 +1,27 @@
 "use client";
 
 import { Badge } from "@fluentui/react-components";
+import { useTranslations } from "next-intl";
 
-const STATUS_CONFIG: Record<
-  string,
-  { color: "informative" | "warning" | "success"; label: string }
-> = {
-  PRIVATE: { color: "informative", label: "Private" },
-  STAGING: { color: "warning", label: "Staging" },
-  PUBLIC: { color: "success", label: "Public" },
+const STATUS_COLORS: Record<string, "informative" | "warning" | "success"> = {
+  PRIVATE: "informative",
+  STAGING: "warning",
+  PUBLIC: "success",
+};
+
+const STATUS_KEYS: Record<string, string> = {
+  PRIVATE: "private",
+  STAGING: "staging",
+  PUBLIC: "public",
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? {
-    color: "informative" as const,
-    label: status,
-  };
+  const t = useTranslations("status");
+  const color = STATUS_COLORS[status] ?? "informative";
+  const key = STATUS_KEYS[status];
   return (
-    <Badge appearance="filled" color={config.color}>
-      {config.label}
+    <Badge appearance="filled" color={color}>
+      {key ? t(key as "private" | "staging" | "public") : status}
     </Badge>
   );
 }

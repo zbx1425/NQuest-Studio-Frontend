@@ -37,6 +37,8 @@ import {
 import { StepDurationsDetail } from "@/components/ranking/StepDurationsDetail";
 import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
 import { formatDuration } from "@/lib/utils/duration";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 import type { TimePeriod, SpeedrunMode } from "@/lib/types";
 
 const PAGE_SIZE = 50;
@@ -45,6 +47,8 @@ export default function QuestLeaderboardPage() {
   const searchParams = useSearchParams();
   const questId = searchParams.get("id") ?? "";
   const { user, isAdmin } = useAuth();
+  const t = useTranslations("ranking");
+  const dateLocale = useDateLocale();
 
   const [period, setPeriod] = useState<TimePeriod>("all_time");
   const [mode, setMode] = useState<SpeedrunMode>("personal_best");
@@ -68,15 +72,15 @@ export default function QuestLeaderboardPage() {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
-          <MessageBarBody>No Quest ID provided.</MessageBarBody>
+          <MessageBarBody>{t("noQuestId")}</MessageBarBody>
         </MessageBar>
       </div>
     );
   }
 
   const columns: ColumnDef[] = [
-    { label: "Time", className: "font-mono" },
-    { label: "Date" },
+    { label: t("time"), className: "font-mono" },
+    { label: "" },
     { label: "" },
   ];
   const rows: LeaderboardRow[] = (lb?.entries ?? []).map((e) => ({
@@ -87,7 +91,7 @@ export default function QuestLeaderboardPage() {
     cells: [
       <DurationDisplay key="t" ms={e.durationMillis} />,
       <span key="d" className="text-gray-500 text-xs">
-        {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true })}
+        {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
       </span>,
       e.isWorldRecord ? (
         <Badge key="wr" appearance="filled" color="danger" size="small">
@@ -116,7 +120,7 @@ export default function QuestLeaderboardPage() {
                 }}
                 className="!text-red-600 hover:!bg-red-50"
               >
-                Disqualify
+                {t("disqualify")}
               </Button>
             </div>
           )}
@@ -166,7 +170,7 @@ export default function QuestLeaderboardPage() {
             {quest?.createdBy && (
               <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                 <PersonRegular className="text-[12px]" />
-                by {quest.createdBy.username}
+                {t("by", { author: quest.createdBy.username })}
               </span>
             )}
           </div>
@@ -188,25 +192,25 @@ export default function QuestLeaderboardPage() {
             <StatCard
               icon={<DataBarVerticalRegular />}
               value={stats.totalRuns.toLocaleString()}
-              label="Total Runs"
+              label={t("totalRuns")}
               iconBg="bg-blue-100 text-blue-600"
             />
             <StatCard
               icon={<PeopleRegular />}
               value={stats.uniqueRunners.toLocaleString()}
-              label="Unique Runners"
+              label={t("uniqueRunners")}
               iconBg="bg-purple-100 text-purple-600"
             />
             <StatCard
               icon={<TimerRegular />}
               value={formatDuration(stats.averageDurationMillis)}
-              label="Average Time"
+              label={t("averageTime")}
               iconBg="bg-green-100 text-green-600"
             />
             <StatCard
               icon={<ArrowTrendingRegular />}
               value={formatDuration(stats.medianDurationMillis)}
-              label="Median Time"
+              label={t("medianTime")}
               iconBg="bg-amber-100 text-amber-600"
             />
           </>
@@ -218,7 +222,7 @@ export default function QuestLeaderboardPage() {
         <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
           <div className="flex items-center gap-2 mb-2">
             <TrophyRegular className="text-amber-600" />
-            <span className="text-sm font-semibold text-amber-800">World Record</span>
+            <span className="text-sm font-semibold text-amber-800">{t("worldRecord")}</span>
           </div>
           <div className="flex items-center gap-4">
             <PlayerLink
@@ -233,6 +237,7 @@ export default function QuestLeaderboardPage() {
             <span className="text-xs text-amber-600 ml-auto">
               {formatDistanceToNow(new Date(stats.worldRecord.completionTime), {
                 addSuffix: true,
+                locale: dateLocale,
               })}
             </span>
           </div>
@@ -254,7 +259,7 @@ export default function QuestLeaderboardPage() {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Personal Best
+            {t("personalBest")}
           </button>
           <button
             onClick={() => { setMode("all_runs"); setOffset(0); }}
@@ -264,7 +269,7 @@ export default function QuestLeaderboardPage() {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            All Runs
+            {t("allRuns")}
           </button>
         </div>
       </div>
@@ -280,7 +285,7 @@ export default function QuestLeaderboardPage() {
           limit={PAGE_SIZE}
           onOffsetChange={setOffset}
           highlightUuid={user?.mcUuid}
-          emptyMessage="No speedrun data for this quest yet."
+          emptyMessage={t("noSpeedrunDataYet")}
         />
       </div>
 

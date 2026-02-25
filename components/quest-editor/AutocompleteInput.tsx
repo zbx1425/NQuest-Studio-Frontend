@@ -8,6 +8,7 @@ import {
   Text,
 } from "@fluentui/react-components";
 import type { OptionOnSelectData } from "@fluentui/react-components";
+import { useTranslations } from "next-intl";
 
 interface AutocompleteInputProps {
   label: string;
@@ -27,6 +28,7 @@ export function AutocompleteInput({
   placeholder,
   displayMap,
 }: AutocompleteInputProps) {
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const committedRef = useRef(false);
@@ -152,7 +154,7 @@ export function AutocompleteInput({
         })}
         {!showCustomOption && filtered.length === 0 && (
           <Option disabled value="">
-            No results
+            {tc("noResults")}
           </Option>
         )}
       </Combobox>

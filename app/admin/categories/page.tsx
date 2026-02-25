@@ -35,6 +35,7 @@ import {
 } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
+import { useTranslations } from "next-intl";
 import type { QuestCategory, QuestTier } from "@/lib/types";
 
 interface CategoryFormData {
@@ -60,6 +61,8 @@ const emptyForm: CategoryFormData = {
 export default function CategoriesPage() {
   const { isAdmin } = useAuth();
   const toast = useAppToast();
+  const t = useTranslations("admin");
+  const tc = useTranslations("common");
   const { data: categories, isLoading } = useGetCategoriesQuery();
   const [createCategory] = useCreateCategoryMutation();
   const [updateCategory] = useUpdateCategoryMutation();
@@ -80,7 +83,7 @@ export default function CategoriesPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
-          <MessageBarBody>Only staff members can manage categories.</MessageBarBody>
+          <MessageBarBody>{t("staffOnly")}</MessageBarBody>
         </MessageBar>
       </div>
     );
@@ -129,7 +132,7 @@ export default function CategoriesPage() {
           hidden: form.hidden,
           tiers: normalizedTiers,
         }).unwrap();
-        toast.success("Category updated");
+        toast.success(t("categoryUpdated"));
       } else {
         await createCategory({
           id: form.id,
@@ -140,7 +143,7 @@ export default function CategoriesPage() {
           hidden: form.hidden,
           tiers: normalizedTiers,
         }).unwrap();
-        toast.success("Category created");
+        toast.success(t("categoryCreated"));
       }
       setDialogOpen(false);
     } catch (err) {
@@ -153,7 +156,7 @@ export default function CategoriesPage() {
     if (!deletingId) return;
     try {
       await deleteCategory(deletingId).unwrap();
-      toast.success("Category deleted");
+      toast.success(t("categoryDeleted"));
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -205,29 +208,29 @@ export default function CategoriesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Categories</h1>
+        <h1 className="text-2xl font-semibold">{t("categories")}</h1>
         <Button
           appearance="primary"
           icon={<AddRegular />}
           onClick={openCreate}
         >
-          New Category
+          {t("newCategory")}
         </Button>
       </div>
 
       {isLoading ? (
-        <Spinner label="Loading categories..." />
+        <Spinner label={t("loadingCategories")} />
       ) : (
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50/60">
-                <th className="text-left p-3 font-semibold">ID</th>
-                <th className="text-left p-3 font-semibold">Name</th>
-                <th className="text-left p-3 font-semibold">Icon</th>
-                <th className="text-left p-3 font-semibold">Tiers</th>
-                <th className="text-right p-3 font-semibold w-16">Order</th>
-                <th className="text-center p-3 font-semibold w-16">Hidden</th>
+                <th className="text-left p-3 font-semibold">{t("id")}</th>
+                <th className="text-left p-3 font-semibold">{t("name")}</th>
+                <th className="text-left p-3 font-semibold">{t("icon")}</th>
+                <th className="text-left p-3 font-semibold">{t("tiers")}</th>
+                <th className="text-right p-3 font-semibold w-16">{t("order")}</th>
+                <th className="text-center p-3 font-semibold w-16">{tc("hidden")}</th>
                 <th className="w-20" />
               </tr>
             </thead>
@@ -235,7 +238,7 @@ export default function CategoriesPage() {
               {categoryEntries.length === 0 && (
                 <tr>
                   <td colSpan={7} className="text-center py-8 text-gray-500">
-                    No categories yet.
+                    {t("noCategoriesYet")}
                   </td>
                 </tr>
               )}
@@ -258,7 +261,7 @@ export default function CategoriesPage() {
                   </td>
                   <td className="p-3 text-right">{cat.order}</td>
                   <td className="p-3 text-center text-xs text-gray-500">
-                    {cat.hidden ? "Yes" : ""}
+                    {cat.hidden ? "✓" : ""}
                   </td>
                   <td className="p-3">
                     <div className="flex gap-1">
@@ -289,29 +292,29 @@ export default function CategoriesPage() {
         <DialogSurface>
           <DialogBody>
             <DialogTitle>
-              {editingId ? "Edit Category" : "New Category"}
+              {editingId ? t("editCategory") : t("newCategory")}
             </DialogTitle>
             <DialogContent>
               <div className="space-y-3 mt-2">
                 {!editingId && (
                   <div className="flex flex-col gap-1">
-                    <Label required>Category ID</Label>
+                    <Label required>{t("categoryId")}</Label>
                     <Input
                       value={form.id}
                       onChange={(_, d) => setForm({ ...form, id: d.value })}
-                      placeholder="e.g., mtr-lines"
+                      placeholder={t("categoryIdPlaceholder")}
                     />
                   </div>
                 )}
                 <div className="flex flex-col gap-1">
-                  <Label required>Name</Label>
+                  <Label required>{t("name")}</Label>
                   <Input
                     value={form.name}
                     onChange={(_, d) => setForm({ ...form, name: d.value })}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label>Description</Label>
+                  <Label>{tc("description")}</Label>
                   <Textarea
                     value={form.description}
                     onChange={(_, d) =>
@@ -323,7 +326,7 @@ export default function CategoriesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <Label>Icon</Label>
+                    <Label>{t("icon")}</Label>
                     <Input
                       value={form.icon}
                       onChange={(_, d) =>
@@ -333,7 +336,7 @@ export default function CategoriesPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label>Order</Label>
+                    <Label>{t("order")}</Label>
                     <Input
                       type="number"
                       value={String(form.order)}
@@ -352,13 +355,13 @@ export default function CategoriesPage() {
                     onChange={(_, d) =>
                       setForm({ ...form, hidden: d.checked })
                     }
-                    label="Hidden"
+                    label={tc("hidden")}
                   />
                 </div>
 
                 {/* Tiers */}
                 <div>
-                  <Label className="font-semibold">Tiers</Label>
+                  <Label className="font-semibold">{t("tiers")}</Label>
                   <div className="space-y-2 mt-2">
                     {Object.entries(form.tiers)
                       .sort(([, a], [, b]) => a.order - b.order)
@@ -411,7 +414,7 @@ export default function CategoriesPage() {
                               })
                             }
                             className="w-48"
-                            placeholder="Icon"
+                            placeholder={t("icon")}
                           />
                           <Button
                             appearance="subtle"
@@ -423,19 +426,19 @@ export default function CategoriesPage() {
                   </div>
                   <div className="flex items-end gap-3 mt-3">
                     <div className="flex flex-col gap-1">
-                      <Label>Tier ID</Label>
+                      <Label>{t("tierId")}</Label>
                       <Input
                         value={newTierId}
                         onChange={(_, d) => setNewTierId(d.value)}
-                        placeholder="e.g., easy"
+                        placeholder={t("tierIdPlaceholder")}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label>Name</Label>
+                      <Label>{t("tierName")}</Label>
                       <Input
                         value={newTierName}
                         onChange={(_, d) => setNewTierName(d.value)}
-                        placeholder="e.g., Easy"
+                        placeholder={t("tierNamePlaceholder")}
                       />
                     </div>
                     <Button
@@ -443,7 +446,7 @@ export default function CategoriesPage() {
                       onClick={addTier}
                       disabled={!newTierId}
                     >
-                      Add
+                      {tc("add")}
                     </Button>
                   </div>
                 </div>
@@ -454,14 +457,14 @@ export default function CategoriesPage() {
                 onClick={() => setDialogOpen(false)}
                 appearance="secondary"
               >
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 onClick={handleSave}
                 appearance="primary"
                 icon={<SaveRegular />}
               >
-                Save
+                {tc("save")}
               </Button>
             </DialogActions>
           </DialogBody>
@@ -475,18 +478,16 @@ export default function CategoriesPage() {
       >
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Delete Category</DialogTitle>
+            <DialogTitle>{t("deleteCategory")}</DialogTitle>
             <DialogContent>
-              Are you sure you want to delete category{" "}
-              <strong>{deletingId}</strong>? Quests using this category will have
-              their category set to null.
+              {t("deleteCategoryConfirm", { id: deletingId ?? "" })}
             </DialogContent>
             <DialogActions>
               <Button
                 onClick={() => setDeleteDialogOpen(false)}
                 appearance="secondary"
               >
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 onClick={handleDelete}
@@ -495,7 +496,7 @@ export default function CategoriesPage() {
                   backgroundColor: "var(--colorPaletteRedBackground3)",
                 }}
               >
-                Delete
+                {tc("delete")}
               </Button>
             </DialogActions>
           </DialogBody>

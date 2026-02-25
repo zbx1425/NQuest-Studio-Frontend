@@ -6,6 +6,7 @@ import type { Step, Criterion } from "@/lib/types";
 import { createDefaultStep, createDefaultCriterion } from "@/lib/criterion";
 import { StepEditor } from "../StepEditor";
 import { CriterionEditor } from "../CriterionEditor";
+import { useTranslations } from "next-intl";
 import type { QuestFormState } from "../QuestEditorPage";
 
 interface StepsTabProps {
@@ -14,6 +15,7 @@ interface StepsTabProps {
 }
 
 export function StepsTab({ form, updateForm }: StepsTabProps) {
+  const t = useTranslations("editor");
   const handleStepChange = (index: number, step: Step) => {
     const updated = [...form.steps];
     updated[index] = step;
@@ -49,7 +51,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
         {form.defaultCriteria ? (
           <div>
             <Label className="mb-1 block font-medium">
-              Quest-Wide Failure Condition
+              {t("questFailureCondition")}
             </Label>
             <CriterionEditor
               value={form.defaultCriteria}
@@ -71,7 +73,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
               })
             }
           >
-            Add Quest-Wide Failure Condition
+            {t("addQuestFailureCondition")}
           </Button>
         )}
       </section>
@@ -79,7 +81,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
       {/* Steps */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">
-          Steps ({form.steps.length})
+          {t("stepsCount", { count: form.steps.length })}
         </h2>
 
         {form.steps.map((step, index) => (
@@ -98,7 +100,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
         ))}
 
         <Button appearance="primary" icon={<AddRegular />} onClick={handleAddStep}>
-          Add Step
+          {t("addStep")}
         </Button>
       </section>
     </div>

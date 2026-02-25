@@ -40,13 +40,17 @@ import { StepDurationsDetail } from "@/components/ranking/StepDurationsDetail";
 import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
 import { QpGrantDeductDialog } from "@/components/ranking/QpGrantDeductDialog";
 import { formatDurationShort } from "@/lib/utils/duration";
+import { useTranslations, useLocale } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 
 const HISTORY_PAGE_SIZE = 20;
 
 function OverviewSection({ uuid }: { uuid: string }) {
+  const t = useTranslations("ranking");
+  const dateLocale = useDateLocale();
   const { data } = useGetPlayerProfileQuery(uuid);
   if (!data?.recentActivity.length) {
-    return <p className="text-sm text-gray-500 py-4">No recent activity.</p>;
+    return <p className="text-sm text-gray-500 py-4">{t("noRecentActivity")}</p>;
   }
 
   return (
@@ -67,7 +71,7 @@ function OverviewSection({ uuid }: { uuid: string }) {
             </div>
             <p className="text-xs text-gray-500 mt-0.5">
               {formatDurationShort(a.durationMillis)} &middot;{" "}
-              {formatDistanceToNow(new Date(a.completionTime), { addSuffix: true })}
+              {formatDistanceToNow(new Date(a.completionTime), { addSuffix: true, locale: dateLocale })}
             </p>
           </div>
         </div>
@@ -77,6 +81,9 @@ function OverviewSection({ uuid }: { uuid: string }) {
 }
 
 function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
+  const t = useTranslations("ranking");
+  const tc = useTranslations("common");
+  const dateLocale = useDateLocale();
   const [offset, setOffset] = useState(0);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [dqTarget, setDqTarget] = useState<number | null>(null);
@@ -91,7 +98,7 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
   }
 
   if (!data?.entries.length) {
-    return <p className="text-sm text-gray-500 py-4">No completion history.</p>;
+    return <p className="text-sm text-gray-500 py-4">{t("noCompletionHistory")}</p>;
   }
 
   const totalPages = Math.ceil((data.total ?? 0) / HISTORY_PAGE_SIZE);
@@ -102,10 +109,10 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-left">
-            <th className="py-2 px-3 text-gray-500 font-medium">Quest</th>
-            <th className="py-2 px-3 text-gray-500 font-medium">Time</th>
-            <th className="py-2 px-3 text-gray-500 font-medium text-right">QP</th>
-            <th className="py-2 px-3 text-gray-500 font-medium">Date</th>
+            <th className="py-2 px-3 text-gray-500 font-medium">{t("quest")}</th>
+            <th className="py-2 px-3 text-gray-500 font-medium">{t("time")}</th>
+            <th className="py-2 px-3 text-gray-500 font-medium text-right">{t("qp")}</th>
+            <th className="py-2 px-3 text-gray-500 font-medium"></th>
             <th className="py-2 px-3 text-gray-500 font-medium w-12"></th>
             <th className="py-2 px-3 w-8" />
           </tr>
@@ -128,7 +135,7 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono">{e.questPoints}</td>
                   <td className="py-2.5 px-3 text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
                   </td>
                   <td className="py-2.5 px-3 space-x-1">
                     {e.disqualified && (
@@ -167,7 +174,7 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
                             }}
                             className="!text-red-600 hover:!bg-red-50"
                           >
-                            Disqualify
+                            {t("disqualify")}
                           </Button>
                         </div>
                       )}
@@ -183,13 +190,15 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
         <div className="flex items-center justify-between mt-3 px-1">
           <Button appearance="subtle" size="small" icon={<ChevronLeftRegular />}
             disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - HISTORY_PAGE_SIZE))}>
-            Prev
+            {tc("prev")}
           </Button>
-          <span className="text-xs text-gray-500">Page {currentPage} of {totalPages}</span>
+          <span className="text-xs text-gray-500">
+            {tc("pageOf", { current: currentPage, total: totalPages })}
+          </span>
           <Button appearance="subtle" size="small" icon={<ChevronRightRegular />} iconPosition="after"
             disabled={offset + HISTORY_PAGE_SIZE >= (data.total ?? 0)}
             onClick={() => setOffset(offset + HISTORY_PAGE_SIZE)}>
-            Next
+            {tc("next")}
           </Button>
         </div>
       )}
@@ -210,6 +219,8 @@ function HistoryRowGroup({ children }: { children: React.ReactNode }) {
 }
 
 function PersonalBestsSection({ uuid }: { uuid: string }) {
+  const t = useTranslations("ranking");
+  const dateLocale = useDateLocale();
   const { data, isLoading } = useGetPlayerPersonalBestsQuery(uuid);
 
   if (isLoading) {
@@ -217,17 +228,17 @@ function PersonalBestsSection({ uuid }: { uuid: string }) {
   }
 
   if (!data?.entries.length) {
-    return <p className="text-sm text-gray-500 py-4">No personal bests.</p>;
+    return <p className="text-sm text-gray-500 py-4">{t("noPersonalBests")}</p>;
   }
 
   return (
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b border-gray-200 text-left">
-          <th className="py-2 px-3 text-gray-500 font-medium">Quest</th>
-          <th className="py-2 px-3 text-gray-500 font-medium">Best Time</th>
-          <th className="py-2 px-3 text-gray-500 font-medium text-right">Rank</th>
-          <th className="py-2 px-3 text-gray-500 font-medium">Date</th>
+          <th className="py-2 px-3 text-gray-500 font-medium">{t("quest")}</th>
+          <th className="py-2 px-3 text-gray-500 font-medium">{t("bestTime")}</th>
+          <th className="py-2 px-3 text-gray-500 font-medium text-right">{t("rank")}</th>
+          <th className="py-2 px-3 text-gray-500 font-medium"></th>
         </tr>
       </thead>
       <tbody>
@@ -247,7 +258,7 @@ function PersonalBestsSection({ uuid }: { uuid: string }) {
               </span>
             </td>
             <td className="py-2.5 px-3 text-xs text-gray-500">
-              {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true })}
+              {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
             </td>
           </tr>
         ))}
@@ -262,6 +273,9 @@ export default function PlayerPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const { isAdmin } = useAuth();
   const [grantDeductMode, setGrantDeductMode] = useState<"grant" | "deduct" | null>(null);
+  const t = useTranslations("ranking");
+  const ts = useTranslations("settings");
+  const locale = useLocale();
 
   const { data: profile, isLoading, error, refetch } = useGetPlayerProfileQuery(uuid, {
     skip: !uuid,
@@ -271,7 +285,7 @@ export default function PlayerPage() {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
-          <MessageBarBody>No player UUID provided.</MessageBarBody>
+          <MessageBarBody>{t("noPlayerUuid")}</MessageBarBody>
         </MessageBar>
       </div>
     );
@@ -282,7 +296,7 @@ export default function PlayerPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="error">
           <MessageBarBody>
-            Player not found or failed to load.
+            {t("playerNotFound")}
           </MessageBarBody>
         </MessageBar>
       </div>
@@ -316,11 +330,12 @@ export default function PlayerPage() {
               <h1 className="text-2xl font-bold">{profile.playerName}</h1>
               {profile.firstCompletionTime && (
                 <p className="text-sm text-gray-500">
-                  Playing since{" "}
-                  {new Date(profile.firstCompletionTime).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                  {t("playingSince", {
+                    date: new Date(profile.firstCompletionTime).toLocaleDateString(locale, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }),
                   })}
                 </p>
               )}
@@ -344,26 +359,26 @@ export default function PlayerPage() {
             <StatCard
               icon={<TrophyRegular />}
               value={profile.qpBalance.toLocaleString()}
-              label="QP Balance"
+              label={ts("qpBalance")}
               iconBg="bg-amber-100 text-amber-600"
               valueClassName={profile.qpBalance < 0 ? "text-red-600" : undefined}
             />
             <StatCard
               icon={<CheckmarkCircleRegular />}
               value={profile.totalQuestCompletions}
-              label="Total Completions"
+              label={ts("totalCompletions")}
               iconBg="bg-green-100 text-green-600"
             />
             <StatCard
               icon={<ArrowTrendingRegular />}
               value={profile.personalBestCount}
-              label="Personal Bests"
+              label={ts("personalBests")}
               iconBg="bg-blue-100 text-blue-600"
             />
             <StatCard
               icon={<CalendarRegular />}
               value={profile.worldRecordCount}
-              label="World Records"
+              label={ts("worldRecords")}
               iconBg="bg-red-100 text-red-600"
             />
           </>
@@ -374,7 +389,7 @@ export default function PlayerPage() {
       {!isLoading && profile && isAdmin && (
         <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Admin Actions
+            {t("adminActions")}
           </span>
           <div className="flex gap-2">
             <Button
@@ -384,7 +399,7 @@ export default function PlayerPage() {
               onClick={() => setGrantDeductMode("grant")}
               className="!text-green-700"
             >
-              Grant QP
+              {t("grantQp")}
             </Button>
             <Button
               appearance="subtle"
@@ -393,7 +408,7 @@ export default function PlayerPage() {
               onClick={() => setGrantDeductMode("deduct")}
               className="!text-red-600"
             >
-              Deduct QP
+              {t("deductQp")}
             </Button>
           </div>
         </div>
@@ -406,9 +421,9 @@ export default function PlayerPage() {
             selectedValue={activeTab}
             onTabSelect={(_, d) => setActiveTab(d.value as string)}
           >
-            <Tab value="overview" icon={<HistoryRegular />}>Overview</Tab>
-            <Tab value="history" icon={<CheckmarkCircleRegular />}>History</Tab>
-            <Tab value="pbs" icon={<StarRegular />}>Personal Bests</Tab>
+            <Tab value="overview" icon={<HistoryRegular />}>{t("overview")}</Tab>
+            <Tab value="history" icon={<CheckmarkCircleRegular />}>{t("history")}</Tab>
+            <Tab value="pbs" icon={<StarRegular />}>{t("personalBest")}</Tab>
           </TabList>
 
           <div className="rounded-xl border border-gray-200 bg-white p-4">

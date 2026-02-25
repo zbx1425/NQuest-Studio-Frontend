@@ -37,6 +37,7 @@ import { InfoTab } from "./tabs/InfoTab";
 import { AclTab } from "./tabs/AclTab";
 import { JsonTab } from "./tabs/JsonTab";
 import { ReviewTab } from "./tabs/ReviewTab";
+import { useTranslations } from "next-intl";
 
 export interface QuestFormState {
   id: string;
@@ -85,6 +86,7 @@ export function QuestEditorPage() {
 
   const { isLoggedIn } = useAuth();
   const toast = useAppToast();
+  const t = useTranslations("editor");
 
   const {
     data: questData,
@@ -130,7 +132,7 @@ export function QuestEditorPage() {
             ? { failureCriteria: form.defaultCriteria }
             : null,
         }).unwrap();
-        toast.success("Quest created", `Quest "${result.name}" has been created.`);
+        toast.success(t("questCreated"), t("questCreatedBody", { name: result.name }));
         router.replace(`/author/editor?id=${encodeURIComponent(result.id)}`);
       } else {
         const result = await updateQuest({
@@ -146,9 +148,9 @@ export function QuestEditorPage() {
             : null,
         }).unwrap();
         setForm(questToForm(result));
-        toast.success("Quest saved", result.hasPendingDraft
-          ? "Saved. There are pending draft changes awaiting staff approval."
-          : "All changes saved successfully.");
+        toast.success(t("questSaved"), result.hasPendingDraft
+          ? t("questSavedPending")
+          : t("questSavedSuccess"));
       }
     } catch (err) {
       const { title, body } = extractApiError(err);
@@ -161,7 +163,7 @@ export function QuestEditorPage() {
   if (!isNew && isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Spinner size="large" label="Loading quest..." />
+        <Spinner size="large" label={t("loadingQuest")} />
       </div>
     );
   }
@@ -171,8 +173,8 @@ export function QuestEditorPage() {
       <div className="flex h-full items-center justify-center p-8">
         <MessageBar intent="error">
           <MessageBarBody>
-            <MessageBarTitle>Failed to load quest</MessageBarTitle>
-            {questId} could not be loaded. It may not exist or you may not have permission.
+            <MessageBarTitle>{t("failedToLoad")}</MessageBarTitle>
+            {t("failedToLoadBody", { id: questId })}
           </MessageBarBody>
         </MessageBar>
       </div>
@@ -185,10 +187,10 @@ export function QuestEditorPage() {
       <aside className="w-56 shrink-0 border-r border-gray-200 flex flex-col overflow-y-auto">
         <div className="px-4 pt-6 pb-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Quest Editor
+            {t("questEditor")}
           </p>
           {isNew ? (
-            <p className="font-semibold mt-2">New Quest</p>
+            <p className="font-semibold mt-2">{t("newQuest")}</p>
           ) : questData ? (
             <div className="mt-2">
               <p className="font-semibold truncate">
@@ -209,20 +211,20 @@ export function QuestEditorPage() {
             size="large"
             appearance="subtle"
           >
-            <Tab value="info" icon={<InfoRegular />}>Info</Tab>
-            <Tab value="steps" icon={<ListRegular />}>Steps</Tab>
+            <Tab value="info" icon={<InfoRegular />}>{t("info")}</Tab>
+            <Tab value="steps" icon={<ListRegular />}>{t("steps")}</Tab>
             {permissions.canManageAcl && (
-              <Tab value="acl" icon={<PeopleRegular />}>ACL</Tab>
+              <Tab value="acl" icon={<PeopleRegular />}>{t("acl")}</Tab>
             )}
-            <Tab value="json" icon={<CodeRegular />}>JSON</Tab>
+            <Tab value="json" icon={<CodeRegular />}>{t("json")}</Tab>
             {questData?.hasPendingDraft && questData.status === "PUBLIC" && questData.dataPublic && (
-              <Tab value="review" icon={<DocumentSearchRegular />}>Review</Tab>
+              <Tab value="review" icon={<DocumentSearchRegular />}>{t("review")}</Tab>
             )}
             {!isNew && questId && (
-              <Tab value="stats" icon={<DataBarVerticalRegular />}>Stats</Tab>
+              <Tab value="stats" icon={<DataBarVerticalRegular />}>{t("stats")}</Tab>
             )}
             {!isNew && questData && permissions.canEdit && (
-              <Tab value="qp-adjust" icon={<CurrencyDollarEuroRegular />}>QP Adjustment</Tab>
+              <Tab value="qp-adjust" icon={<CurrencyDollarEuroRegular />}>{t("qpAdjustment")}</Tab>
             )}
           </TabList>
         </nav>

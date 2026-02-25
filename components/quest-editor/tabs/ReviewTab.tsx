@@ -19,6 +19,7 @@ import { diffLines, type Change } from "diff";
 import { usePromoteQuestMutation } from "@/lib/store/api";
 import { usePermissions } from "@/lib/hooks/usePermissions";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
+import { useTranslations } from "next-intl";
 import type { Quest } from "@/lib/types";
 import { useState } from "react";
 
@@ -29,6 +30,8 @@ interface ReviewTabProps {
 export function ReviewTab({ quest }: ReviewTabProps) {
   const toast = useAppToast();
   const permissions = usePermissions(quest);
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
   const [promote, { isLoading: isPromoting }] = usePromoteQuestMutation();
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
 
@@ -50,7 +53,7 @@ export function ReviewTab({ quest }: ReviewTabProps) {
   const handlePromote = async () => {
     try {
       await promote(quest.id).unwrap();
-      toast.success("Draft promoted", "Draft changes are now live.");
+      toast.success(t("draftPromoted"), t("draftPromotedBody"));
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -61,26 +64,26 @@ export function ReviewTab({ quest }: ReviewTabProps) {
   return (
     <div className="max-w-4xl space-y-4">
       <div>
-        <h2 className="text-lg font-semibold mb-1">Review Draft Changes</h2>
+        <h2 className="text-lg font-semibold mb-1">{t("reviewTitle")}</h2>
         <Text size={200} className="text-gray-500">
-          Comparing live (published) game logic with the current draft.
+          {t("reviewDesc")}
         </Text>
       </div>
 
       {stats.added === 0 && stats.removed === 0 ? (
         <MessageBar intent="success">
           <MessageBarBody>
-            Draft and live versions are identical. No changes to review.
+            {t("noDiffChanges")}
           </MessageBarBody>
         </MessageBar>
       ) : (
         <>
           <div className="flex items-center gap-3">
             <Badge appearance="filled" color="success" size="small">
-              +{stats.added} added
+              {t("addedLines", { count: stats.added })}
             </Badge>
             <Badge appearance="filled" color="danger" size="small">
-              -{stats.removed} removed
+              {t("removedLines", { count: stats.removed })}
             </Badge>
           </div>
 
@@ -135,7 +138,7 @@ export function ReviewTab({ quest }: ReviewTabProps) {
             icon={<ArrowUpRegular />}
             onClick={() => setPromoteDialogOpen(true)}
           >
-            Promote Draft to Live
+            {t("promoteDraftToLive")}
           </Button>
         </div>
       )}
@@ -146,25 +149,23 @@ export function ReviewTab({ quest }: ReviewTabProps) {
       >
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Promote Draft to Live</DialogTitle>
+            <DialogTitle>{t("promoteDraftToLive")}</DialogTitle>
             <DialogContent>
-              Are you sure you want to promote the draft changes to the live
-              version? This will make the draft game logic immediately available
-              to all players.
+              {t("promoteConfirmText")}
             </DialogContent>
             <DialogActions>
               <Button
                 onClick={() => setPromoteDialogOpen(false)}
                 appearance="secondary"
               >
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 onClick={handlePromote}
                 appearance="primary"
                 disabled={isPromoting}
               >
-                {isPromoting ? "Promoting..." : "Promote to Live"}
+                {isPromoting ? t("promoting") : t("promoteToLive")}
               </Button>
             </DialogActions>
           </DialogBody>

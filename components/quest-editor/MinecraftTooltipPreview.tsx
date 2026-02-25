@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Dropdown, Option } from "@fluentui/react-components";
+import { useTranslations } from "next-intl";
 
 const CHAR_W: Record<string, number> = {
   " ": 4, "!": 2, '"': 5, "#": 6, $: 6, "%": 6, "&": 6, "'": 3,
@@ -61,18 +62,19 @@ export function MinecraftTooltipPreview({
 }: Props) {
   const [guiScale, setGuiScale] = useState(3);
   const safe = useMemo(() => safeTooltipWidth(guiScale), [guiScale]);
+  const t = useTranslations("editor");
 
   const lines = useMemo<Line[]>(() => {
     const r: Line[] = [];
     const n = name || "(No name)";
     r.push({ text: n, color: "#fff", label: "Name", width: mcTextWidth(n) });
     if (tierName) {
-      const t = `Tier: ${tierName}`;
+      const tierText = "Tier: " + tierName;
       r.push({
-        text: t,
+        text: tierText,
         color: "#FFFF55",
         label: "Tier",
-        width: mcTextWidth(t),
+        width: mcTextWidth(tierText),
       });
     }
     if (description) {
@@ -97,9 +99,9 @@ export function MinecraftTooltipPreview({
   return (
     <div className="mt-4 space-y-3 border-t pt-4">
       <div className="flex items-center gap-4 flex-wrap">
-        <span className="text-sm font-semibold">Minecraft Tooltip Preview</span>
+        <span className="text-sm font-semibold">{t("tooltipPreview")}</span>
         <div className="flex items-center gap-1.5 ml-auto text-xs">
-          <span className="text-gray-500">GUI Scale</span>
+          <span className="text-gray-500">{t("guiScale")}</span>
           <Dropdown
             size="small"
             value={String(guiScale)}
@@ -146,7 +148,7 @@ export function MinecraftTooltipPreview({
       {/* Width bars */}
       <div className="space-y-1">
         <p className="text-xs text-gray-500">
-          Line width — safe limit {safe}px (1920x1080, GUI Scale {guiScale})
+          {t("lineWidth", { safe, scale: guiScale })}
         </p>
 
         {lines.map((l, i) => {
@@ -184,19 +186,18 @@ export function MinecraftTooltipPreview({
         <div className="flex gap-4 text-[10px] text-gray-400 mt-0.5 pl-12">
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-0 border-t border-dashed border-blue-400" />{" "}
-            Chest (176px)
+            {t("chest", { px: 176 })}
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-0 border-t-2 border-dashed border-green-600" />{" "}
-            Safe ({safe}px)
+            {t("safe", { px: safe })}
           </span>
         </div>
       </div>
 
       {overflow && (
         <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded px-3 py-2">
-          ⚠ Some lines may overflow at GUI Scale {guiScale}. Consider adding
-          line breaks to wrap long text.
+          ⚠ {t("tooltipOverflow", { scale: guiScale })}
         </p>
       )}
     </div>

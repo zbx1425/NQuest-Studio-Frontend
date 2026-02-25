@@ -40,6 +40,8 @@ import {
 import { QuestLink } from "@/components/ranking/QuestLink";
 import { DurationDisplay } from "@/components/ranking/DurationDisplay";
 import { DisqualifyDialog } from "@/components/ranking/DisqualifyDialog";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 import type { TimePeriod, SpeedrunMode } from "@/lib/types";
 
 const PAGE_SIZE = 50;
@@ -51,6 +53,7 @@ function QpTab({
   period: TimePeriod;
   highlightUuid?: string | null;
 }) {
+  const t = useTranslations("ranking");
   const [offset, setOffset] = useState(0);
   const { data, isLoading } = useGetQpLeaderboardQuery({
     period,
@@ -58,7 +61,7 @@ function QpTab({
     offset,
   });
 
-  const columns: ColumnDef[] = [{ label: "QP", className: "text-right font-mono" }];
+  const columns: ColumnDef[] = [{ label: t("qp"), className: "text-right font-mono" }];
   const rows: LeaderboardRow[] = (data?.entries ?? []).map((e) => ({
     rank: e.rank,
     playerUuid: e.playerUuid,
@@ -76,7 +79,7 @@ function QpTab({
       limit={PAGE_SIZE}
       onOffsetChange={setOffset}
       highlightUuid={highlightUuid}
-      emptyMessage="No QP data yet."
+      emptyMessage={t("noQpData")}
     />
   );
 }
@@ -88,6 +91,7 @@ function CompletionsTab({
   period: TimePeriod;
   highlightUuid?: string | null;
 }) {
+  const t = useTranslations("ranking");
   const [offset, setOffset] = useState(0);
   const { data, isLoading } = useGetCompletionsLeaderboardQuery({
     period,
@@ -96,7 +100,7 @@ function CompletionsTab({
   });
 
   const columns: ColumnDef[] = [
-    { label: "Completions", className: "text-right font-mono" },
+    { label: t("completions"), className: "text-right font-mono" },
   ];
   const rows: LeaderboardRow[] = (data?.entries ?? []).map((e) => ({
     rank: e.rank,
@@ -115,7 +119,7 @@ function CompletionsTab({
       limit={PAGE_SIZE}
       onOffsetChange={setOffset}
       highlightUuid={highlightUuid}
-      emptyMessage="No completion data yet."
+      emptyMessage={t("noCompletionData")}
     />
   );
 }
@@ -129,6 +133,8 @@ function SpeedrunTab({
   highlightUuid?: string | null;
   isAdmin: boolean;
 }) {
+  const t = useTranslations("ranking");
+  const dateLocale = useDateLocale();
   const [searchText, setSearchText] = useState("");
   const [selectedQuestId, setSelectedQuestId] = useState("");
   const [selectedQuestName, setSelectedQuestName] = useState("");
@@ -155,8 +161,8 @@ function SpeedrunTab({
   }, [allQuestsData, searchText]);
 
   const columns: ColumnDef[] = [
-    { label: "Time", className: "font-mono" },
-    { label: "Date" },
+    { label: t("time"), className: "font-mono" },
+    { label: "" },
     { label: "" },
   ];
   const rows: LeaderboardRow[] = (data?.entries ?? []).map((e) => ({
@@ -167,7 +173,7 @@ function SpeedrunTab({
     cells: [
       <DurationDisplay key="t" ms={e.durationMillis} />,
       <span key="d" className="text-gray-500 text-xs">
-        {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true })}
+        {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
       </span>,
       e.isWorldRecord ? (
         <Badge key="wr" appearance="filled" color="danger" size="small">
@@ -196,7 +202,7 @@ function SpeedrunTab({
                 }}
                 className="!text-red-600 hover:!bg-red-50"
               >
-                Disqualify
+                {t("disqualify")}
               </Button>
             </div>
           )}
@@ -207,7 +213,7 @@ function SpeedrunTab({
   return (
     <div className="space-y-4">
       <Combobox
-        placeholder="Search quest by name..."
+        placeholder={t("searchQuestPlaceholder")}
         freeform
         value={searchText}
         onInput={(e) => {
@@ -234,7 +240,7 @@ function SpeedrunTab({
         ))}
         {searchText.trim().length >= 1 && questOptions.length === 0 && (
           <Option value="" text="" disabled>
-            No quests found
+            {t("noQuestsFound")}
           </Option>
         )}
       </Combobox>
@@ -251,7 +257,7 @@ function SpeedrunTab({
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Personal Best
+              {t("personalBest")}
             </button>
             <button
               onClick={() => { setMode("all_runs"); setOffset(0); }}
@@ -261,7 +267,7 @@ function SpeedrunTab({
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              All Runs
+              {t("allRuns")}
             </button>
           </div>
         </div>
@@ -277,11 +283,11 @@ function SpeedrunTab({
           limit={PAGE_SIZE}
           onOffsetChange={setOffset}
           highlightUuid={highlightUuid}
-          emptyMessage="No speedrun data for this quest."
+          emptyMessage={t("noSpeedrunData")}
         />
       ) : (
         <p className="text-sm text-gray-500 text-center py-12">
-          Search for a quest above to view its speedrun leaderboard.
+          {t("searchPrompt")}
         </p>
       )}
 
@@ -298,6 +304,7 @@ function SpeedrunTab({
 }
 
 function PlayerSearch() {
+  const t = useTranslations("ranking");
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -316,7 +323,7 @@ function PlayerSearch() {
 
   return (
     <Combobox
-      placeholder="Search by Minecraft name..."
+      placeholder={t("searchPlayerPlaceholder")}
       freeform
       value={query}
       onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
@@ -344,7 +351,7 @@ function PlayerSearch() {
       ))}
       {debouncedQuery.length >= 2 && !isFetching && results.length === 0 && (
         <Option value="" text="" disabled>
-          No players found
+          {t("noPlayersFound")}
         </Option>
       )}
     </Combobox>
@@ -352,6 +359,7 @@ function PlayerSearch() {
 }
 
 export default function RankingPage() {
+  const t = useTranslations("ranking");
   const { user, isAdmin } = useAuth();
   const mcProfile = useMinecraftProfile(user?.mcUuid);
   const [activeTab, setActiveTab] = useState("qp");
@@ -362,7 +370,7 @@ export default function RankingPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Leaderboards</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -374,13 +382,13 @@ export default function RankingPage() {
               onTabSelect={(_, d) => setActiveTab(d.value as string)}
             >
               <Tab value="qp" icon={<TrophyRegular />}>
-                QP Ranking
+                {t("qpRanking")}
               </Tab>
               <Tab value="completions" icon={<CheckmarkCircleRegular />}>
-                Completions
+                {t("completions")}
               </Tab>
               <Tab value="speedrun" icon={<TimerRegular />}>
-                Speedrun
+                {t("speedrun")}
               </Tab>
             </TabList>
             <PeriodSelector value={period} onChange={setPeriod} />
@@ -405,7 +413,7 @@ export default function RankingPage() {
           {user?.mcUuid && (
             <div className="rounded-xl border border-gray-200 bg-white p-4">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                My Profile
+                {t("myProfile")}
               </p>
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -434,7 +442,7 @@ export default function RankingPage() {
                 icon={<PersonRegular />}
                 className="mt-3 w-full"
               >
-                View My Profile
+                {t("viewMyProfile")}
               </Button>
             </div>
           )}
@@ -442,7 +450,7 @@ export default function RankingPage() {
           {/* Player Search */}
           <div className="rounded-xl border border-gray-200 bg-white p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Find Player
+              {t("findPlayer")}
             </p>
             <PlayerSearch />
           </div>
@@ -450,7 +458,7 @@ export default function RankingPage() {
           {/* Recent Activity */}
           <div className="rounded-xl border border-gray-200 bg-white p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Recent Activity
+              {t("recentActivity")}
             </p>
             <ActivityFeed limit={15} />
           </div>

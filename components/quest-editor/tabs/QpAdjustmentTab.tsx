@@ -20,6 +20,7 @@ import {
 import { useAdjustQuestQpMutation, useLazyGetJobStatusQuery } from "@/lib/store/api";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useTranslations } from "next-intl";
 import type { Quest } from "@/lib/types";
 
 interface QpAdjustmentTabProps {
@@ -29,6 +30,9 @@ interface QpAdjustmentTabProps {
 export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
   const toast = useAppToast();
   const { isAdmin } = useAuth();
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
+  const tr = useTranslations("ranking");
   const [newQp, setNewQp] = useState(quest.questPoints);
   const [reason, setReason] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -56,8 +60,8 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
 
         if (result.status === "COMPLETED") {
           toast.success(
-            "QP Adjustment Complete",
-            `Processed ${result.progress.total} completions.`
+            t("qpAdjustmentComplete"),
+            t("qpAdjustmentCompleteBody", { total: result.progress.total })
           );
           setJobId(null);
           setReason("");
@@ -65,7 +69,7 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
         }
 
         if (result.status === "FAILED") {
-          toast.error("QP Adjustment Failed", "The adjustment job failed.");
+          toast.error(t("qpAdjustmentFailed"), t("qpAdjustmentFailedBody"));
           setJobId(null);
           return;
         }
@@ -112,18 +116,15 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
   return (
     <div className="max-w-2xl space-y-6">
       <section>
-        <h2 className="text-lg font-semibold mb-3">QP Adjustment</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("qpAdjustmentTitle")}</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Retroactively adjust the QP value for this quest. This will update all
-          existing completion records and adjust every affected player&apos;s QP
-          balance.
+          {t("qpAdjustmentDesc")}
         </p>
         {!isAdmin && (
           <MessageBar intent="warning">
             <MessageBarBody>
-              <MessageBarTitle>Permission Notice</MessageBarTitle>
-              If any player has completed this quest, contact a staff member
-              to perform QP adjustments.
+              <MessageBarTitle>{t("permissionNotice")}</MessageBarTitle>
+              {t("permissionNoticeBody")}
             </MessageBarBody>
           </MessageBar>
         )}
@@ -131,12 +132,12 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
 
       <section className="space-y-4">
         <div className="flex flex-col gap-1">
-          <Label>Current Quest Points</Label>
+          <Label>{t("currentQuestPoints")}</Label>
           <p className="text-2xl font-bold">{quest.questPoints}</p>
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="new-qp">New Quest Points</Label>
+          <Label htmlFor="new-qp">{t("newQuestPoints")}</Label>
           <Input
             id="new-qp"
             type="number"
@@ -150,18 +151,18 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
           />
           {delta !== 0 && (
             <p className={`text-sm font-semibold ${delta > 0 ? "text-green-600" : "text-red-600"}`}>
-              {delta > 0 ? "+" : ""}{delta} QP per completion
+              {t("deltaPerCompletion", { delta: `${delta > 0 ? "+" : ""}${delta}` })}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="reason">Reason</Label>
+          <Label htmlFor="reason">{tr("reason")}</Label>
           <Textarea
             id="reason"
             value={reason}
             onChange={(_, d) => setReason(d.value)}
-            placeholder="Explain why this adjustment is needed..."
+            placeholder={t("reasonPlaceholder")}
             resize="vertical"
             rows={3}
             disabled={!!jobId}
@@ -173,7 +174,7 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
           onClick={() => setConfirmOpen(true)}
           disabled={delta === 0 || !reason.trim() || isSubmitting || !!jobId}
         >
-          Adjust QP for All Completions
+          {t("adjustForAll")}
         </Button>
       </section>
 
@@ -191,15 +192,15 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
           <MessageBarBody>
             <MessageBarTitle>
               {jobProgress.status === "COMPLETED"
-                ? "Adjustment Complete"
+                ? t("adjustmentComplete")
                 : jobProgress.status === "FAILED"
-                  ? "Adjustment Failed"
-                  : "Processing..."}
+                  ? t("adjustmentFailed")
+                  : t("processing")}
             </MessageBarTitle>
             <div className="flex items-center gap-2 mt-1">
               {jobProgress.status === "PROCESSING" && <Spinner size="tiny" />}
               <span>
-                {jobProgress.processed} / {jobProgress.total} completions
+                {t("completionProgress", { processed: jobProgress.processed, total: jobProgress.total })}
               </span>
             </div>
           </MessageBarBody>
@@ -210,29 +211,30 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
       <Dialog open={confirmOpen} onOpenChange={(_, d) => setConfirmOpen(d.open)}>
         <DialogSurface>
           <DialogBody>
-            <DialogTitle>Confirm QP Adjustment</DialogTitle>
+            <DialogTitle>{t("confirmQpAdjustment")}</DialogTitle>
             <DialogContent>
               <p>
-                This will change the quest points for <strong>{quest.name}</strong> from{" "}
-                <strong>{quest.questPoints}</strong> to <strong>{newQp}</strong>.
+                {t("confirmQpAdjustmentText", {
+                  name: quest.name,
+                  from: quest.questPoints,
+                  to: newQp,
+                })}
               </p>
               <p className="mt-2">
-                Every player who has completed this quest will have their QP balance adjusted by{" "}
-                <strong className={delta > 0 ? "text-green-600" : "text-red-600"}>
-                  {delta > 0 ? "+" : ""}{delta} QP
-                </strong>{" "}
-                per completion.
+                {t("confirmQpAdjustmentDelta", {
+                  delta: `${delta > 0 ? "+" : ""}${delta}`,
+                })}
               </p>
               <p className="mt-2 text-sm text-gray-500">
-                Reason: {reason}
+                {t("confirmReason", { reason })}
               </p>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setConfirmOpen(false)} appearance="secondary">
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button onClick={handleSubmit} appearance="primary" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Confirm Adjustment"}
+                {isSubmitting ? t("submitting") : t("confirmAdjustment")}
               </Button>
             </DialogActions>
           </DialogBody>

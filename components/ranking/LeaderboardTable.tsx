@@ -9,6 +9,7 @@ import {
   ChevronUpRegular,
 } from "@fluentui/react-icons";
 import { PlayerLink } from "./PlayerLink";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 interface LeaderboardTableProps {
@@ -81,13 +82,15 @@ export function LeaderboardTable({
   limit,
   onOffsetChange,
   highlightUuid,
-  emptyMessage = "No data available.",
+  emptyMessage,
 }: LeaderboardTableProps) {
   const [expandedId, setExpandedId] = useState<string | number | null>(null);
+  const t = useTranslations("ranking");
+  const tc = useTranslations("common");
 
   if (!isLoading && rows.length === 0) {
     return (
-      <p className="text-sm text-gray-500 text-center py-12">{emptyMessage}</p>
+      <p className="text-sm text-gray-500 text-center py-12">{emptyMessage ?? t("noDataAvailable")}</p>
     );
   }
 
@@ -100,8 +103,8 @@ export function LeaderboardTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-left">
-            <th className="py-2 px-3 w-14 text-gray-500 font-medium">Rank</th>
-            <th className="py-2 px-3 text-gray-500 font-medium">Player</th>
+            <th className="py-2 px-3 w-14 text-gray-500 font-medium">{t("rank")}</th>
+            <th className="py-2 px-3 text-gray-500 font-medium">{t("player")}</th>
             {columns.map((col, i) => (
               <th
                 key={i}
@@ -189,10 +192,10 @@ export function LeaderboardTable({
             disabled={offset === 0}
             onClick={() => onOffsetChange(Math.max(0, offset - limit))}
           >
-            Prev
+            {tc("prev")}
           </Button>
           <span className="text-xs text-gray-500">
-            Page {currentPage} of {totalPages}
+            {tc("pageOf", { current: currentPage, total: totalPages })}
           </span>
           <Button
             appearance="subtle"
@@ -202,7 +205,7 @@ export function LeaderboardTable({
             disabled={offset + limit >= total}
             onClick={() => onOffsetChange(offset + limit)}
           >
-            Next
+            {tc("next")}
           </Button>
         </div>
       )}

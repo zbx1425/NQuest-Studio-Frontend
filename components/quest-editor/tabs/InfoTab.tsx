@@ -6,7 +6,6 @@ import {
   Label,
   Dropdown,
   Option,
-  SpinButton,
   Text,
 } from "@fluentui/react-components";
 import { useGetCategoriesQuery } from "@/lib/store/api";
@@ -14,6 +13,8 @@ import type { QuestFormState } from "../QuestEditorPage";
 import type { Quest } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { MinecraftTooltipPreview } from "../MinecraftTooltipPreview";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 
 interface InfoTabProps {
   form: QuestFormState;
@@ -24,6 +25,9 @@ interface InfoTabProps {
 
 export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
   const { data: categories } = useGetCategoriesQuery();
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
+  const dateLocale = useDateLocale();
 
   const categoryEntries = categories
     ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
@@ -41,58 +45,59 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
   return (
     <div className="max-w-3xl space-y-6">
       <section>
-        <h2 className="text-lg font-semibold mb-3">Quest Metadata</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("questMetadata")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="quest-id" required>Quest ID</Label>
+            <Label htmlFor="quest-id" required>{t("questId")}</Label>
             <Input
               id="quest-id"
               value={form.id}
               onChange={(_, d) => updateForm({ id: d.value })}
-              placeholder="e.g., mtr-central-line"
+              placeholder={t("questIdPlaceholder")}
               disabled={!isNew}
               pattern="[a-z0-9_-]+"
             />
             {isNew && (
               <Text size={200} className="text-gray-500">
-                Lowercase letters, numbers, hyphens, underscores. No double underscores.
+                {t("questIdHint")}
               </Text>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="quest-name" required>Name</Label>
+            <Label htmlFor="quest-name" required>{t("questName")}</Label>
             <Input
               id="quest-name"
               value={form.name}
               onChange={(_, d) => updateForm({ name: d.value })}
-              placeholder="e.g., Central Line Tour"
+              placeholder={t("questNamePlaceholder")}
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="quest-points">Quest Points</Label>
+            <Label htmlFor="quest-points">{t("questPoints")}</Label>
             {isNew ? (
-              <SpinButton
+              <Input
                 id="quest-points"
-                value={form.questPoints}
-                onChange={(_, d) => updateForm({ questPoints: d.value ?? 0 })}
+                type="number"
+                value={String(form.questPoints)}
+                onChange={(_, d) => updateForm({ questPoints: Math.max(0, Number(d.value) || 0) })}
                 min={0}
               />
             ) : (
               <div>
                 <span className="text-lg font-semibold me-2">{form.questPoints}</span>
                 <span className="text-xs text-gray-500 mt-0.5">
-                  Use &quot;QP Adjustment&quot; tab
+                  {t("questPointsHint")}
                 </span>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Category</Label>
+            <Label>{t("category")}</Label>
             <Dropdown
-              placeholder="Select category"
+              placeholder={t("categoryPlaceholder")}
               value={
                 form.category && categories?.[form.category]
                   ? categories[form.category].name
@@ -103,7 +108,7 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
                 updateForm({ category: val, tier: "" });
               }}
             >
-              <Option value="__none__">None</Option>
+              <Option value="__none__">{tc("none")}</Option>
               {categoryEntries.map(([id, cat]) => (
                 <Option key={id} value={id}>{cat.name}</Option>
               ))}
@@ -111,9 +116,9 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Tier</Label>
+            <Label>{t("tier")}</Label>
             <Dropdown
-              placeholder="Select tier"
+              placeholder={t("tierPlaceholder")}
               value={
                 form.tier && selectedCategory?.tiers[form.tier]
                   ? selectedCategory.tiers[form.tier].name
@@ -124,7 +129,7 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
               }}
               disabled={!form.category || tierEntries.length === 0}
             >
-              <Option value="__none__">None</Option>
+              <Option value="__none__">{tc("none")}</Option>
               {tierEntries.map(([id, tier]) => (
                 <Option key={id} value={id}>{tier.name}</Option>
               ))}
@@ -133,12 +138,12 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
         </div>
 
         <div className="mt-4 flex flex-col gap-1">
-          <Label htmlFor="quest-desc">Description</Label>
+          <Label htmlFor="quest-desc">{t("descriptionLabel")}</Label>
           <Textarea
             id="quest-desc"
             value={form.description}
             onChange={(_, d) => updateForm({ description: d.value })}
-            placeholder="Describe this quest..."
+            placeholder={t("descriptionPlaceholder")}
             resize="vertical"
             rows={3}
           />
@@ -154,22 +159,24 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
       {/* Quest info (read-only) */}
       {quest && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">Details</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("details")}</h2>
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-            <div className="text-gray-500">Created by</div>
+            <div className="text-gray-500">{t("createdBy")}</div>
             <div>{quest.createdBy.username}</div>
-            <div className="text-gray-500">Created</div>
+            <div className="text-gray-500">{t("created")}</div>
             <div>
               {formatDistanceToNow(new Date(quest.createdAt), {
                 addSuffix: true,
+                locale: dateLocale,
               })}
             </div>
-            <div className="text-gray-500">Last modified by</div>
+            <div className="text-gray-500">{t("lastModifiedBy")}</div>
             <div>{quest.lastModifiedBy.username}</div>
-            <div className="text-gray-500">Last modified</div>
+            <div className="text-gray-500">{t("lastModified")}</div>
             <div>
               {formatDistanceToNow(new Date(quest.lastModifiedAt), {
                 addSuffix: true,
+                locale: dateLocale,
               })}
             </div>
           </div>

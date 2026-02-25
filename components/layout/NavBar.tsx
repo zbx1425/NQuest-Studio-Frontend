@@ -11,6 +11,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  MenuItemRadio,
   Badge,
   Avatar,
   Tooltip,
@@ -20,31 +21,48 @@ import {
   PersonRegular,
   SignOutRegular,
   SettingsRegular,
+  LocalLanguageRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useTranslations } from "next-intl";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "@/lib/store";
+import { setLocale, type AppLocale } from "@/lib/store/localeSlice";
+
+const LOCALE_LABELS: Record<AppLocale, string> = {
+  en: "English",
+  "zh-CN": "简体中文",
+  zh: "繁體中文",
+  ja: "日本語",
+};
 
 export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
   const { user, isLoggedIn, isAdmin, isAuthor, login, logout } = useAuth();
+  const t = useTranslations("nav");
+  const tc = useTranslations("common");
+  const currentLocale = useSelector((state: RootState) => state.locale.locale);
   const tabs = [
-    { value: "/ranking", label: "Leaderboards" },
-    { value: isAuthor ? "/author/quests" : "/quests", label: "Quests" },
+    { value: "/ranking", label: t("leaderboards") },
+    { value: isAuthor ? "/author/quests" : "/quests", label: t("quests") },
     ...(isAdmin
-      ? [{ value: "/admin/categories", label: "Categories" }]
+      ? [{ value: "/admin/categories", label: t("categories") }]
       : []),
     ...(isLoggedIn
-      ? [{ value: "/settings", label: "Settings" }]
+      ? [{ value: "/settings", label: t("settings") }]
       : []),
     ...(isAuthor
-      ? [{ value: "/author/guide", label: "Guide" }]
+      ? [{ value: "/author/guide", label: t("guide") }]
       : []),
   ];
 
+  const questsTab = tabs.find((tab) => tab.value === "/quests" || tab.value === "/author/quests");
   const selectedTab =
-    tabs.find((t) => pathname === t.value)?.value ??
+    tabs.find((tab) => pathname === tab.value)?.value ??
     (pathname === "/quests" || pathname === "/author/quests"
-      ? tabs.find((t) => t.label === "Quests")?.value
+      ? questsTab?.value
       : "") ??
     "";
 
@@ -69,6 +87,35 @@ export function NavBar() {
           </TabList>
 
           <div className="flex items-center gap-2 ml-auto">
+            <Menu
+              checkedValues={{ locale: [currentLocale] }}
+              onCheckedValueChange={(_, data) => {
+                const val = data.checkedItems[0] as AppLocale;
+                if (val) dispatch(setLocale(val));
+              }}
+            >
+              <MenuTrigger disableButtonEnhancement>
+                <Tooltip content={LOCALE_LABELS[currentLocale]} relationship="label">
+                  <Button
+                    appearance="subtle"
+                    icon={<LocalLanguageRegular />}
+                    size="small"
+                  />
+                </Tooltip>
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  {(Object.entries(LOCALE_LABELS) as [AppLocale, string][]).map(
+                    ([locale, label]) => (
+                      <MenuItemRadio key={locale} name="locale" value={locale}>
+                        {label}
+                      </MenuItemRadio>
+                    )
+                  )}
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+
             {isLoggedIn && user ? (
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
@@ -80,12 +127,12 @@ export function NavBar() {
                       {user.username}
                       {isAdmin && (
                         <Badge appearance="filled" color="danger" size="small" className="ml-1.5">
-                          Admin
+                          {tc("admin")}
                         </Badge>
                       )}
                       {!isAdmin && isAuthor && (
                         <Badge appearance="filled" color="brand" size="small" className="ml-1.5">
-                          Author
+                          {tc("author")}
                         </Badge>
                       )}
                     </Button>
@@ -94,10 +141,10 @@ export function NavBar() {
                 <MenuPopover>
                   <MenuList>
                     <Link href="/settings" className="no-underline">
-                      <MenuItem icon={<SettingsRegular />}>Settings</MenuItem>
+                      <MenuItem icon={<SettingsRegular />}>{t("settings")}</MenuItem>
                     </Link>
                     <MenuItem icon={<SignOutRegular />} onClick={() => { logout(); router.push("/"); }}>
-                      Logout
+                      {t("logout")}
                     </MenuItem>
                   </MenuList>
                 </MenuPopover>
@@ -108,7 +155,7 @@ export function NavBar() {
                 icon={<PersonRegular />}
                 onClick={login}
               >
-                Login with Discord
+                {t("login")}
               </Button>
             )}
           </div>

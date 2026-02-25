@@ -26,7 +26,8 @@
     "noUsersFound": "No users found",
     "useAsDiscordId": "Use \"{query}\" as Discord User ID",
     "hidden": "Hidden",
-    "amount": "Amount"
+    "amount": "Amount",
+    "description": "Description"
   },
   "nav": {
     "leaderboards": "Leaderboards",
@@ -54,8 +55,7 @@
     "workflowPublish": "Publish",
     "workflowPublishDesc": "Go live for all players on the server",
     "copyright": "ALL RIGHTS RESERVED",
-    "copyrightOwner": "Copyright (C) 2026-present Zbx1425",
-    "warrantyDisclaimer": "THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES."
+    "copyrightOwner": "Copyright (C) 2026-present"
   },
   "settings": {
     "myProfile": "My Profile",
@@ -218,7 +218,9 @@
     "noQuestsMatch": "No quests matching your search.",
     "noQuestsPending": "No quests pending review.",
     "noQuestsFoundEmpty": "No quests found.",
-    "pageOfTotal": "Page {page} of {total} ({count} quests)"
+    "pageOfTotal": "Page {page} of {total} ({count} quests)",
+    "status": "Status",
+    "category": "Category"
   },
   "editor": {
     "questEditor": "Quest Editor",
@@ -336,7 +338,6 @@
     "import": "Import",
     "copyToClipboard": "Copy to Clipboard",
     "importDesc": "Paste quest JSON below. This will overwrite the current editor state.",
-    "importPlaceholder": "{ \"id\": \"...\", \"name\": \"...\", ... }",
     "questImported": "Quest imported from JSON",
     "invalidJson": "Invalid JSON",
     "invalidJsonBody": "Please check the JSON format and try again.",
@@ -427,7 +428,7 @@
     "step1Title": "Create & Edit Your Quest",
     "step1Desc": "Use the visual quest editor to build your quest with steps and criteria. Your quest starts in Private state, visible only to you.",
     "step2Title": "Test In-Game",
-    "step2Desc": "Join the Minecraft server and use {command} to preview your quest. Make sure to link your Minecraft account first (see below).",
+    "step2Desc": "Join the Minecraft server and use <command>/nquest debugMode</command> to preview your quest. Make sure to link your Minecraft account first (see below).",
     "step3Title": "Promote to Staging",
     "step3Desc": "When you are satisfied with your quest, promote it from Private to Staging. This makes it visible to all builders for peer testing. Then ask a staff member to review it.",
     "step4Title": "Staff Review & Publish",
@@ -443,9 +444,9 @@
     "tipsSetup": "Tips & Setup",
     "tipsSetupDesc": "A few things to set up before you start building quests.",
     "linkMcTitle": "Link Your Minecraft Account",
-    "linkMcDesc": "Run {command} in-game to get a token, then paste it in {settings} to connect your Minecraft account. This is required for Private quest testing.",
+    "linkMcDesc": "Run <command>/idtoken</command> in-game to get a token, then paste it in <settings>Settings</settings> to connect your Minecraft account. This is required for Private quest testing.",
     "debugModeTitle": "Debug Mode",
-    "debugModeDesc": "Use {command} in-game to toggle debug mode. When active, you can see and test quests in Private and Staging states without affecting the experience for regular players.",
+    "debugModeDesc": "Use <command>/nquest debugMode</command> in-game to toggle debug mode. When active, you can see and test quests in Private and Staging states without affecting the experience for regular players.",
     "liveSyncTitle": "Live Sync with the Server",
     "liveSyncDesc": "The Minecraft server automatically pulls quest data from NQuest Studio. After you save changes in the editor, your quest becomes available in-game within moments. No manual file transfers or JSON wrangling needed."
   },

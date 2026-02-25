@@ -8,6 +8,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useGetRecentActivityQuery } from "@/lib/store/rankingApi";
 import { formatDurationShort } from "@/lib/utils/duration";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 import Link from "next/link";
 
 interface ActivityFeedProps {
@@ -16,6 +18,9 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ limit = 15 }: ActivityFeedProps) {
   const { data, isLoading } = useGetRecentActivityQuery({ limit });
+  const t = useTranslations("ranking");
+  const tc = useTranslations("common");
+  const dateLocale = useDateLocale();
 
   if (isLoading) {
     return (
@@ -37,7 +42,7 @@ export function ActivityFeed({ limit = 15 }: ActivityFeedProps) {
   }
 
   if (!data?.entries.length) {
-    return <p className="text-sm text-gray-500 py-4">No recent activity.</p>;
+    return <p className="text-sm text-gray-500 py-4">{t("noRecentActivity")}</p>;
   }
 
   return (
@@ -64,7 +69,7 @@ export function ActivityFeed({ limit = 15 }: ActivityFeedProps) {
               >
                 {entry.playerName}
               </Link>
-              <span className="text-xs text-gray-400">{" "}completed</span>
+              <span className="text-xs text-gray-400">{" "}{tc("completed")}</span>
             </p>
             <p className="text-sm truncate">
               <Link
@@ -101,6 +106,7 @@ export function ActivityFeed({ limit = 15 }: ActivityFeedProps) {
               <span className="text-xs text-gray-400 ml-auto">
                 {formatDistanceToNow(new Date(entry.completionTime), {
                   addSuffix: true,
+                  locale: dateLocale,
                 })}
               </span>
             </div>

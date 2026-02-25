@@ -18,6 +18,7 @@ import { useGetAclQuery, useUpdateAclMutation } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import { UserSearchCombobox } from "../UserSearchCombobox";
+import { useTranslations } from "next-intl";
 import type { Quest, AclEntry } from "@/lib/types";
 
 interface AclTabProps {
@@ -33,6 +34,8 @@ interface LocalAclEntry {
 export function AclTab({ quest }: AclTabProps) {
   const { user, isAdmin } = useAuth();
   const toast = useAppToast();
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
   const { data: serverAcl } = useGetAclQuery(quest.id);
   const [updateAcl, { isLoading: isSaving }] = useUpdateAclMutation();
 
@@ -55,7 +58,7 @@ export function AclTab({ quest }: AclTabProps) {
       entry.discordUserId === user?.discordUserId &&
       role === "EDITOR"
     ) {
-      toast.warning("Cannot downgrade yourself", "Non-staff users cannot demote themselves from OWNER.");
+      toast.warning(t("cannotDowngrade"), t("cannotDowngradeBody"));
       return;
     }
     const updated = [...acl];
@@ -67,7 +70,7 @@ export function AclTab({ quest }: AclTabProps) {
   const handleRemove = (index: number) => {
     const entry = acl[index];
     if (!isAdmin && entry.discordUserId === user?.discordUserId) {
-      toast.warning("Cannot remove yourself", "Non-staff users cannot remove themselves from the ACL.");
+      toast.warning(t("cannotRemove"), t("cannotRemoveBody"));
       return;
     }
     setAcl(acl.filter((_, i) => i !== index));
@@ -76,7 +79,7 @@ export function AclTab({ quest }: AclTabProps) {
 
   const handleAdd = (newUser: { discordUserId: string; username: string }) => {
     if (acl.find((e) => e.discordUserId === newUser.discordUserId)) {
-      toast.warning("User already in ACL");
+      toast.warning(t("userAlreadyInAcl"));
       return;
     }
     setAcl([
@@ -93,7 +96,7 @@ export function AclTab({ quest }: AclTabProps) {
   const handleSave = async () => {
     const localOwnerCount = acl.filter((e) => e.role === "OWNER").length;
     if (localOwnerCount === 0) {
-      toast.error("Validation error", "ACL must have at least one OWNER.");
+      toast.error(t("validationError"), t("aclNeedsOwner"));
       return;
     }
     try {
@@ -105,7 +108,7 @@ export function AclTab({ quest }: AclTabProps) {
           role: e.role,
         })),
       }).unwrap();
-      toast.success("ACL updated");
+      toast.success(t("aclUpdated"));
       setDirty(false);
     } catch (err) {
       const { title, body } = extractApiError(err);
@@ -116,7 +119,7 @@ export function AclTab({ quest }: AclTabProps) {
   return (
     <div className="max-w-2xl space-y-4">
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold">Access Control List</h2>
+        <h2 className="text-lg font-semibold">{t("acl_title")}</h2>
         <div className="flex-1" />
         {dirty && (
           <Button
@@ -125,13 +128,13 @@ export function AclTab({ quest }: AclTabProps) {
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? "Saving..." : "Save ACL"}
+            {isSaving ? t("saving") : t("saveAcl")}
           </Button>
         )}
       </div>
       
       <p className="text-sm text-gray-500 -mt-4">
-        By adding members to the ACL, you can collaborate on quests with your team.
+        {t("acl_desc")}
       </p>
 
       {/* Member table */}
@@ -139,9 +142,9 @@ export function AclTab({ quest }: AclTabProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50/60">
-              <th className="text-left p-3 font-semibold">User</th>
-              <th className="text-left p-3 font-semibold w-20">Discord ID</th>
-              <th className="text-left p-3 font-semibold w-40">Role</th>
+              <th className="text-left p-3 font-semibold">{t("user")}</th>
+              <th className="text-left p-3 font-semibold w-20">{t("discordId")}</th>
+              <th className="text-left p-3 font-semibold w-40">{t("role")}</th>
               <th className="w-12" />
             </tr>
           </thead>
@@ -153,11 +156,11 @@ export function AclTab({ quest }: AclTabProps) {
                 <tr key={entry.discordUserId} className="border-b border-gray-100 last:border-b-0">
                   <td className="p-3">
                     {entry.discordUsername ?? (
-                      <Text className="text-gray-400 italic">Unknown</Text>
+                      <Text className="text-gray-400 italic">{tc("unknown")}</Text>
                     )}
                     {isSelf && (
                       <Text size={200} className="text-gray-400 ml-1">
-                        (you)
+                        {tc("you")}
                       </Text>
                     )}
                   </td>
@@ -178,8 +181,8 @@ export function AclTab({ quest }: AclTabProps) {
                       }
                       disabled={isLastOwner && !isAdmin}
                     >
-                      <Option value="OWNER">Owner</Option>
-                      <Option value="EDITOR">Editor</Option>
+                      <Option value="OWNER">{tc("owner")}</Option>
+                      <Option value="EDITOR">{tc("editor")}</Option>
                     </Dropdown>
                   </td>
                   <td className="p-3">
@@ -204,7 +207,7 @@ export function AclTab({ quest }: AclTabProps) {
       <div className="flex items-end gap-2">
         <div className="flex-1">
           <UserSearchCombobox
-            label="Add Member"
+            label={t("addMember")}
             onSelect={handleAdd}
             excludeIds={acl.map((e) => e.discordUserId)}
           />
@@ -214,7 +217,7 @@ export function AclTab({ quest }: AclTabProps) {
       {ownerCount === 0 && (
         <MessageBar intent="error">
           <MessageBarBody>
-            ACL must have at least one OWNER. Add an owner before saving.
+            {t("aclNeedsOwnerSave")}
           </MessageBarBody>
         </MessageBar>
       )}

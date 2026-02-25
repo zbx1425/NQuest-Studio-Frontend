@@ -5,6 +5,7 @@ import { DeleteRegular, AddRegular, ArrowUpRegular, ArrowDownRegular } from "@fl
 import type { Step } from "@/lib/types";
 import { createDefaultCriterion } from "@/lib/criterion";
 import { CriterionEditor } from "./CriterionEditor";
+import { useTranslations } from "next-intl";
 
 interface StepEditorProps {
   step: Step;
@@ -19,10 +20,11 @@ interface StepEditorProps {
 }
 
 export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onMoveUp, onMoveDown, isFirst, isLast }: StepEditorProps) {
+  const t = useTranslations("editor");
   return (
     <Card appearance="outline" size="small">
       <CardHeader
-        header={<Text weight="semibold" size={300}>Step {index + 1}</Text>}
+        header={<Text weight="semibold" size={300}>{t("stepN", { n: index + 1 })}</Text>}
         action={
           <div className="flex items-center">
             <Button
@@ -30,7 +32,7 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
               icon={<AddRegular />}
               size="small"
               onClick={onInsertAbove}
-              title="Insert step above"
+              title={t("insertStepAbove")}
             />
             <Button
               appearance="subtle"
@@ -38,7 +40,7 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
               size="small"
               onClick={onMoveUp}
               disabled={isFirst}
-              title="Move step up"
+              title={t("moveStepUp")}
             />
             <Button
               appearance="subtle"
@@ -46,14 +48,14 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
               size="small"
               onClick={onMoveDown}
               disabled={isLast}
-              title="Move step down"
+              title={t("moveStepDown")}
             />
             <Button
               appearance="subtle"
               icon={<DeleteRegular />}
               size="small"
               onClick={onDelete}
-              title="Remove step"
+              title={t("removeStep")}
             />
           </div>
         }
@@ -61,7 +63,7 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
 
       <div className="space-y-3">
         <div>
-          <Label size="small" className="mb-1 block font-medium">Completion Criteria</Label>
+          <Label size="small" className="mb-1 block font-medium">{t("completionCriteria")}</Label>
           <CriterionEditor
             value={step.criteria}
             onChange={(criteria) => onChange({ ...step, criteria })}
@@ -70,7 +72,7 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
 
         {step.failureCriteria ? (
           <div>
-            <Label size="small" className="mb-1 block font-medium">Step Failure Condition</Label>
+            <Label size="small" className="mb-1 block font-medium">{t("stepFailureCondition")}</Label>
             <CriterionEditor
               value={step.failureCriteria}
               onChange={(failureCriteria) =>
@@ -91,7 +93,7 @@ export function StepEditor({ step, index, onChange, onDelete, onInsertAbove, onM
               })
             }
           >
-            Add Step Failure Condition
+            {t("addStepFailureCondition")}
           </Button>
         )}
       </div>

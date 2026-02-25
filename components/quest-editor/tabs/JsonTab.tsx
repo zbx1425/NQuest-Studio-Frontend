@@ -8,6 +8,7 @@ import {
   ArrowExportRegular,
 } from "@fluentui/react-icons";
 import { useAppToast } from "@/lib/hooks/useAppToast";
+import { useTranslations } from "next-intl";
 import type { QuestFormState } from "../QuestEditorPage";
 
 interface JsonTabProps {
@@ -17,6 +18,7 @@ interface JsonTabProps {
 
 export function JsonTab({ form, setForm }: JsonTabProps) {
   const toast = useAppToast();
+  const t = useTranslations("editor");
   const [importText, setImportText] = useState("");
 
   const exportJson = JSON.stringify(
@@ -49,19 +51,19 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
         steps: parsed.steps ?? [],
         defaultCriteria: parsed.defaultCriteria?.failureCriteria ?? null,
       });
-      toast.success("Quest imported from JSON");
+      toast.success(t("questImported"));
       setImportText("");
     } catch {
-      toast.error("Invalid JSON", "Please check the JSON format and try again.");
+      toast.error(t("invalidJson"), t("invalidJsonBody"));
     }
   };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(exportJson);
-      toast.success("Copied to clipboard");
+      toast.success(t("copiedToClipboard"));
     } catch {
-      toast.error("Failed to copy", "Please select and copy the text manually.");
+      toast.error(t("failedToCopy"), t("failedToCopyBody"));
     }
   };
 
@@ -71,7 +73,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
       <section>
         <div className="flex items-center gap-2 mb-2">
           <ArrowExportRegular />
-          <h2 className="text-lg font-semibold">Export</h2>
+          <h2 className="text-lg font-semibold">{t("export")}</h2>
         </div>
         <Textarea
           value={exportJson}
@@ -86,7 +88,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
           onClick={handleCopy}
           className="mt-3"
         >
-          Copy to Clipboard
+          {t("copyToClipboard")}
         </Button>
       </section>
 
@@ -94,10 +96,10 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
       <section>
         <div className="flex items-center gap-2 mb-2">
           <ArrowImportRegular />
-          <h2 className="text-lg font-semibold">Import</h2>
+          <h2 className="text-lg font-semibold">{t("import")}</h2>
         </div>
         <p className="text-xs text-gray-500 mb-2">
-          Paste quest JSON below. This will overwrite the current editor state.
+          {t("importDesc")}
         </p>
         <Textarea
           value={importText}
@@ -114,7 +116,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
           disabled={!importText.trim()}
           className="mt-3"
         >
-          Import
+          {t("import")}
         </Button>
       </section>
     </div>

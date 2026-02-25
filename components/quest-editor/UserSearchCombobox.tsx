@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Combobox, Option, Label } from "@fluentui/react-components";
 import { useLazySearchUsersQuery } from "@/lib/store/api";
+import { useTranslations } from "next-intl";
 import type { UserRef } from "@/lib/types";
 
 interface UserSearchComboboxProps {
@@ -18,6 +19,7 @@ export function UserSearchCombobox({
 }: UserSearchComboboxProps) {
   const [query, setQuery] = useState("");
   const [trigger, { data: results, isFetching }] = useLazySearchUsersQuery();
+  const tc = useTranslations("common");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
@@ -56,9 +58,9 @@ export function UserSearchCombobox({
           }
         }}
       >
-        {isFetching && <Option disabled value="">Searching...</Option>}
+        {isFetching && <Option disabled value="">{tc("searchingEllipsis")}</Option>}
         {!isFetching && query.length >= 2 && filtered.length === 0 && (
-          <Option disabled value="">No users found</Option>
+          <Option disabled value="">{tc("noUsersFound")}</Option>
         )}
         {filtered.map((user) => (
           <Option
@@ -74,7 +76,7 @@ export function UserSearchCombobox({
         ))}
         {query.length >= 2 && !filtered.find((u) => u.discordUserId === query) && (
           <Option value={query} text={query}>
-            Use &quot;{query}&quot; as Discord User ID
+            {tc("useAsDiscordId", { query })}
           </Option>
         )}
       </Combobox>

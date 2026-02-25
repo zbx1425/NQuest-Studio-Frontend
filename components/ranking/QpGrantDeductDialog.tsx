@@ -22,6 +22,7 @@ import {
   useAdminDeductQpMutation,
 } from "@/lib/store/api";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
+import { useTranslations } from "next-intl";
 
 interface QpGrantDeductDialogProps {
   playerUuid: string;
@@ -45,6 +46,8 @@ export function QpGrantDeductDialog({
   const [grantQp, { isLoading: granting }] = useAdminGrantQpMutation();
   const [deductQp, { isLoading: deducting }] = useAdminDeductQpMutation();
   const toast = useAppToast();
+  const t = useTranslations("ranking");
+  const tc = useTranslations("common");
   const isLoading = granting || deducting;
   const isGrant = mode === "grant";
 
@@ -58,8 +61,10 @@ export function QpGrantDeductDialog({
         reason: reason.trim(),
       }).unwrap();
       toast.success(
-        isGrant ? "QP granted" : "QP deducted",
-        `${isGrant ? "+" : "-"}${amount} QP for ${playerName}. New balance: ${result.newBalance}`
+        isGrant ? t("qpGranted") : t("qpDeducted"),
+        isGrant
+          ? t("qpGrantBody", { amount, playerName, newBalance: result.newBalance })
+          : t("qpDeductBody", { amount, playerName, newBalance: result.newBalance })
       );
       setAmount(0);
       setReason("");
@@ -87,11 +92,11 @@ export function QpGrantDeductDialog({
               ) : (
                 <ArrowDownRegular className="text-red-600" />
               )}
-              {isGrant ? "Grant" : "Deduct"} QP — {playerName}
+              {isGrant ? t("qpGrantTitle", { playerName }) : t("qpDeductTitle", { playerName })}
             </span>
           </DialogTitle>
           <DialogContent className="space-y-3">
-            <Field label="Amount" required>
+            <Field label={tc("amount")} required>
               <Input
                 type="number"
                 min={1}
@@ -102,14 +107,14 @@ export function QpGrantDeductDialog({
                 }}
               />
             </Field>
-            <Field label="Reason" required>
+            <Field label={t("reason")} required>
               <Textarea
                 value={reason}
                 onChange={(_, data) => setReason(data.value)}
                 placeholder={
                   isGrant
-                    ? "e.g. Bug compensation"
-                    : "e.g. Penalty for misconduct"
+                    ? t("grantPlaceholder")
+                    : t("deductPlaceholder")
                 }
                 resize="vertical"
               />
@@ -117,7 +122,7 @@ export function QpGrantDeductDialog({
           </DialogContent>
           <DialogActions>
             <Button appearance="secondary" onClick={onClose} disabled={isLoading}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button
               appearance="primary"
@@ -126,11 +131,11 @@ export function QpGrantDeductDialog({
             >
               {isLoading
                 ? isGrant
-                  ? "Granting..."
-                  : "Deducting..."
+                  ? t("granting")
+                  : t("deducting")
                 : isGrant
-                  ? `Grant ${amount} QP`
-                  : `Deduct ${amount} QP`}
+                  ? t("grantAmountQp", { amount })
+                  : t("deductAmountQp", { amount })}
             </Button>
           </DialogActions>
         </DialogBody>

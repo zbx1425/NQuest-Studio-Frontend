@@ -5,6 +5,7 @@ const messageImports: Record<AppLocale, () => Promise<{ default: Record<string, 
   "zh-CN": () => import("@/messages/zh-CN.json"),
   zh: () => import("@/messages/zh.json"),
   ja: () => import("@/messages/ja.json"),
+  ko: () => import("@/messages/ko.json"),
 };
 
 const cache = new Map<AppLocale, Record<string, unknown>>();

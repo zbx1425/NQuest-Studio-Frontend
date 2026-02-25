@@ -26,14 +26,21 @@ import {
 } from "@fluentui/react-icons";
 import { useGetQuestsQuery, useGetCategoriesQuery } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 
 type StatusFilter = "" | "PRIVATE" | "STAGING" | "PUBLIC";
 
 export default function QuestListPage() {
   const router = useRouter();
   const { isLoggedIn, isAuthor, isAdmin } = useAuth();
+  const dateLocale = useDateLocale();
+  const t = useTranslations("quests");
+  const tCommon = useTranslations("common");
+  const tStatus = useTranslations("status");
+  const tNav = useTranslations("nav");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [pendingOnly, setPendingOnly] = useState(false);
@@ -96,11 +103,11 @@ export default function QuestListPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Quests</h1>
+        <h1 className="text-2xl font-semibold">{tNav("quests")}</h1>
         {isLoggedIn && isAuthor && (
           <Link href="/author/editor">
             <Button appearance="primary" icon={<AddRegular />}>
-              New Quest
+              {t("newQuest")}
             </Button>
           </Link>
         )}
@@ -109,7 +116,7 @@ export default function QuestListPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <Input
-          placeholder="Search by name..."
+          placeholder={t("searchByName")}
           contentBefore={<SearchRegular />}
           contentAfter={
             searchQuery ? (
@@ -136,20 +143,20 @@ export default function QuestListPage() {
           }}
           size="small"
         >
-          <Tab value="">All</Tab>
-          <Tab value="PRIVATE">Private</Tab>
-          <Tab value="STAGING">Staging</Tab>
-          <Tab value="PUBLIC">Public</Tab>
+          <Tab value="">{tCommon("all")}</Tab>
+          <Tab value="PRIVATE">{tStatus("private")}</Tab>
+          <Tab value="STAGING">{tStatus("staging")}</Tab>
+          <Tab value="PUBLIC">{tStatus("public")}</Tab>
         </TabList>
 
         <div className="self-stretch w-px bg-gray-200" />
 
         <Dropdown
-          placeholder="All Categories"
+          placeholder={t("allCategories")}
           value={
             categoryFilter
               ? categories?.[categoryFilter]?.name ?? categoryFilter
-              : "All Categories"
+              : t("allCategories")
           }
           onOptionSelect={(_, d) => {
             setCategoryFilter(d.optionValue === "__all__" ? "" : (d.optionValue ?? ""));
@@ -157,7 +164,7 @@ export default function QuestListPage() {
           }}
           className="min-w-[160px]"
         >
-          <Option value="__all__">All Categories</Option>
+          <Option value="__all__">{t("allCategories")}</Option>
           {categoryEntries.map(([id, cat]) => (
             <Option key={id} value={id}>
               {cat.name}
@@ -169,7 +176,7 @@ export default function QuestListPage() {
           <>
             <div className="self-stretch w-px bg-gray-200" />
             <Checkbox
-              label="Pending review only"
+              label={t("pendingReviewOnly")}
               checked={pendingOnly}
               onChange={(_, d) => {
                 setPendingOnly(!!d.checked);
@@ -183,7 +190,7 @@ export default function QuestListPage() {
       {/* Table */}
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <Spinner size="large" label="Loading quests..." />
+          <Spinner size="large" label={t("loadingQuests")} />
         </div>
       ) : (
         <>
@@ -191,12 +198,12 @@ export default function QuestListPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50/60">
-                  <th className="text-left p-3 font-semibold">Name</th>
-                  <th className="text-left p-3 font-semibold w-24">Status</th>
-                  <th className="text-left p-3 font-semibold">Category</th>
-                  <th className="text-right p-3 font-semibold w-16">Pts</th>
-                  <th className="text-left p-3 font-semibold w-24">Draft</th>
-                  <th className="text-left p-3 font-semibold w-32">Modified</th>
+                  <th className="text-left p-3 font-semibold">{t("name")}</th>
+                  <th className="text-left p-3 font-semibold w-24">{t("status")}</th>
+                  <th className="text-left p-3 font-semibold">{t("category")}</th>
+                  <th className="text-right p-3 font-semibold w-16">{t("pts")}</th>
+                  <th className="text-left p-3 font-semibold w-24">{t("draft")}</th>
+                  <th className="text-left p-3 font-semibold w-32">{t("modified")}</th>
                   <th className="text-center p-3 font-semibold w-16"></th>
                 </tr>
               </thead>
@@ -205,10 +212,10 @@ export default function QuestListPage() {
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-gray-500">
                       {searchQuery.trim()
-                        ? "No quests matching your search."
+                        ? t("noQuestsMatch")
                         : pendingOnly
-                          ? "No quests pending review."
-                          : "No quests found."}
+                          ? t("noQuestsPending")
+                          : t("noQuestsFoundEmpty")}
                     </td>
                   </tr>
                 )}
@@ -254,13 +261,14 @@ export default function QuestListPage() {
                       <td className="p-3">
                         {quest.hasPendingDraft && (
                           <Badge appearance="filled" color="warning" size="small">
-                            Pending
+                            {tCommon("pending")}
                           </Badge>
                         )}
                       </td>
                       <td className="p-3 text-gray-500">
                         {formatDistanceToNow(new Date(quest.lastModifiedAt), {
                           addSuffix: true,
+                          locale: dateLocale,
                         })}
                       </td>
                       <td className="p-3 text-center">
@@ -287,7 +295,7 @@ export default function QuestListPage() {
                 onClick={() => setPage((p) => p - 1)}
               />
               <Text size={300}>
-                Page {page} of {totalPages} ({totalItems} quests)
+                {t("pageOfTotal", { page, total: totalPages, count: totalItems })}
               </Text>
               <Button
                 appearance="subtle"

@@ -46,18 +46,20 @@ import { StatCard } from "@/components/ranking/StatCard";
 import { QuestLink } from "@/components/ranking/QuestLink";
 import { formatDurationShort } from "@/lib/utils/duration";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/lib/hooks/useDateLocale";
 import type { TransactionType } from "@/lib/types";
 
 const TX_PAGE_SIZE = 20;
-const TX_TYPE_LABELS: Record<TransactionType | "ALL", string> = {
-  ALL: "All Types",
-  QUEST_COMPLETION: "Quest Completion",
-  SPEND: "Spend",
-  EARN: "Earn",
-  QP_ADJUSTMENT: "QP Adjustment",
-  DISQUALIFY: "Disqualify",
-  ADMIN_GRANT: "Admin Grant",
-  ADMIN_DEDUCT: "Admin Deduct",
+const TX_TYPE_KEYS: Record<TransactionType | "ALL", string> = {
+  ALL: "txAllTypes",
+  QUEST_COMPLETION: "txQuestCompletion",
+  SPEND: "txSpend",
+  EARN: "txEarn",
+  QP_ADJUSTMENT: "txQpAdjustment",
+  DISQUALIFY: "txDisqualify",
+  ADMIN_GRANT: "txAdminGrant",
+  ADMIN_DEDUCT: "txAdminDeduct",
 };
 const TX_TYPE_COLORS: Record<string, "brand" | "danger" | "success" | "warning" | "informative"> = {
   QUEST_COMPLETION: "success",
@@ -70,10 +72,11 @@ const TX_TYPE_COLORS: Record<string, "brand" | "danger" | "success" | "warning" 
 };
 
 function NeedsMcUuid() {
+  const t = useTranslations("settings");
   return (
     <div className="py-4">
       <p className="text-sm text-gray-500">
-        Link your Minecraft account in the Account tab to see your rankings.
+        {t("mcLinkPrompt")}
       </p>
     </div>
   );
@@ -91,6 +94,8 @@ function AccountSection({
   mcUuid: string | null;
 }) {
   const toast = useAppToast();
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const dispatch = useDispatch<AppDispatch>();
   const mcProfile = useMinecraftProfile(mcUuid);
   const [bindMc, { isLoading: isBinding }] = useBindMcMutation();
@@ -101,7 +106,7 @@ function AccountSection({
   const handleBind = async () => {
     try {
       const result = await bindMc({ token: mcToken }).unwrap();
-      toast.success("Minecraft account linked", `UUID: ${result.mcUuid}`);
+      toast.success(t("mcLinked"), t("mcLinkedBody", { uuid: result.mcUuid }));
       setMcToken("");
     } catch (err) {
       const { title, body } = extractApiError(err);
@@ -112,7 +117,7 @@ function AccountSection({
   const handleUnbind = async () => {
     try {
       await unbindMc().unwrap();
-      toast.success("Minecraft account unlinked");
+      toast.success(t("mcUnlinked"));
     } catch (err) {
       const { title, body } = extractApiError(err);
       toast.error(title, body);
@@ -122,9 +127,9 @@ function AccountSection({
   const handleFetchSystemMap = async () => {
     try {
       await dispatch(fetchSystemMap(systemMap.baseUrl)).unwrap();
-      toast.success("System map data loaded");
+      toast.success(t("systemMapLoaded"));
     } catch (err) {
-      toast.error("Failed to fetch system map", String(err));
+      toast.error(t("systemMapFailed"), String(err));
     }
   };
 
@@ -132,15 +137,15 @@ function AccountSection({
     <div className="max-w-2xl space-y-6">
       {/* Discord Account */}
       <section>
-        <h2 className="text-lg font-semibold mb-3">Discord Account</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("discordAccount")}</h2>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-lg">{user.username}</span>
             {isAdmin && (
-              <Badge appearance="filled" color="danger" size="small">Admin</Badge>
+              <Badge appearance="filled" color="danger" size="small">{tc("admin")}</Badge>
             )}
             {!isAdmin && isAuthor && (
-              <Badge appearance="filled" color="brand" size="small">Author</Badge>
+              <Badge appearance="filled" color="brand" size="small">{tc("author")}</Badge>
             )}
           </div>
           <p className="text-xs text-gray-500">Discord ID: {user.discordUserId}</p>
@@ -151,7 +156,7 @@ function AccountSection({
 
       {/* Minecraft Account */}
       <section>
-        <h2 className="text-lg font-semibold mb-3">Minecraft Account</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("minecraftAccount")}</h2>
         {mcUuid ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -168,7 +173,7 @@ function AccountSection({
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <Badge appearance="outline" color="success" size="small">Linked</Badge>
+                  <Badge appearance="outline" color="success" size="small">{tc("linked")}</Badge>
                   {mcProfile.loading ? (
                     <Spinner size="tiny" />
                   ) : mcProfile.username ? (
@@ -184,24 +189,22 @@ function AccountSection({
               onClick={handleUnbind}
               disabled={isUnbinding}
             >
-              {isUnbinding ? "Unlinking..." : "Unlink Minecraft Account"}
+              {isUnbinding ? t("unlinking") : t("unlinkAccount")}
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-gray-600">
-              To link your Minecraft account, run{" "}
-              <code className="bg-gray-100 px-1 rounded">/idtoken</code> on the
-              Minecraft server to get a token, then paste it below.
+              {t("mcLinkInstruction", { command: "/idtoken" })}
             </p>
             <div className="flex items-end gap-2">
               <div className="flex-1 flex flex-col gap-1">
-                <Label htmlFor="mc-token">Binding Token</Label>
+                <Label htmlFor="mc-token">{t("bindingToken")}</Label>
                 <Input
                   id="mc-token"
                   value={mcToken}
                   onChange={(_, d) => setMcToken(d.value)}
-                  placeholder="Paste token from MC server..."
+                  placeholder={t("bindingTokenPlaceholder")}
                   type="password"
                 />
               </div>
@@ -211,7 +214,7 @@ function AccountSection({
                 onClick={handleBind}
                 disabled={!mcToken || isBinding}
               >
-                {isBinding ? "Linking..." : "Link"}
+                {isBinding ? t("linking") : t("link")}
               </Button>
             </div>
           </div>
@@ -223,19 +226,18 @@ function AccountSection({
         <>
           <Divider />
           <section>
-            <h2 className="text-lg font-semibold mb-3">System Map API</h2>
+            <h2 className="text-lg font-semibold mb-3">{t("systemMapApi")}</h2>
             <p className="text-sm text-gray-600 mb-3">
-              Configure the MTR System Map API to enable station and route
-              autocomplete in the quest editor.
+              {t("systemMapDesc")}
             </p>
             <div className="space-y-3">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="sysmap-url">API Base URL</Label>
+                <Label htmlFor="sysmap-url">{t("apiBaseUrl")}</Label>
                 <Input
                   id="sysmap-url"
                   value={systemMap.baseUrl}
                   onChange={(_, d) => dispatch(setBaseUrl(d.value))}
-                  placeholder="https://..."
+                  placeholder={t("apiBaseUrlPlaceholder")}
                 />
               </div>
               <Button
@@ -246,7 +248,7 @@ function AccountSection({
                 onClick={handleFetchSystemMap}
                 disabled={systemMap.loading || !systemMap.baseUrl}
               >
-                {systemMap.loading ? "Fetching..." : "Fetch Station & Route Data"}
+                {systemMap.loading ? t("fetching") : t("fetchStationData")}
               </Button>
 
               {systemMap.error && (
@@ -257,8 +259,10 @@ function AccountSection({
 
               {systemMap.data && (
                 <p className="text-xs text-gray-500 mt-2">
-                  Loaded {systemMap.data.stationNames.length} stations and{" "}
-                  {systemMap.data.routeNames.length} routes.
+                  {t("systemMapLoadedBody", {
+                    stations: systemMap.data.stationNames.length,
+                    routes: systemMap.data.routeNames.length,
+                  })}
                 </p>
               )}
             </div>
@@ -270,6 +274,8 @@ function AccountSection({
 }
 
 function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
+  const t = useTranslations("settings");
+  const dateLocale = useDateLocale();
   const { data: profile, isLoading } = useGetPlayerProfileQuery(mcUuid!, {
     skip: !mcUuid,
   });
@@ -279,7 +285,7 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Spinner size="medium" label="Loading your rankings..." />
+        <Spinner size="medium" label={t("loadingRankings")} />
       </div>
     );
   }
@@ -287,46 +293,46 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
   if (!profile) {
     return (
       <p className="text-sm text-gray-500 py-4">
-        No ranking data found. Complete some quests in-game to see your stats here.
+        {t("noRankingData")}
       </p>
     );
   }
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h2 className="text-lg font-semibold">My Rankings</h2>
+      <h2 className="text-lg font-semibold">{t("myRankings")}</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard
           icon={<TrophyRegular />}
           value={profile.qpBalance.toLocaleString()}
-          label="QP Balance"
+          label={t("qpBalance")}
           iconBg="bg-amber-100 text-amber-600"
           valueClassName={profile.qpBalance < 0 ? "text-red-600" : undefined}
         />
         <StatCard
           icon={<CheckmarkCircleRegular />}
           value={profile.totalQuestCompletions}
-          label="Total Completions"
+          label={t("totalCompletions")}
           iconBg="bg-green-100 text-green-600"
         />
         <StatCard
           icon={<ArrowTrendingRegular />}
           value={profile.personalBestCount}
-          label="Personal Bests"
+          label={t("personalBests")}
           iconBg="bg-blue-100 text-blue-600"
         />
         <StatCard
           icon={<CalendarRegular />}
           value={profile.worldRecordCount}
-          label="World Records"
+          label={t("worldRecords")}
           iconBg="bg-red-100 text-red-600"
         />
       </div>
 
       {profile.recentActivity.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Recent Activity</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">{t("recentActivity")}</h3>
           <div className="space-y-1">
             {profile.recentActivity.map((a, i) => (
               <div
@@ -339,7 +345,7 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
                 )}
                 <span className="text-xs text-gray-500 ml-auto">
                   {formatDurationShort(a.durationMillis)} &middot;{" "}
-                  {formatDistanceToNow(new Date(a.completionTime), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(a.completionTime), { addSuffix: true, locale: dateLocale })}
                 </span>
               </div>
             ))}
@@ -349,7 +355,7 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
 
       <Link href={`/ranking/player?uuid=${encodeURIComponent(mcUuid)}`}>
         <Button appearance="subtle" icon={<OpenRegular />}>
-          View Full Profile
+          {t("viewFullProfile")}
         </Button>
       </Link>
     </div>
@@ -357,6 +363,9 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
 }
 
 function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const dateLocale = useDateLocale();
   const [offset, setOffset] = useState(0);
   const [typeFilter, setTypeFilter] = useState<TransactionType | "ALL">("ALL");
 
@@ -376,7 +385,7 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Spinner size="medium" label="Loading transactions..." />
+        <Spinner size="medium" label={t("loadingTransactions")} />
       </div>
     );
   }
@@ -386,7 +395,7 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
 
   return (
     <div className="max-w-3xl space-y-4">
-      <h2 className="text-lg font-semibold">QP Transactions</h2>
+      <h2 className="text-lg font-semibold">{t("qpTransactions")}</h2>
 
       {profile && (
         <div className="flex items-baseline gap-6 rounded-lg border border-gray-200 bg-white px-5 py-3">
@@ -394,57 +403,57 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
             <p className={`text-2xl font-bold ${profile.qpBalance < 0 ? "text-red-600" : ""}`}>
               {profile.qpBalance.toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500">Balance</p>
+            <p className="text-xs text-gray-500">{t("balance")}</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div>
             <p className="text-base font-semibold text-green-600">
               +{profile.totalQpEarned.toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500">Earned</p>
+            <p className="text-xs text-gray-500">{t("earned")}</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div>
             <p className="text-base font-semibold text-red-600">
               -{profile.totalQpSpent.toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500">Spent</p>
+            <p className="text-xs text-gray-500">{t("spent")}</p>
           </div>
         </div>
       )}
 
       <Dropdown
-        value={TX_TYPE_LABELS[typeFilter]}
+        value={t(TX_TYPE_KEYS[typeFilter])}
         onOptionSelect={(_, d) => {
           setTypeFilter(d.optionValue as TransactionType | "ALL");
           setOffset(0);
         }}
       >
-        {(Object.keys(TX_TYPE_LABELS) as (TransactionType | "ALL")[]).map((t) => (
-          <Option key={t} value={t}>
-            {TX_TYPE_LABELS[t]}
+        {(Object.keys(TX_TYPE_KEYS) as (TransactionType | "ALL")[]).map((key) => (
+          <Option key={key} value={key}>
+            {t(TX_TYPE_KEYS[key])}
           </Option>
         ))}
       </Dropdown>
 
       {!data?.entries.length ? (
-        <p className="text-sm text-gray-500 py-4">No transactions found.</p>
+        <p className="text-sm text-gray-500 py-4">{t("noTransactions")}</p>
       ) : (
         <>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-left">
-                <th className="py-2 px-3 text-gray-500 font-medium">Date</th>
-                <th className="py-2 px-3 text-gray-500 font-medium">Type</th>
-                <th className="py-2 px-3 text-gray-500 font-medium">Description</th>
-                <th className="py-2 px-3 text-gray-500 font-medium text-right">Amount</th>
+                <th className="py-2 px-3 text-gray-500 font-medium">{t("date")}</th>
+                <th className="py-2 px-3 text-gray-500 font-medium">{t("type")}</th>
+                <th className="py-2 px-3 text-gray-500 font-medium">{t("description")}</th>
+                <th className="py-2 px-3 text-gray-500 font-medium text-right">{tc("amount")}</th>
               </tr>
             </thead>
             <tbody>
               {data.entries.map((tx) => (
                 <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50/80">
                   <td className="py-2.5 px-3 text-xs text-gray-500 whitespace-nowrap">
-                    {formatDistanceToNow(new Date(tx.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(tx.createdAt), { addSuffix: true, locale: dateLocale })}
                   </td>
                   <td className="py-2.5 px-3">
                     <Badge
@@ -452,7 +461,7 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
                       color={TX_TYPE_COLORS[tx.type] ?? "informative"}
                       size="small"
                     >
-                      {tx.type.replace(/_/g, " ")}
+                      {t(TX_TYPE_KEYS[tx.type as TransactionType] ?? tx.type)}
                     </Badge>
                   </td>
                   <td className="py-2.5 px-3 text-gray-700 max-w-xs leading-5"><span className="line-clamp-2">{tx.description}</span></td>
@@ -477,10 +486,10 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
                 disabled={offset === 0}
                 onClick={() => setOffset(Math.max(0, offset - TX_PAGE_SIZE))}
               >
-                Prev
+                {tc("prev")}
               </Button>
               <span className="text-xs text-gray-500">
-                Page {currentPage} of {totalPages}
+                {tc("pageOf", { current: currentPage, total: totalPages })}
               </span>
               <Button
                 appearance="subtle"
@@ -490,7 +499,7 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
                 disabled={offset + TX_PAGE_SIZE >= (data.total ?? 0)}
                 onClick={() => setOffset(offset + TX_PAGE_SIZE)}
               >
-                Next
+                {tc("next")}
               </Button>
             </div>
           )}
@@ -502,6 +511,8 @@ function QpHistorySection({ mcUuid }: { mcUuid: string | null }) {
 
 export default function SettingsPage() {
   const { user, isLoggedIn, isAdmin, isAuthor } = useAuth();
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const mcProfile = useMinecraftProfile(user?.mcUuid);
   const [activeTab, setActiveTab] = useState("account");
 
@@ -509,7 +520,7 @@ export default function SettingsPage() {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <MessageBar intent="warning">
-          <MessageBarBody>Please log in to access settings.</MessageBarBody>
+          <MessageBarBody>{t("loginRequired")}</MessageBarBody>
         </MessageBar>
       </div>
     );
@@ -521,7 +532,7 @@ export default function SettingsPage() {
       <aside className="w-56 shrink-0 border-r border-gray-200 flex flex-col overflow-y-auto">
         <div className="px-4 pt-6 pb-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            My Profile
+            {t("myProfile")}
           </p>
           <div className="flex items-center gap-3 mt-3">
             {user.mcUuid && mcProfile.avatarUrl && (
@@ -540,12 +551,12 @@ export default function SettingsPage() {
               <div className="flex items-center gap-1">
                 {isAdmin && (
                   <Badge appearance="filled" color="danger">
-                    Admin
+                    {tc("admin")}
                   </Badge>
                 )}
                 {!isAdmin && isAuthor && (
                   <Badge appearance="filled" color="brand">
-                    Author
+                    {tc("author")}
                   </Badge>
                 )}
               </div>
@@ -561,9 +572,9 @@ export default function SettingsPage() {
             size="large"
             appearance="subtle"
           >
-            <Tab value="account" icon={<PersonRegular />}>Account</Tab>
-            <Tab value="rankings" icon={<TrophyRegular />}>My Rankings</Tab>
-            <Tab value="qp-history" icon={<WalletRegular />}>QP Transactions</Tab>
+            <Tab value="account" icon={<PersonRegular />}>{t("account")}</Tab>
+            <Tab value="rankings" icon={<TrophyRegular />}>{t("myRankings")}</Tab>
+            <Tab value="qp-history" icon={<WalletRegular />}>{t("qpTransactions")}</Tab>
           </TabList>
         </nav>
       </aside>

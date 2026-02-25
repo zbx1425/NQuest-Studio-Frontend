@@ -13,36 +13,39 @@ import {
   TrophyRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useTranslations } from "next-intl";
 
 const WORKFLOW_STEPS = [
   {
     icon: <EditRegular className="text-lg" />,
-    label: "Create & Edit",
-    desc: "Build quests visually with the step editor",
+    labelKey: "workflowCreate" as const,
+    descKey: "workflowCreateDesc" as const,
     color: "bg-blue-500",
   },
   {
     icon: <BugRegular className="text-lg" />,
-    label: "Test in-Game",
-    desc: "Test the quest in-game with debug mode enabled",
+    labelKey: "workflowTest" as const,
+    descKey: "workflowTestDesc" as const,
     color: "bg-violet-500",
   },
   {
     icon: <ShieldKeyholeRegular className="text-lg" />,
-    label: "Review",
-    desc: "LPS Staff reviews the quest and approves it for publishing",
+    labelKey: "workflowReview" as const,
+    descKey: "workflowReviewDesc" as const,
     color: "bg-amber-500",
   },
   {
     icon: <RocketRegular className="text-lg" />,
-    label: "Publish",
-    desc: "Go live for all players on the server",
+    labelKey: "workflowPublish" as const,
+    descKey: "workflowPublishDesc" as const,
     color: "bg-emerald-500",
   },
 ];
 
 export default function LandingPage() {
   const { isLoggedIn, isAuthor, login } = useAuth();
+  const t = useTranslations("landing");
+  const tNav = useTranslations("nav");
   const questsHref = isAuthor ? "/author/quests" : "/quests";
 
   return (
@@ -61,15 +64,15 @@ export default function LandingPage() {
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15]">
-              Quest Management
+              {t("title")}
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Made Simple
+                {t("titleHighlight")}
               </span>
             </h1>
 
             <p className="text-base text-gray-500 max-w-md leading-relaxed">
-              Browse public quests, compete on leaderboards, and track your speedrun records. Quest authors can also create and publish quests with a visual editor.
+              {t("description")}
             </p>
 
             <div className="space-y-4 pt-1">
@@ -81,7 +84,7 @@ export default function LandingPage() {
                     icon={<ArrowRightRegular />}
                     iconPosition="after"
                   >
-                    Browse Quests
+                    {t("browseQuests")}
                   </Button>
                 </Link>
                 <Link href="/ranking">
@@ -90,7 +93,7 @@ export default function LandingPage() {
                     size="large"
                     icon={<TrophyRegular />}
                   >
-                    Leaderboards
+                    {t("leaderboards")}
                   </Button>
                 </Link>
               </div>
@@ -103,7 +106,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-blue-700">
-                        Quest author? Read the workflow guide
+                        {t("authorGuide")}
                       </p>
                     </div>
                     <ArrowRightRegular className="text-blue-400 ml-1" />
@@ -117,9 +120,9 @@ export default function LandingPage() {
                     icon={<PersonRegular />}
                     onClick={login}
                   >
-                    Login with Discord
+                    {tNav("login")}
                   </Button>
-                  <span className="text-sm text-gray-400">to track stats</span>
+                  <span className="text-sm text-gray-400">{t("loginPrompt")}</span>
                 </div>
               )}
             </div>
@@ -130,7 +133,7 @@ export default function LandingPage() {
             <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
               <div className="py-4 px-6">
                 {WORKFLOW_STEPS.map((step, i) => (
-                  <div key={step.label} className="flex items-start gap-4">
+                  <div key={step.labelKey} className="flex items-start gap-4">
                     <div className="flex flex-col items-center">
                       <div
                         className={`w-8 h-8 rounded-full ${step.color} flex items-center justify-center text-white shrink-0`}
@@ -143,9 +146,9 @@ export default function LandingPage() {
                     </div>
                     <div className="pt-0.5">
                       <p className="text-sm font-semibold text-gray-800">
-                        {step.label}
+                        {t(step.labelKey)}
                       </p>
-                      <p className="text-sm text-gray-500">{step.desc}</p>
+                      <p className="text-sm text-gray-500">{t(step.descKey)}</p>
                     </div>
                   </div>
                 ))}
@@ -154,8 +157,8 @@ export default function LandingPage() {
 
             <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5">
               <p className="text-xs font-bold tracking-wider text-gray-600 mb-2">
-                ALL RIGHTS RESERVED <br/>
-                Copyright (C) 2026-present Zbx1425
+                {t("copyright")} <br/>
+                {t("copyrightOwner")} Zbx1425
               </p>
               <p className="text-[0.625rem] text-gray-500 leading-relaxed">
 THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.

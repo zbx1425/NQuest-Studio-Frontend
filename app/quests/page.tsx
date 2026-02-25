@@ -23,11 +23,13 @@ import {
   useGetPublicCategoriesQuery,
 } from "@/lib/store/rankingApi";
 import { ActivityFeed } from "@/components/ranking/ActivityFeed";
+import { useTranslations } from "next-intl";
 import type { PublicQuestListItem } from "@/lib/types";
 
 const PAGE_SIZE = 18;
 
 function QuestCard({ quest }: { quest: PublicQuestListItem }) {
+  const t = useTranslations("quests");
   return (
     <Link
       href={`/ranking/quest?id=${encodeURIComponent(quest.id)}`}
@@ -53,7 +55,7 @@ function QuestCard({ quest }: { quest: PublicQuestListItem }) {
             {quest.description}
           </p>
         ) : (
-          <p className="text-xs text-gray-400 mb-2 italic">No description</p>
+          <p className="text-xs text-gray-400 mb-2 italic">{t("noDescription")}</p>
         )}
 
         <div className="mt-auto flex items-center gap-2 flex-wrap">
@@ -69,12 +71,12 @@ function QuestCard({ quest }: { quest: PublicQuestListItem }) {
           {quest.totalRuns != null && quest.totalRuns > 0 && (
             <span className="inline-flex items-center gap-1 text-[11px] text-gray-400">
               <PeopleRegular className="text-[11px]" />
-              {quest.uniqueRunners ?? 0} runner{quest.uniqueRunners !== 1 ? "s" : ""}
+              {t("runnerCount", { count: quest.uniqueRunners ?? 0 })}
             </span>
           )}
           <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 group-hover:text-blue-500 transition-colors ml-auto">
             <TimerRegular className="text-[11px]" />
-            Leaderboard
+            {t("leaderboard")}
             <ArrowRightRegular className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity" />
           </span>
         </div>
@@ -103,6 +105,8 @@ function QuestCardSkeleton() {
 }
 
 export default function PublicQuestsPage() {
+  const t = useTranslations("quests");
+  const tr = useTranslations("ranking");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -172,11 +176,10 @@ export default function PublicQuestsPage() {
         <div className="relative">
           <div className="text-2xl sm:text-3xl items-center gap-2 mb-2 flex items-center">
             <TrophyRegular className="text-yellow-300" />
-            <p className="font-bold">Quest Catalog</p>
+            <p className="font-bold">{t("questCatalog")}</p>
           </div>
           <p className="text-sm text-blue-100 max-w-lg">
-            Explore quests, view speedrun leaderboards, and find your
-            next challenge.
+            {t("questCatalogDesc")}
           </p>
         </div>
       </div>
@@ -187,7 +190,7 @@ export default function PublicQuestsPage() {
           {/* Search & Filters */}
           <div className="flex items-center gap-3 mb-3 flex-wrap">
             <Input
-              placeholder="Search quests..."
+              placeholder={t("searchPlaceholder")}
               contentBefore={<SearchRegular />}
               contentAfter={
                 searchQuery ? (
@@ -205,11 +208,13 @@ export default function PublicQuestsPage() {
             />
             {!isLoading && (
               <span className="text-sm text-gray-500">
-                {totalItems} quest{totalItems !== 1 ? "s" : ""}
-                {debouncedSearch ? ` matching "${debouncedSearch}"` : ""}
-                {categoryFilter && categoriesMap?.[categoryFilter]
-                  ? ` in ${categoriesMap[categoryFilter].name}`
-                  : ""}
+                {debouncedSearch && categoryFilter && categoriesMap?.[categoryFilter]
+                  ? t("questCountMatchingInCategory", { count: totalItems, search: debouncedSearch, category: categoriesMap[categoryFilter].name })
+                  : debouncedSearch
+                    ? t("questCountMatching", { count: totalItems, search: debouncedSearch })
+                    : categoryFilter && categoriesMap?.[categoryFilter]
+                      ? t("questCountInCategory", { count: totalItems, category: categoriesMap[categoryFilter].name })
+                      : t("questCount", { count: totalItems })}
               </span>
             )}
           </div>
@@ -225,7 +230,7 @@ export default function PublicQuestsPage() {
                     : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                 }`}
               >
-                All
+                {t("allCategories")}
               </button>
               {categoryEntries.map(([id, cat]) => (
                 <button
@@ -256,12 +261,12 @@ export default function PublicQuestsPage() {
                 <SearchRegular className="text-xl text-gray-400" />
               </div>
               <p className="text-sm font-semibold text-gray-700 mb-1">
-                No quests found
+                {t("noQuestsFound")}
               </p>
               <p className="text-xs text-gray-500">
                 {debouncedSearch || categoryFilter
-                  ? "Try a different search term or category."
-                  : "No public quests available yet."}
+                  ? t("tryDifferent")
+                  : t("noPublicQuests")}
               </p>
             </div>
           ) : (
@@ -282,7 +287,7 @@ export default function PublicQuestsPage() {
                 onClick={() => setPage((p) => p - 1)}
               />
               <span className="text-sm text-gray-600 tabular-nums">
-                Page {page} of {totalPages}
+                {t("pageOfTotal", { page, total: totalPages, count: totalItems })}
               </span>
               <Button
                 appearance="subtle"
@@ -298,7 +303,7 @@ export default function PublicQuestsPage() {
         <aside className="w-full lg:w-72 shrink-0 space-y-5">
           <div className="rounded-xl border border-gray-200 bg-white p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Recent Activity
+              {tr("recentActivity")}
             </p>
             <ActivityFeed limit={10} />
           </div>

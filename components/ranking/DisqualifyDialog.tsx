@@ -15,6 +15,7 @@ import {
 import { ShieldDismissRegular } from "@fluentui/react-icons";
 import { useDisqualifyCompletionMutation } from "@/lib/store/api";
 import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
+import { useTranslations } from "next-intl";
 
 interface DisqualifyDialogProps {
   completionId: number;
@@ -32,6 +33,8 @@ export function DisqualifyDialog({
   const [reason, setReason] = useState("");
   const [disqualify, { isLoading }] = useDisqualifyCompletionMutation();
   const toast = useAppToast();
+  const t = useTranslations("ranking");
+  const tc = useTranslations("common");
 
   const handleSubmit = async () => {
     if (!reason.trim()) return;
@@ -41,8 +44,8 @@ export function DisqualifyDialog({
         reason: reason.trim(),
       }).unwrap();
       toast.success(
-        "Completion disqualified",
-        `Deducted ${result.qpDeducted} QP. New balance: ${result.newBalance}`
+        t("completionDisqualified"),
+        t("disqualifiedBody", { qpDeducted: result.qpDeducted, newBalance: result.newBalance })
       );
       setReason("");
       onClose();
@@ -55,7 +58,7 @@ export function DisqualifyDialog({
         "status" in err &&
         (err as { status: number }).status === 409
       ) {
-        toast.warning("Already disqualified", body);
+        toast.warning(t("alreadyDisqualified"), body);
       } else {
         toast.error(title, body);
       }
@@ -74,26 +77,25 @@ export function DisqualifyDialog({
           <DialogTitle>
             <span className="flex items-center gap-2">
               <ShieldDismissRegular className="text-red-600" />
-              Disqualify Completion #{completionId}
+              {t("disqualifyTitle", { id: completionId })}
             </span>
           </DialogTitle>
           <DialogContent className="space-y-3">
             <p className="text-sm text-gray-600">
-              This will remove the completion from all leaderboards and deduct
-              the awarded QP from the player. This action cannot be undone.
+              {t("disqualifyDesc")}
             </p>
-            <Field label="Reason" required>
+            <Field label={t("reason")} required>
               <Textarea
                 value={reason}
                 onChange={(_, data) => setReason(data.value)}
-                placeholder="e.g. Exploiting map bug to skip checkpoint"
+                placeholder={t("disqualifyPlaceholder")}
                 resize="vertical"
               />
             </Field>
           </DialogContent>
           <DialogActions>
             <Button appearance="secondary" onClick={onClose} disabled={isLoading}>
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button
               appearance="primary"
@@ -101,7 +103,7 @@ export function DisqualifyDialog({
               disabled={!reason.trim() || isLoading}
               style={{ backgroundColor: "var(--colorPaletteRedBackground3)" }}
             >
-              {isLoading ? "Disqualifying..." : "Disqualify"}
+              {isLoading ? t("disqualifying") : t("disqualify")}
             </Button>
           </DialogActions>
         </DialogBody>

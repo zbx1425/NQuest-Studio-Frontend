@@ -18,6 +18,7 @@ import { CRITERION_TYPES } from "@/lib/types";
 import { createDefaultCriterion, criterionTypeLabel } from "@/lib/criterion";
 import { Vec3dInput } from "./Vec3dInput";
 import { AutocompleteInput } from "./AutocompleteInput";
+import { useTranslations } from "next-intl";
 
 const BORDER_COLORS = [
   "border-l-blue-400",
@@ -41,6 +42,7 @@ export function CriterionEditor({
   depth = 0,
 }: CriterionEditorProps) {
   const systemMap = useSelector((state: RootState) => state.systemMap.data);
+  const t = useTranslations("editor");
   const stationItems = systemMap?.stationNamesAndIds ?? [];
   const routeItems = systemMap?.routeNames ?? [];
   const stationDisplayMap = systemMap?.stationIdToName ?? {};
@@ -106,7 +108,7 @@ export function CriterionEditor({
             icon={<DeleteRegular />}
             size="small"
             onClick={onDelete}
-            title="Remove"
+            title={t("remove")}
           />
         )}
       </div>
@@ -114,51 +116,51 @@ export function CriterionEditor({
       {/* Type-specific fields */}
       {value.type === "VisitStationCriterion" && (
         <AutocompleteInput
-          label="Station Name"
+          label={t("stationName")}
           value={value.stationName}
           onChange={(v) => update({ stationName: v })}
           items={stationItems}
-          placeholder="Select a station"
+          placeholder={t("selectStation")}
           displayMap={stationDisplayMap}
         />
       )}
 
       {value.type === "RideToStationCriterion" && (
         <AutocompleteInput
-          label="Station Name"
+          label={t("stationName")}
           value={value.stationName}
           onChange={(v) => update({ stationName: v })}
           items={stationItems}
-          placeholder="Select a station"
+          placeholder={t("selectStation")}
           displayMap={stationDisplayMap}
         />
       )}
 
       {value.type === "RideLineCriterion" && (
         <AutocompleteInput
-          label="Line Name"
+          label={t("lineName")}
           value={value.lineName}
           onChange={(v) => update({ lineName: v })}
           items={routeItems}
-          placeholder="Select a route"
+          placeholder={t("selectRoute")}
         />
       )}
 
       {value.type === "RideLineToStationCriterion" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <AutocompleteInput
-            label="Line Name"
+            label={t("lineName")}
             value={value.lineName}
             onChange={(v) => update({ lineName: v })}
             items={routeItems}
-            placeholder="Select a route"
+            placeholder={t("selectRoute")}
           />
           <AutocompleteInput
-            label="Station Name"
+            label={t("stationName")}
             value={value.stationName}
             onChange={(v) => update({ stationName: v })}
             items={stationItems}
-            placeholder="Select a station"
+            placeholder={t("selectStation")}
             displayMap={stationDisplayMap}
           />
         </div>
@@ -190,18 +192,18 @@ export function CriterionEditor({
             }}
           >
             <Vec3dInput
-              label="Corner 1"
+              label={t("corner1")}
               value={value.min}
               onChange={(v) => update({ min: v })}
             />
             <Vec3dInput
-              label="Corner 2"
+              label={t("corner2")}
               value={value.max}
               onChange={(v) => update({ max: v })}
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label size="small">Description</Label>
+            <Label size="small">{t("descriptionLabel")}</Label>
             <Input
               size="small"
               value={value.description}
@@ -213,7 +215,7 @@ export function CriterionEditor({
 
       {value.type === "OverSpeedCriterion" && (
         <div className="flex flex-col gap-1">
-          <Label size="small">Max Speed (m/s)</Label>
+          <Label size="small">{t("maxSpeed")}</Label>
           <Input
             size="small"
             type="number"
@@ -227,7 +229,7 @@ export function CriterionEditor({
 
       {value.type === "TeleportDetectCriterion" && (
         <Text size={200} className="text-gray-500">
-          Triggered when a player warps or uses tpa.
+          {t("teleportDesc")}
         </Text>
       )}
 
@@ -237,12 +239,12 @@ export function CriterionEditor({
             ID: <code className="bg-gray-100 px-1 rounded text-xs">{value.id}</code>
           </Text>
           <div className="flex flex-col gap-1">
-            <Label size="small">Description</Label>
+            <Label size="small">{t("descriptionLabel")}</Label>
             <Input
               size="small"
               value={value.description}
               onChange={(_, d) => update({ description: d.value })}
-              placeholder="Describe how to manually trigger this step."
+              placeholder={t("manualTriggerDesc")}
             />
           </div>
         </>
@@ -253,10 +255,10 @@ export function CriterionEditor({
           <Switch
             checked={value.value}
             onChange={(_, d) => update({ value: d.checked })}
-            label="Value"
+            label={t("value")}
           />
           <div className="flex flex-col gap-1">
-            <Label size="small">Description</Label>
+            <Label size="small">{t("descriptionLabel")}</Label>
             <Input
               size="small"
               value={value.description}
@@ -269,7 +271,7 @@ export function CriterionEditor({
       {value.type === "Descriptor" && (
         <>
           <div className="flex flex-col gap-1">
-            <Label size="small">Base Condition</Label>
+            <Label size="small">{t("baseCondition")}</Label>
             <CriterionEditor
               value={value.base}
               onChange={(base) => onChange({ ...value, base })}
@@ -277,7 +279,7 @@ export function CriterionEditor({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label size="small">Description (overwrites base description)</Label>
+            <Label size="small">{t("descriptionOverwrite")}</Label>
             <Input
               size="small"
               value={value.description}
@@ -289,7 +291,7 @@ export function CriterionEditor({
 
       {(value.type === "AndCriterion" || value.type === "OrCriterion") && (
         <div className="space-y-2">
-          <Label size="small">Conditions</Label>
+          <Label size="small">{t("conditions")}</Label>
           {value.criteria.map((child, index) => (
             <CriterionEditor
               key={index}
@@ -319,7 +321,7 @@ export function CriterionEditor({
               })
             }
           >
-            Add Condition
+            {t("addCondition")}
           </Button>
         </div>
       )}
@@ -327,7 +329,7 @@ export function CriterionEditor({
       {value.type === "NotCriterion" && (
         <>
           <div className="flex flex-col gap-1">
-            <Label size="small">Base Condition</Label>
+            <Label size="small">{t("baseCondition")}</Label>
             <CriterionEditor
               value={value.base}
               onChange={(base) => onChange({ ...value, base })}
@@ -335,7 +337,7 @@ export function CriterionEditor({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label size="small">Description (overwrites base description)</Label>
+            <Label size="small">{t("descriptionOverwrite")}</Label>
             <Input
               size="small"
               value={value.description}
@@ -347,7 +349,7 @@ export function CriterionEditor({
 
       {value.type === "LatchingCriterion" && (
         <div className="flex flex-col gap-1">
-          <Label size="small">Base Condition</Label>
+          <Label size="small">{t("baseCondition")}</Label>
           <CriterionEditor
             value={value.base}
             onChange={(base) => onChange({ ...value, base })}
@@ -359,7 +361,7 @@ export function CriterionEditor({
       {value.type === "RisingEdgeAndConditionCriterion" && (
         <div className="space-y-2">
           <div className="flex flex-col gap-1">
-            <Label size="small">Trigger Condition</Label>
+            <Label size="small">{t("triggerCondition")}</Label>
             <CriterionEditor
               value={value.triggerCriteria}
               onChange={(triggerCriteria) =>
@@ -369,7 +371,7 @@ export function CriterionEditor({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label size="small">Condition</Label>
+            <Label size="small">{t("condition")}</Label>
             <CriterionEditor
               value={value.conditionCriteria}
               onChange={(conditionCriteria) =>
