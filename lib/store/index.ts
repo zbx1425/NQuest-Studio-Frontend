@@ -12,12 +12,14 @@ import {
 import storage from "redux-persist/lib/storage";
 import authReducer from "./authSlice";
 import systemMapReducer from "./systemMapSlice";
+import localeReducer from "./localeSlice";
 import { api } from "./api";
 import { rankingApi } from "./rankingApi";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   systemMap: systemMapReducer,
+  locale: localeReducer,
   [api.reducerPath]: api.reducer,
   [rankingApi.reducerPath]: rankingApi.reducer,
 });
@@ -25,7 +27,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: "nquest-studio",
   storage,
-  whitelist: ["auth", "systemMap"],
+  whitelist: ["auth", "systemMap", "locale"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
