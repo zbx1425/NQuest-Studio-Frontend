@@ -80,9 +80,14 @@ export function ActivityFeed({ limit = 15 }: ActivityFeedProps) {
               </Link>
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-gray-500 font-mono">
-                {formatDurationShort(entry.durationMillis)}
+              <span className="text-xs text-gray-700 font-semibold font-mono">
+                {formatDurationShort(entry.rankingDurationMillis)}
               </span>
+              {entry.rankingDurationMillis !== entry.durationMillis && (
+                <span className="text-[10px] text-gray-500 font-mono opacity-80 decoration-[0.5px]">
+                  ({formatDurationShort(entry.durationMillis)})
+                </span>
+              )}
               {(entry.isPersonalBest && !entry.isWorldRecord) && (
                 <Badge
                   appearance="tint"

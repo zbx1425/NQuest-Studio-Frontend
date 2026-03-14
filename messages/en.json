@@ -180,7 +180,9 @@
     "disqualifying": "Disqualifying...",
     "completionDisqualified": "Completion disqualified",
     "disqualifiedBody": "Deducted {qpDeducted} QP. New balance: {newBalance}",
-    "alreadyDisqualified": "Already disqualified"
+    "alreadyDisqualified": "Already disqualified",
+    "rankedTime": "Ranked Time",
+    "totalTime": "Total Time"
   },
   "period": {
     "allTime": "All Time",
@@ -385,7 +387,15 @@
     "chest": "Chest ({px}px)",
     "safe": "Safe ({px}px)",
     "noName": "(No name)",
-    "tierLabel": "Tier: {tier}"
+    "tierLabel": "Tier: {tier}",
+    "excludeFirstStep": "Exclude First Step from Ranking",
+    "excludeFirstStepHint1": "It is recommended to set the first step as a designated starting point to make Quest timing fairer:",
+    "excludeFirstStepHint2": "An InBounds condition, set within the range of a Warp point with the description text \"Warp to XXX with /warp\". Take care that if the global failure condition has TeleportDetection set, set this step's failure condition to Constant False.",
+    "excludeFirstStepHint3": "An InBounds condition, set at a visible station landmark, with a description text guiding the player to this landmark.",
+    "excludeFirstStepHint4": "Or, if precise fairness is less important, a VisitStation condition.",
+    "recalcProgress": "Recalculating Leaderboard...",
+    "recalcFailed": "Recalculation Failed",
+    "rankedTime": "Ranked Time"
   },
   "admin": {
     "categories": "Categories",

@@ -161,7 +161,8 @@ function SpeedrunTab({
   }, [allQuestsData, searchText]);
 
   const columns: ColumnDef[] = [
-    { label: t("time"), className: "font-mono" },
+    { label: t("rankedTime"), className: "font-mono" },
+    { label: t("totalTime"), className: "font-mono text-gray-500 text-xs" },
     { label: "" },
     { label: "" },
   ];
@@ -171,7 +172,12 @@ function SpeedrunTab({
     playerUuid: e.playerUuid,
     playerName: e.playerName,
     cells: [
-      <DurationDisplay key="t" ms={e.durationMillis} />,
+      <DurationDisplay key="t" ms={e.rankingDurationMillis} />,
+      <span key="tt">
+        {e.durationMillis !== e.rankingDurationMillis && (
+          <DurationDisplay ms={e.durationMillis} className="text-gray-400 text-xs" />
+        )}
+      </span>,
       <span key="d" className="text-gray-500 text-xs">
         {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
       </span>,

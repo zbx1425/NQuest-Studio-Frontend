@@ -54,12 +54,12 @@ export const api = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.items.map(({ id }) => ({
-                type: "Quest" as const,
-                id,
-              })),
-              "QuestList",
-            ]
+            ...result.items.map(({ id }) => ({
+              type: "Quest" as const,
+              id,
+            })),
+            "QuestList",
+          ]
           : ["QuestList"],
     }),
     getQuest: builder.query<Quest, string>({
@@ -75,6 +75,7 @@ export const api = createApi({
         category?: string;
         tier?: string;
         questPoints?: number;
+        excludeFirstStep?: boolean;
         steps?: Quest["dataDraft"]["steps"];
         defaultCriteria?: Quest["dataDraft"]["defaultCriteria"];
       }
@@ -91,6 +92,7 @@ export const api = createApi({
         category?: string | null;
         tier?: string | null;
         questPoints?: number;
+        excludeFirstStep?: boolean;
         steps?: Quest["dataDraft"]["steps"];
         defaultCriteria?: Quest["dataDraft"]["defaultCriteria"];
       }
@@ -137,9 +139,11 @@ export const api = createApi({
       ],
     }),
 
-    getQuestStats: builder.query<QuestStatsResponse, string>({
-      query: (questId) =>
-        `/quests/${encodeURIComponent(questId)}/stats`,
+    getQuestStats: builder.query<QuestStatsResponse, { questId: string; durationType?: 'ranking' | 'total' }>({
+      query: ({ questId, durationType }) => ({
+        url: `/quests/${encodeURIComponent(questId)}/stats`,
+        params: durationType ? { durationType } : undefined,
+      }),
     }),
 
     // ─── ACL ───

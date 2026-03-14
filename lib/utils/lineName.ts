@@ -11,3 +11,11 @@ export function parseLineName(raw: string): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 }
+
+/**
+ * Extracts the extra information (after `||`) from a line name string.
+ */
+export function getLineExtra(raw: string): string | null {
+  const parts = raw.split("||");
+  return parts.length > 1 && parts[1].trim() ? parts[1].trim() : null;
+}

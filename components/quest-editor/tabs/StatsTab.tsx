@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Spinner, MessageBar, MessageBarBody, Button } from "@fluentui/react-components";
+import { Spinner, MessageBar, MessageBarBody, Button, Switch } from "@fluentui/react-components";
+import { skipToken } from "@reduxjs/toolkit/query";
 import {
   DataBarVerticalRegular,
   PeopleRegular,
@@ -10,7 +12,7 @@ import {
   TrophyRegular,
   OpenRegular,
 } from "@fluentui/react-icons";
-import { useGetQuestStatsQuery } from "@/lib/store/api";
+import { useGetQuestStatsQuery, useGetQuestQuery } from "@/lib/store/api";
 import { StatCard } from "@/components/ranking/StatCard";
 import { PlayerLink } from "@/components/ranking/PlayerLink";
 import { DurationDisplay } from "@/components/ranking/DurationDisplay";
@@ -24,12 +26,25 @@ interface StatsTabProps {
 }
 
 export function StatsTab({ questId }: StatsTabProps) {
-  const { data: stats, isLoading, error } = useGetQuestStatsQuery(questId);
+  const [useRanked, setUseRanked] = useState(true);
+  const { data: quest, isLoading: isQuestLoading } = useGetQuestQuery(questId);
+  const durationType = quest?.excludeFirstStep && useRanked ? "ranking" : "total";
+  const { data: stats, isLoading, error } = useGetQuestStatsQuery(
+    quest
+      ? {
+        questId,
+        durationType,
+      }
+      : skipToken,
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
   const t = useTranslations("editor");
   const tr = useTranslations("ranking");
   const dateLocale = useDateLocale();
 
-  if (isLoading) {
+  if (isQuestLoading || isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="medium" label={t("loadingStats")} />
@@ -58,7 +73,17 @@ export function StatsTab({ questId }: StatsTabProps) {
     <div className="max-w-3xl space-y-6">
       {/* Overview */}
       <section>
-        <h2 className="text-lg font-semibold mb-3">{tr("overview")}</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">{tr("overview")}</h2>
+          {quest?.excludeFirstStep && (
+            <Switch
+              checked={useRanked}
+              onChange={(e, data) => setUseRanked(data.checked)}
+              label={tr("rankedTime")}
+              labelPosition="before"
+            />
+          )}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard
             icon={<DataBarVerticalRegular />}
@@ -99,10 +124,17 @@ export function StatsTab({ questId }: StatsTabProps) {
                 playerName={stats.worldRecord.playerName}
                 avatarSize={32}
               />
-              <DurationDisplay
-                ms={stats.worldRecord.durationMillis}
-                className="text-lg font-bold text-amber-900"
-              />
+              <div className="flex flex-row gap-3">
+                <DurationDisplay
+                  ms={quest?.excludeFirstStep && useRanked ? stats.worldRecord.rankingDurationMillis : stats.worldRecord.durationMillis}
+                  className="text-lg font-bold text-amber-900 leading-none"
+                />
+                {quest?.excludeFirstStep && useRanked && stats.worldRecord.durationMillis !== stats.worldRecord.rankingDurationMillis && (
+                  <span className="text-xs text-amber-700/70 mt-0.5">
+                    ({formatDuration(stats.worldRecord.durationMillis)})
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-amber-600 ml-auto">
                 {formatDistanceToNow(new Date(stats.worldRecord.completionTime), {
                   addSuffix: true,

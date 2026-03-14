@@ -170,6 +170,7 @@ export interface Quest {
   dataDraft: QuestData;
   dataPublic?: QuestData;
   hasPendingDraft: boolean;
+  excludeFirstStep: boolean;
   createdBy: UserRef;
   createdAt: number;
   lastModifiedBy: UserRef;
@@ -302,6 +303,7 @@ export interface ActivityEntry {
   questId: string;
   questName: string;
   durationMillis: number;
+  rankingDurationMillis: number;
   completionTime: number;
   questPoints: number;
   isPersonalBest: boolean;
@@ -336,6 +338,7 @@ export interface SpeedrunEntry {
   playerUuid: string;
   playerName: string;
   durationMillis: number;
+  rankingDurationMillis: number;
   completionTime: number;
   completionId: number;
   isWorldRecord: boolean;
@@ -370,6 +373,7 @@ export interface PlayerProfile {
     questId: string;
     questName: string;
     durationMillis: number;
+    rankingDurationMillis: number;
     completionTime: number;
     isPersonalBest: boolean;
   }[];
@@ -381,6 +385,7 @@ export interface PlayerHistoryEntry {
   questName: string;
   completionTime: number;
   durationMillis: number;
+  rankingDurationMillis: number;
   questPoints: number;
   stepDetails: Record<string, StepDetail> | null;
   isPersonalBest: boolean;
@@ -403,6 +408,7 @@ export interface PersonalBestEntry {
   questId: string;
   questName: string;
   durationMillis: number;
+  rankingDurationMillis: number;
   completionTime: number;
   rank: number;
 }
@@ -451,6 +457,7 @@ export interface QuestStatsResponse {
     playerUuid: string;
     playerName: string;
     durationMillis: number;
+    rankingDurationMillis: number;
     completionTime: number;
   } | null;
   stepAnalytics: StepAnalytic[];

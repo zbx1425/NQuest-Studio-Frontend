@@ -23,6 +23,7 @@ import {
   useGetQuestQuery,
   useCreateQuestMutation,
   useUpdateQuestMutation,
+  useLazyGetJobStatusQuery,
 } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { usePermissions } from "@/lib/hooks/usePermissions";
@@ -38,6 +39,7 @@ import { AclTab } from "./tabs/AclTab";
 import { JsonTab } from "./tabs/JsonTab";
 import { ReviewTab } from "./tabs/ReviewTab";
 import { useTranslations } from "next-intl";
+import React from "react";
 
 export interface QuestFormState {
   id: string;
@@ -46,6 +48,7 @@ export interface QuestFormState {
   category: string;
   tier: string;
   questPoints: number;
+  excludeFirstStep: boolean;
   steps: Step[];
   defaultCriteria: Criterion | null;
 }
@@ -58,6 +61,7 @@ function questToForm(quest: Quest): QuestFormState {
     category: quest.category ?? "",
     tier: quest.tier ?? "",
     questPoints: quest.questPoints,
+    excludeFirstStep: quest.excludeFirstStep ?? false,
     steps: structuredClone(quest.dataDraft.steps),
     defaultCriteria: quest.dataDraft.defaultCriteria
       ? structuredClone(quest.dataDraft.defaultCriteria.failureCriteria)
@@ -73,6 +77,7 @@ function createNewFormState(): QuestFormState {
     category: "",
     tier: "",
     questPoints: 0,
+    excludeFirstStep: false,
     steps: [createDefaultStep()],
     defaultCriteria: null,
   };
@@ -103,6 +108,45 @@ export function QuestEditorPage() {
 
   const permissions = usePermissions(questData);
 
+  const [triggerJobStatus] = useLazyGetJobStatusQuery();
+  const [jobProgress, setJobProgress] = useState<{
+    processed: number;
+    total: number;
+    status: string;
+  } | null>(null);
+  const pollingRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const pollJob = useCallback(
+    async (id: string) => {
+      try {
+        const result = await triggerJobStatus(id).unwrap();
+        setJobProgress({
+          processed: result.progress.processed,
+          total: result.progress.total,
+          status: result.status,
+        });
+
+        if (result.status === "COMPLETED" || result.status === "FAILED") {
+          return;
+        }
+
+        pollingRef.current = setTimeout(() => pollJob(id), 2000);
+      } catch {
+        pollingRef.current = setTimeout(() => pollJob(id), 5000);
+      }
+    },
+    [triggerJobStatus]
+  );
+
+  useEffect(() => {
+    if (questId && (permissions.canEdit)) {
+      pollJob(`recalc-${questId}`);
+    }
+    return () => {
+      if (pollingRef.current) clearTimeout(pollingRef.current);
+    };
+  }, [questId, pollJob, permissions.canEdit]);
+
   useEffect(() => {
     if (questData && !initialized) {
       setForm(questToForm(questData));
@@ -127,6 +171,7 @@ export function QuestEditorPage() {
           category: form.category || undefined,
           tier: form.tier || undefined,
           questPoints: form.questPoints,
+          excludeFirstStep: form.excludeFirstStep,
           steps: form.steps,
           defaultCriteria: form.defaultCriteria
             ? { failureCriteria: form.defaultCriteria }
@@ -142,6 +187,7 @@ export function QuestEditorPage() {
           category: form.category || null,
           tier: form.tier || null,
           questPoints: form.questPoints,
+          excludeFirstStep: form.excludeFirstStep,
           steps: form.steps,
           defaultCriteria: form.defaultCriteria
             ? { failureCriteria: form.defaultCriteria }
@@ -241,33 +287,53 @@ export function QuestEditorPage() {
           onNavigateToReview={() => setActiveTab("review")}
         />
 
-        <div className="flex-1 overflow-auto p-6">
-          {activeTab === "steps" && (
-            <StepsTab form={form} updateForm={updateForm} />
+        <div className="flex-1 overflow-auto p-6 flex flex-col gap-4">
+          {jobProgress && (jobProgress.status === "PROCESSING" || jobProgress.status === "FAILED") && (
+            <MessageBar intent={jobProgress.status === "FAILED" ? "error" : "info"} className="shrink-0">
+              <MessageBarBody>
+                <MessageBarTitle>
+                  {jobProgress.status === "FAILED" ? t("recalcFailed") : t("recalcProgress")}
+                </MessageBarTitle>
+                {jobProgress.status === "PROCESSING" && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Spinner size="tiny" />
+                    <span>
+                      {Math.round((jobProgress.processed / jobProgress.total) * 100)}% ({jobProgress.processed}/{jobProgress.total})
+                    </span>
+                  </div>
+                )}
+              </MessageBarBody>
+            </MessageBar>
           )}
-          {activeTab === "info" && (
-            <InfoTab
-              form={form}
-              updateForm={updateForm}
-              quest={questData ?? null}
-              isNew={isNew}
-            />
-          )}
-          {activeTab === "acl" && questData && (
-            <AclTab quest={questData} />
-          )}
-          {activeTab === "json" && (
-            <JsonTab form={form} setForm={setForm} />
-          )}
-          {activeTab === "review" && questData && (
-            <ReviewTab quest={questData} />
-          )}
-          {activeTab === "stats" && questId && (
-            <StatsTab questId={questId} />
-          )}
-          {activeTab === "qp-adjust" && questData && (
-            <QpAdjustmentTab quest={questData} />
-          )}
+
+          <div className="flex-1">
+            {activeTab === "steps" && (
+              <StepsTab form={form} updateForm={updateForm} />
+            )}
+            {activeTab === "info" && (
+              <InfoTab
+                form={form}
+                updateForm={updateForm}
+                quest={questData ?? null}
+                isNew={isNew}
+              />
+            )}
+            {activeTab === "acl" && questData && (
+              <AclTab quest={questData} />
+            )}
+            {activeTab === "json" && (
+              <JsonTab form={form} setForm={setForm} />
+            )}
+            {activeTab === "review" && questData && (
+              <ReviewTab quest={questData} />
+            )}
+            {activeTab === "stats" && questId && (
+              <StatsTab questId={questId} />
+            )}
+            {activeTab === "qp-adjust" && questData && (
+              <QpAdjustmentTab quest={questData} />
+            )}
+          </div>
         </div>
       </div>
     </div>

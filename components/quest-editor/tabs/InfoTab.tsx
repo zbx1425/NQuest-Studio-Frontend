@@ -7,6 +7,7 @@ import {
   Dropdown,
   Option,
   Text,
+  Switch,
 } from "@fluentui/react-components";
 import { useGetCategoriesQuery } from "@/lib/store/api";
 import type { QuestFormState } from "../QuestEditorPage";
@@ -147,6 +148,25 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
             resize="vertical"
             rows={3}
           />
+        </div>
+
+        <div className="mt-4 flex flex-col gap-1">
+          <Switch
+            id="quest-exclude-first-step"
+            checked={form.excludeFirstStep}
+            onChange={(ev, data) => updateForm({ excludeFirstStep: data.checked })}
+            label={t("excludeFirstStepLabel")}
+          />
+          {form.excludeFirstStep && (
+            <div className="pl-4 pr-2 py-2 mt-1 bg-yellow-50 text-yellow-900 text-sm rounded-md border border-yellow-200">
+              <p className="font-semibold mb-1">{t("excludeFirstStepHint1")}</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>{t("excludeFirstStepHint2")}</li>
+                <li>{t("excludeFirstStepHint3")}</li>
+                <li>{t("excludeFirstStepHint4")}</li>
+              </ul>
+            </div>
+          )}
         </div>
 
         <MinecraftTooltipPreview

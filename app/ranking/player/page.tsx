@@ -70,7 +70,13 @@ function OverviewSection({ uuid }: { uuid: string }) {
               )}
             </div>
             <p className="text-xs text-gray-500 mt-0.5">
-              {formatDurationShort(a.durationMillis)} &middot;{" "}
+              <span className="font-semibold text-gray-700">{formatDurationShort(a.rankingDurationMillis)}</span>
+              {a.rankingDurationMillis !== a.durationMillis && (
+                <span className="ml-1 text-[10px] opacity-80 decoration-[0.5px]">
+                  ({formatDurationShort(a.durationMillis)})
+                </span>
+              )}
+              <span className="mx-1.5 opacity-50">&middot;</span>
               {formatDistanceToNow(new Date(a.completionTime), { addSuffix: true, locale: dateLocale })}
             </p>
           </div>
@@ -111,6 +117,7 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
           <tr className="border-b border-gray-200 text-left">
             <th className="py-2 px-3 text-gray-500 font-medium">{t("quest")}</th>
             <th className="py-2 px-3 text-gray-500 font-medium">{t("time")}</th>
+            <th className="py-2 px-3 text-gray-500 font-medium text-xs">{t("totalTime")}</th>
             <th className="py-2 px-3 text-gray-500 font-medium text-right">{t("qp")}</th>
             <th className="py-2 px-3 text-gray-500 font-medium"></th>
             <th className="py-2 px-3 text-gray-500 font-medium w-12"></th>
@@ -131,7 +138,12 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
                     <QuestLink questId={e.questId} questName={e.questName} />
                   </td>
                   <td className="py-2.5 px-3">
-                    <DurationDisplay ms={e.durationMillis} />
+                    <DurationDisplay ms={e.rankingDurationMillis} />
+                  </td>
+                  <td className="py-2.5 px-3">
+                    {e.durationMillis !== e.rankingDurationMillis && (
+                      <DurationDisplay ms={e.durationMillis} className="text-gray-400 text-xs" />
+                    )}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono">{e.questPoints}</td>
                   <td className="py-2.5 px-3 text-xs text-gray-500">
@@ -155,7 +167,7 @@ function HistorySection({ uuid, isAdmin }: { uuid: string; isAdmin: boolean }) {
                 </tr>
                 {isExpanded && (
                   <tr className="border-b border-gray-100 bg-gray-50/60">
-                    <td colSpan={6} className="px-6 py-3 space-y-3">
+                    <td colSpan={7} className="px-6 py-3 space-y-3">
                       {e.stepDetails && (
                         <StepDurationsDetail
                           stepDetails={e.stepDetails}
@@ -237,6 +249,7 @@ function PersonalBestsSection({ uuid }: { uuid: string }) {
         <tr className="border-b border-gray-200 text-left">
           <th className="py-2 px-3 text-gray-500 font-medium">{t("quest")}</th>
           <th className="py-2 px-3 text-gray-500 font-medium">{t("bestTime")}</th>
+          <th className="py-2 px-3 text-gray-500 font-medium text-xs">{t("totalTime")}</th>
           <th className="py-2 px-3 text-gray-500 font-medium text-right">{t("rank")}</th>
           <th className="py-2 px-3 text-gray-500 font-medium"></th>
         </tr>
@@ -248,7 +261,12 @@ function PersonalBestsSection({ uuid }: { uuid: string }) {
               <QuestLink questId={e.questId} questName={e.questName} />
             </td>
             <td className="py-2.5 px-3">
-              <DurationDisplay ms={e.durationMillis} />
+              <DurationDisplay ms={e.rankingDurationMillis} />
+            </td>
+            <td className="py-2.5 px-3">
+              {e.durationMillis !== e.rankingDurationMillis && (
+                <DurationDisplay ms={e.durationMillis} className="text-gray-400 text-xs" />
+              )}
             </td>
             <td className="py-2.5 px-3 text-right">
               <span className={`font-semibold ${

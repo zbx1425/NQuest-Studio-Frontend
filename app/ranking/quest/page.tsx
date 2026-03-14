@@ -7,6 +7,8 @@ import {
   Button,
   MessageBar,
   MessageBarBody,
+  MessageBarTitle,
+  Spinner,
 } from "@fluentui/react-components";
 import {
   PeopleRegular,
@@ -23,7 +25,7 @@ import {
   useGetQuestDetailQuery,
   useGetSpeedrunLeaderboardQuery,
 } from "@/lib/store/rankingApi";
-import { useGetQuestStatsQuery } from "@/lib/store/api";
+import { useGetQuestStatsQuery, useLazyGetJobStatusQuery } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { StatCard } from "@/components/ranking/StatCard";
 import { PlayerLink } from "@/components/ranking/PlayerLink";
@@ -60,7 +62,7 @@ export default function QuestLeaderboardPage() {
     { skip: !questId }
   );
   const { data: stats, isLoading: statsLoading } = useGetQuestStatsQuery(
-    questId,
+    { questId: questId, durationType: "ranking" },
     { skip: !questId }
   );
   const { data: lb, isLoading: lbLoading, refetch: refetchLb } = useGetSpeedrunLeaderboardQuery(
@@ -79,7 +81,8 @@ export default function QuestLeaderboardPage() {
   }
 
   const columns: ColumnDef[] = [
-    { label: t("time"), className: "font-mono" },
+    { label: quest?.excludeFirstStep ? t("rankedTime") : t("time"), className: "font-mono" },
+    ...(quest?.excludeFirstStep ? [{ label: t("totalTime"), className: "font-mono text-gray-500 text-xs" }] : []),
     { label: "" },
     { label: "" },
   ];
@@ -89,7 +92,10 @@ export default function QuestLeaderboardPage() {
     playerUuid: e.playerUuid,
     playerName: e.playerName,
     cells: [
-      <DurationDisplay key="t" ms={e.durationMillis} />,
+      <DurationDisplay key="t" ms={e.rankingDurationMillis} />,
+      ...(quest?.excludeFirstStep
+        ? [<DurationDisplay key="tt" ms={e.durationMillis} />]
+        : []),
       <span key="d" className="text-gray-500 text-xs">
         {formatDistanceToNow(new Date(e.completionTime), { addSuffix: true, locale: dateLocale })}
       </span>,
@@ -230,10 +236,17 @@ export default function QuestLeaderboardPage() {
               playerName={stats.worldRecord.playerName}
               avatarSize={32}
             />
-            <DurationDisplay
-              ms={stats.worldRecord.durationMillis}
-              className="text-lg font-bold text-amber-900"
-            />
+            <div className="flex flex-col">
+              <DurationDisplay
+                ms={stats.worldRecord.rankingDurationMillis}
+                className="text-lg font-bold text-amber-900 leading-none"
+              />
+              {quest?.excludeFirstStep && stats.worldRecord.durationMillis !== stats.worldRecord.rankingDurationMillis && (
+                <span className="text-xs text-amber-700/70 mt-0.5">
+                  ({formatDuration(stats.worldRecord.durationMillis)})
+                </span>
+              )}
+            </div>
             <span className="text-xs text-amber-600 ml-auto">
               {formatDistanceToNow(new Date(stats.worldRecord.completionTime), {
                 addSuffix: true,

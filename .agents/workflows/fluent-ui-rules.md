@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+description: Project tech stack, conventions and important tips.
 ---
 
 ## 项目技术栈
