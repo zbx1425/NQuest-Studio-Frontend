@@ -116,7 +116,7 @@ export function StatsTab({ questId }: StatsTabProps) {
       {stats.worldRecord && (
         <section>
           <h2 className="text-lg font-semibold mb-3">{tr("worldRecord")}</h2>
-          <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
+          <div className="rounded-lg border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
             <div className="flex items-center gap-4">
               <TrophyRegular className="text-amber-600 text-xl" />
               <PlayerLink

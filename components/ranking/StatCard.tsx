@@ -16,7 +16,7 @@ export function StatCard({
   valueClassName,
 }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col items-start gap-2">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 flex flex-col items-start gap-2">
       <div
         className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}
       >

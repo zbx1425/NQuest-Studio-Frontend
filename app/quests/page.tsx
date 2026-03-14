@@ -35,7 +35,7 @@ function QuestCard({ quest }: { quest: PublicQuestListItem }) {
       href={`/ranking/quest?id=${encodeURIComponent(quest.id)}`}
       className="no-underline text-inherit"
     >
-      <div className="group relative rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 flex flex-col h-full">
+      <div className="group relative rounded-lg border border-gray-200 bg-white p-4 transition-all hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 flex flex-col h-full">
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <h3 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
             {quest.name}
@@ -87,7 +87,7 @@ function QuestCard({ quest }: { quest: PublicQuestListItem }) {
 
 function QuestCardSkeleton() {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-2">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
         <div className="h-5 w-12 bg-gray-200 rounded-full animate-pulse shrink-0" />
@@ -171,7 +171,7 @@ export default function PublicQuestsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Hero Header */}
-      <div className="relative rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white p-6 sm:p-8 mb-6 overflow-hidden">
+      <div className="relative rounded-lg bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white p-6 sm:p-8 mb-6 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         <div className="relative">
           <div className="text-2xl sm:text-3xl items-center gap-2 mb-2 flex items-center">
@@ -256,7 +256,7 @@ export default function PublicQuestsPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="rounded-xl border border-gray-200 bg-white flex flex-col items-center justify-center py-16 px-6">
+            <div className="rounded-lg border border-gray-200 bg-white flex flex-col items-center justify-center py-16 px-6">
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <SearchRegular className="text-xl text-gray-400" />
               </div>
@@ -301,7 +301,7 @@ export default function PublicQuestsPage() {
 
         {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0 space-y-5">
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
               {tr("recentActivity")}
             </p>

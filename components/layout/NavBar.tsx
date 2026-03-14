@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,6 +23,8 @@ import {
   SignOutRegular,
   SettingsRegular,
   LocalLanguageRegular,
+  NavigationRegular,
+  DismissRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useTranslations } from "next-intl";
@@ -44,10 +47,17 @@ export function NavBar() {
   const { user, isLoggedIn, isAdmin, isAuthor, login, logout } = useAuth();
   const t = useTranslations("nav");
   const tc = useTranslations("common");
-  const currentLocale = useSelector((state: RootState) => state.locale.locale);
+  const currentLocale = useSelector(
+    (state: RootState) => state.locale.locale
+  );
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const tabs = [
     { value: "/ranking", label: t("leaderboards") },
-    { value: isAuthor ? "/author/quests" : "/quests", label: t("quests") },
+    {
+      value: isAuthor ? "/author/quests" : "/quests",
+      label: t("quests"),
+    },
     ...(isAdmin
       ? [{ value: "/admin/categories", label: t("categories") }]
       : []),
@@ -59,7 +69,9 @@ export function NavBar() {
       : []),
   ];
 
-  const questsTab = tabs.find((tab) => tab.value === "/quests" || tab.value === "/author/quests");
+  const questsTab = tabs.find(
+    (tab) => tab.value === "/quests" || tab.value === "/author/quests"
+  );
   const selectedTab =
     tabs.find((tab) => pathname === tab.value)?.value ??
     (pathname === "/quests" || pathname === "/author/quests"
@@ -70,24 +82,36 @@ export function NavBar() {
   return (
     <>
       <Toaster toasterId="global-toaster" position="top-end" />
-      <nav className="w-full border-b border-gray-200 shrink-0">
+      <nav className="w-full border-b border-gray-200 shrink-0 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-          <Link href="/" className="text-lg font-bold mr-6 no-underline text-inherit">
+          <Link
+            href="/"
+            className="text-lg font-bold mr-6 no-underline text-inherit shrink-0"
+          >
             NQuest Studio
           </Link>
 
+          {/* Desktop tabs */}
           <TabList
             selectedValue={selectedTab}
-            className="flex-1"
+            className="flex-1 !hidden md:!flex"
           >
             {tabs.map((tab) => (
-              <Link key={tab.value} href={tab.value} className="no-underline">
+              <Link
+                key={tab.value}
+                href={tab.value}
+                className="no-underline"
+              >
                 <Tab value={tab.value}>{tab.label}</Tab>
               </Link>
             ))}
           </TabList>
 
-          <div className="flex items-center gap-2 ml-auto">
+          {/* Spacer on mobile */}
+          <div className="flex-1 md:hidden" />
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Language picker */}
             <Menu
               checkedValues={{ locale: [currentLocale] }}
               onCheckedValueChange={(_, data) => {
@@ -96,7 +120,10 @@ export function NavBar() {
               }}
             >
               <MenuTrigger disableButtonEnhancement>
-                <Tooltip content={LOCALE_LABELS[currentLocale]} relationship="label">
+                <Tooltip
+                  content={LOCALE_LABELS[currentLocale]}
+                  relationship="label"
+                >
                   <Button
                     appearance="subtle"
                     icon={<LocalLanguageRegular />}
@@ -106,17 +133,22 @@ export function NavBar() {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
-                  {(Object.entries(LOCALE_LABELS) as [AppLocale, string][]).map(
-                    ([locale, label]) => (
-                      <MenuItemRadio key={locale} name="locale" value={locale}>
-                        {label}
-                      </MenuItemRadio>
-                    )
-                  )}
+                  {(
+                    Object.entries(LOCALE_LABELS) as [AppLocale, string][]
+                  ).map(([locale, label]) => (
+                    <MenuItemRadio
+                      key={locale}
+                      name="locale"
+                      value={locale}
+                    >
+                      {label}
+                    </MenuItemRadio>
+                  ))}
                 </MenuList>
               </MenuPopover>
             </Menu>
 
+            {/* User menu / Login */}
             {isLoggedIn && user ? (
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
@@ -125,14 +157,26 @@ export function NavBar() {
                       appearance="subtle"
                       icon={<Avatar name={user.username} size={24} />}
                     >
-                      {user.username}
+                      <span className="hidden sm:inline">
+                        {user.username}
+                      </span>
                       {isAdmin && (
-                        <Badge appearance="filled" color="danger" size="small" className="ml-1.5">
+                        <Badge
+                          appearance="filled"
+                          color="danger"
+                          size="small"
+                          className="ml-1.5 hidden sm:inline-flex"
+                        >
                           {tc("admin")}
                         </Badge>
                       )}
                       {!isAdmin && isAuthor && (
-                        <Badge appearance="filled" color="brand" size="small" className="ml-1.5">
+                        <Badge
+                          appearance="filled"
+                          color="brand"
+                          size="small"
+                          className="ml-1.5 hidden sm:inline-flex"
+                        >
                           {tc("author")}
                         </Badge>
                       )}
@@ -142,9 +186,17 @@ export function NavBar() {
                 <MenuPopover>
                   <MenuList>
                     <Link href="/settings" className="no-underline">
-                      <MenuItem icon={<SettingsRegular />}>{t("settings")}</MenuItem>
+                      <MenuItem icon={<SettingsRegular />}>
+                        {t("settings")}
+                      </MenuItem>
                     </Link>
-                    <MenuItem icon={<SignOutRegular />} onClick={() => { logout(); router.push("/"); }}>
+                    <MenuItem
+                      icon={<SignOutRegular />}
+                      onClick={() => {
+                        logout();
+                        router.push("/");
+                      }}
+                    >
                       {t("logout")}
                     </MenuItem>
                   </MenuList>
@@ -156,13 +208,44 @@ export function NavBar() {
                 icon={<PersonRegular />}
                 onClick={login}
               >
-                {t("login")}
+                <span className="hidden sm:inline">{t("login")}</span>
               </Button>
             )}
+
+            {/* Mobile hamburger */}
+            <Button
+              appearance="subtle"
+              icon={
+                mobileOpen ? <DismissRegular /> : <NavigationRegular />
+              }
+              onClick={() => setMobileOpen((v) => !v)}
+              className="md:!hidden"
+            />
           </div>
         </div>
+
+        {/* Mobile dropdown */}
+        {mobileOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white pb-2">
+            <div className="px-4 py-1 space-y-0.5">
+              {tabs.map((tab) => (
+                <Link
+                  key={tab.value}
+                  href={tab.value}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block px-3 py-2.5 rounded-lg text-sm no-underline transition-colors ${
+                    selectedTab === tab.value
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
     </>
   );
 }
-

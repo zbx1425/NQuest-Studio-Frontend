@@ -100,7 +100,7 @@ export default function LandingPage() {
 
               {isAuthor && (
                 <Link href="/author/guide" className="block">
-                  <div className="inline-flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 transition-colors hover:bg-blue-100/60">
+                  <div className="inline-flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50/60 px-4 py-3 transition-colors hover:bg-blue-100/60">
                     <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                       <BookQuestionMarkRegular className="text-lg" />
                     </div>
@@ -130,7 +130,7 @@ export default function LandingPage() {
 
           {/* Right — Workflow preview */}
           <div className="space-y-4">
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
               <div className="py-4 px-6">
                 {WORKFLOW_STEPS.map((step, i) => (
                   <div key={step.labelKey} className="flex items-start gap-4">
@@ -155,7 +155,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5">
+            <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-5">
               <p className="text-xs font-bold tracking-wider text-gray-600 mb-2">
                 {t("copyright")} <br/>
                 {t("copyrightOwner")} Zbx1425

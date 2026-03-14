@@ -190,7 +190,7 @@ export default function GuidePage() {
           {stateCards.map((s) => (
             <div
               key={s.key}
-              className={`rounded-xl border ${s.border} bg-gradient-to-b ${s.bg} p-5 space-y-3`}
+              className={`rounded-lg border ${s.border} bg-gradient-to-b ${s.bg} p-5 space-y-3`}
             >
               <div className="flex items-center justify-between">
                 <div
@@ -275,7 +275,7 @@ export default function GuidePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-2">
+          <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-2">
             <div className="w-9 h-9 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
               <LinkRegular className="text-lg" />
             </div>
@@ -292,7 +292,7 @@ export default function GuidePage() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-2">
+          <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-2">
             <div className="w-9 h-9 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
               <PersonRegular className="text-lg" />
             </div>
@@ -306,7 +306,7 @@ export default function GuidePage() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-2 md:col-span-2">
+          <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-2 md:col-span-2">
             <div className="w-9 h-9 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
               <ArrowSyncRegular className="text-lg" />
             </div>

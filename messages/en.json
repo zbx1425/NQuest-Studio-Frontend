@@ -182,7 +182,14 @@
     "disqualifiedBody": "Deducted {qpDeducted} QP. New balance: {newBalance}",
     "alreadyDisqualified": "Already disqualified",
     "rankedTime": "Ranked Time",
-    "totalTime": "Total Time"
+    "totalTime": "Total Time",
+    "findQuestLeaderboard": "Quest Speedrun Leaderboard",
+    "questsCompleted": "Quests Completed",
+    "worldRecords": "World Records",
+    "bestTimes": "Best Times",
+    "filters": "Filters",
+    "timePeriod": "Time Period",
+    "mode": "Mode"
   },
   "period": {
     "allTime": "All Time",
