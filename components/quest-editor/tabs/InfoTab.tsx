@@ -155,7 +155,7 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
             id="quest-exclude-first-step"
             checked={form.excludeFirstStep}
             onChange={(ev, data) => updateForm({ excludeFirstStep: data.checked })}
-            label={t("excludeFirstStepLabel")}
+            label={t("excludeFirstStep")}
           />
           {form.excludeFirstStep && (
             <div className="pl-4 pr-2 py-2 mt-1 bg-yellow-50 text-yellow-900 text-sm rounded-md border border-yellow-200">

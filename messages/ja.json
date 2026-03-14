@@ -180,7 +180,16 @@
     "disqualifying": "失格処理中...",
     "completionDisqualified": "記録を失格にしました",
     "disqualifiedBody": "{qpDeducted} QP を控除しました。新残高: {newBalance}",
-    "alreadyDisqualified": "すでに失格済みです"
+    "alreadyDisqualified": "すでに失格済みです",
+    "rankedTime": "ランク時間",
+    "totalTime": "総時間",
+    "findQuestLeaderboard": "クエストスピードランリーダーボード",
+    "questsCompleted": "クエスト完了数",
+    "worldRecords": "世界記録",
+    "bestTimes": "ベストタイム",
+    "filters": "フィルタ",
+    "timePeriod": "時間帯",
+    "mode": "モード"
   },
   "period": {
     "allTime": "全期間",
@@ -385,7 +394,14 @@
     "chest": "チェスト ({px}px)",
     "safe": "安全 ({px}px)",
     "noName": "(名前なし)",
-    "tierLabel": "ランク: {tier}"
+    "tierLabel": "Tier: {tier}",
+    "excludeFirstStep": "最初のステップをランキングから除外する",
+    "excludeFirstStepHint1": "クエストのタイミングをより公平にするために、最初のステップを指定された開始点に設定することをお勧めします：",
+    "excludeFirstStepHint2": "説明テキスト「/warpでXXXにワープ」が設定されたワープポイントの範囲内に設定されるInBounds条件。グローバル失敗条件にTeleportDetectionが設定されている場合は、このステップの失敗条件をConstant Falseに設定してください（ステップ失敗条件はグローバル失敗条件を上書きします）。",
+    "excludeFirstStepHint3": "目に見える駅のランドマークに設定されたInBounds条件で、プレイヤーをそのランドマークに導く説明テキストが付いています。",
+    "excludeFirstStepHint4": "または、正確な公平性がそれほど重要でない場合は、VisitStation条件を使用します。",
+    "recalcProgress": "リーダーボードを再計算中...",
+    "recalcFailed": "再計算失敗"
   },
   "admin": {
     "categories": "カテゴリ",

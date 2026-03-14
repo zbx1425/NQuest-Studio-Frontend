@@ -180,7 +180,16 @@
     "disqualifying": "取消记录中...",
     "completionDisqualified": "任务记录已取消记录",
     "disqualifiedBody": "已扣除 {qpDeducted} QP。新余额：{newBalance}",
-    "alreadyDisqualified": "已取消记录"
+    "alreadyDisqualified": "已取消记录",
+    "rankedTime": "排名时间",
+    "totalTime": "总时间",
+    "findQuestLeaderboard": "任务速通排行榜",
+    "questsCompleted": "完成任务数",
+    "worldRecords": "世界纪录",
+    "bestTimes": "最佳时间",
+    "filters": "筛选",
+    "timePeriod": "时间段",
+    "mode": "模式"
   },
   "period": {
     "allTime": "全部时间",
@@ -385,7 +394,15 @@
     "chest": "箱子（{px}px）",
     "safe": "安全（{px}px）",
     "noName": "（无名称）",
-    "tierLabel": "等级：{tier}"
+    "tierLabel": "等级：{tier}",
+    "excludeFirstStep": "排名时从总时间中排除第一步用时",
+    "excludeFirstStepHint1": "建议将第一步设置为指定的起点，以使任务计时更公平：",
+    "excludeFirstStepHint2": "一个 InBounds 条件，设置在传送点范围内，描述文本为 “Warp to XXX with /warp”。注意，如果全局失败条件设置了 TeleportDetection，请将此步骤的失败条件设置为 Constant False（步骤失败条件覆盖全局失败条件）。",
+    "excludeFirstStepHint3": "一个 InBounds 条件，设置在可见的车站地标处，带有引导玩家前往该地标的描述文本。",
+    "excludeFirstStepHint4": "或者，如果不需要那么精确地公平，可以使用 VisitStation 条件。",
+    "recalcProgress": "正在重新计算排行榜...",
+    "recalcFailed": "重新计算失败",
+    "rankedTime": "排名时间"
   },
   "admin": {
     "categories": "分类",

@@ -180,7 +180,16 @@
     "disqualifying": "取消記錄中...",
     "completionDisqualified": "任務記錄已取消記錄",
     "disqualifiedBody": "已扣除 {qpDeducted} QP。新餘額：{newBalance}",
-    "alreadyDisqualified": "已取消記錄"
+    "alreadyDisqualified": "已取消記錄",
+    "rankedTime": "排名時間",
+    "totalTime": "總時間",
+    "findQuestLeaderboard": "任務速通排行榜",
+    "questsCompleted": "完成任務數",
+    "worldRecords": "世界紀錄",
+    "bestTimes": "最佳時間",
+    "filters": "篩選",
+    "timePeriod": "時間段",
+    "mode": "模式"
   },
   "period": {
     "allTime": "全部時間",
@@ -385,7 +394,14 @@
     "chest": "箱子（{px}px）",
     "safe": "安全（{px}px）",
     "noName": "（無名稱）",
-    "tierLabel": "等級：{tier}"
+    "tierLabel": "Tier: {tier}",
+    "excludeFirstStep": "排名時從總時間中排除第一步用時",
+    "excludeFirstStepHint1": "建議將第一步設置為指定的起點，以使任務計時更公平：",
+    "excludeFirstStepHint2": "一個 InBounds 條件，設置在傳送點範圍內，描述文本為 “Warp to XXX with /warp”。注意，如果全局失敗條件設置了 TeleportDetection，請將此步驟的失敗條件設置為 Constant False（步驟失敗條件覆蓋全局失敗條件）。",
+    "excludeFirstStepHint3": "一個 InBounds 條件，設置在可見的車站地標處，帶有引導玩家前往該地標的描述文本。",
+    "excludeFirstStepHint4": "或者，如果不需要那麼精確地公平，可以使用 VisitStation 條件。",
+    "recalcProgress": "正在重新計算排行榜...",
+    "recalcFailed": "重新計算失敗"
   },
   "admin": {
     "categories": "分類",
