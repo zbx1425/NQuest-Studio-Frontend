@@ -50,6 +50,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
         questPoints: parsed.questPoints ?? 0,
         steps: parsed.steps ?? [],
         defaultCriteria: parsed.defaultCriteria?.failureCriteria ?? null,
+        excludeFirstStep: false
       });
       toast.success(t("questImported"));
       setImportText("");

@@ -1,6 +1,41 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Criterion, CriterionType, Step } from "./types";
 
+export type CriterionTypeGroupType =
+  | "mtr"
+  | "misc"
+  | "logic";
+
+export interface CriterionTypeGroup {
+  type: CriterionTypeGroupType;
+  children: CriterionType[];
+}
+
+export const GROUPED_ORDERED_CRITERION_TYPES: CriterionTypeGroup[] = [
+  {
+    type: "mtr",
+    children: [
+      "VisitStationCriterion", "RideLineCriterion", "RideToStationCriterion", 
+      "RideLineToStationCriterion", "RideFromStationCriterion", "RideLineFromStationCriterion"
+    ],
+  },
+  {
+    type: "misc",
+    children: [
+      "ManualTriggerCriterion", "InBoundsCriterion", "TeleportDetectCriterion",
+      "OverSpeedCriterion", 
+    ],
+  },
+  {
+    type: "logic",
+    children: [
+      "ConstantCriterion", "Descriptor", "NotCriterion",
+      "AndCriterion", "OrCriterion", "SequenceCriterion", 
+      "LatchingCriterion", "RisingEdgeAndConditionCriterion"
+    ],
+  },
+];
+
 export function createDefaultCriterion(type: CriterionType): Criterion {
   switch (type) {
     case "ManualTriggerCriterion":
@@ -28,6 +63,14 @@ export function createDefaultCriterion(type: CriterionType): Criterion {
         lineName: "",
         stationName: "",
       };
+    case "RideFromStationCriterion":
+      return { type: "RideFromStationCriterion", stationName: "" };
+    case "RideLineFromStationCriterion":
+      return {
+        type: "RideLineFromStationCriterion",
+        lineName: "",
+        stationName: "",
+      };
     case "ConstantCriterion":
       return { type: "ConstantCriterion", value: true, description: "" };
     case "Descriptor":
@@ -46,6 +89,8 @@ export function createDefaultCriterion(type: CriterionType): Criterion {
         base: createDefaultCriterion("ConstantCriterion"),
         description: "",
       };
+    case "SequenceCriterion":
+      return { type: "SequenceCriterion", criteria: [] };
     case "LatchingCriterion":
       return {
         type: "LatchingCriterion",

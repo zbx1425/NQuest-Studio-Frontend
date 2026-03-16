@@ -9,12 +9,16 @@ import {
   Combobox,
   Option,
   Spinner,
+  MessageBar,
+  MessageBarBody,
+  MessageBarTitle,
 } from "@fluentui/react-components";
 import {
   TrophyRegular,
   CheckmarkCircleRegular,
   SearchRegular,
   PersonRegular,
+  LightbulbRegular,
 } from "@fluentui/react-icons";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useMinecraftProfile } from "@/lib/hooks/useMinecraftProfile";
@@ -73,10 +77,10 @@ function Podium({
           <Link
             key={entry.rank}
             href={`/ranking/player?uuid=${encodeURIComponent(entry.playerUuid)}`}
-            className="no-underline text-inherit flex-1 max-w-[180px]"
+            className="no-underline text-inherit flex-1 max-w-50 h-full block"
           >
             <div
-              className={`${c.pad} flex flex-col items-center gap-1.5 px-3 sm:px-5 pb-4 rounded-lg border bg-gradient-to-b ${c.bg} transition-all hover:shadow-md hover:-translate-y-0.5 ${
+              className={`flex flex-col items-center gap-1.5 px-3 sm:px-5 pb-4 rounded-lg border bg-gradient-to-b ${c.bg} transition-all hover:shadow-md hover:-translate-y-0.5 ${
                 highlightUuid === entry.playerUuid ? "ring-2 ring-blue-400" : ""
               }`}
             >
@@ -85,9 +89,7 @@ function Podium({
               <img
                 src={`https://vzge.me/face/256/${entry.playerUuid}`}
                 alt=""
-                width={c.avatarPx}
-                height={c.avatarPx}
-                className="rounded-lg [image-rendering:pixelated]"
+                className="rounded-lg [image-rendering:pixelated] w-13 h-13 mt-3"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.visibility = "hidden";
                 }}
@@ -116,7 +118,7 @@ function PodiumSkeleton() {
       ].map((c, i) => (
         <div
           key={i}
-          className={`${c.pad} flex flex-col items-center gap-1.5 px-3 sm:px-5 pb-4 rounded-lg border border-gray-200 bg-gray-50/80 flex-1 max-w-[180px]`}
+          className={`flex flex-col items-center gap-1.5 px-3 sm:px-5 pb-4 rounded-lg border border-gray-200 bg-gray-50/80 flex-1 max-w-50`}
         >
           <div className="h-7 w-7 rounded-full bg-gray-200 animate-pulse" />
           <div
@@ -424,13 +426,9 @@ export default function RankingPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Hero Banner */}
-      <div className="relative rounded-lg bg-gradient-to-br from-indigo-600 via-blue-700 to-purple-700 text-white px-6 py-4 mb-6 overflow-hidden">
-        <div className="text-2xl sm:text-3xl items-center gap-2 mb-2 flex items-center">
-          <TrophyRegular className="text-yellow-300" />
-          <p className="font-bold">{t("title")}</p>
-        </div>
-      </div>
+      <MessageBar intent="info" className="mb-6">
+        <MessageBarBody>{t("takeItEasy")}</MessageBarBody>
+      </MessageBar>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main content */}

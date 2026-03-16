@@ -26,6 +26,8 @@ import {
   DismissRegular,
   ArrowUpRegular,
   ArrowDownRegular,
+  CopyRegular,
+  ClipboardPasteRegular,
 } from "@fluentui/react-icons";
 import {
   useGetCategoriesQuery,
@@ -184,8 +186,9 @@ export default function CategoriesPage() {
   };
 
   const removeTier = (tierId: string) => {
-    const { [tierId]: _, ...rest } = form.tiers;
-    setForm({ ...form, tiers: rest });
+    const nextTiers = { ...form.tiers };
+    delete nextTiers[tierId];
+    setForm({ ...form, tiers: nextTiers });
   };
 
   const moveTier = (tierId: string, direction: "up" | "down") => {
@@ -203,6 +206,70 @@ export default function CategoriesPage() {
     newTiers[currentId] = { ...newTiers[currentId], order: newTiers[swapId].order };
     newTiers[swapId] = { ...newTiers[swapId], order: currentOrder };
     setForm({ ...form, tiers: newTiers });
+  };
+
+  const normalizeTiers = (tiers: Record<string, QuestTier>) => {
+    const normalized: Record<string, QuestTier> = {};
+    Object.entries(tiers)
+      .sort(([, a], [, b]) => a.order - b.order)
+      .forEach(([id, tier], i) => {
+        normalized[id] = { ...tier, order: i };
+      });
+    return normalized;
+  };
+
+  const copyTiersToClipboard = async () => {
+    try {
+      const serialized = JSON.stringify(normalizeTiers(form.tiers), null, 2);
+      await navigator.clipboard.writeText(serialized);
+      toast.success("Tiers copied to clipboard");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to access clipboard";
+      toast.error("Copy failed", message);
+    }
+  };
+
+  const replaceTiersFromClipboard = async () => {
+    try {
+      const raw = (await navigator.clipboard.readText()).trim();
+      if (!raw) {
+        throw new Error("Clipboard is empty");
+      }
+
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("Clipboard content must be a tier object map");
+      }
+
+      const incoming = parsed as Record<string, unknown>;
+      const replaced: Record<string, QuestTier> = {};
+
+      Object.entries(incoming).forEach(([tierId, tierValue], idx) => {
+        if (!tierId.trim()) {
+          throw new Error("Tier id cannot be empty");
+        }
+        if (!tierValue || typeof tierValue !== "object" || Array.isArray(tierValue)) {
+          throw new Error(`Tier "${tierId}" must be an object`);
+        }
+
+        const tierObj = tierValue as Partial<QuestTier>;
+        const name = typeof tierObj.name === "string" ? tierObj.name : tierId;
+        const icon = typeof tierObj.icon === "string" ? tierObj.icon : "minecraft:gold_nugget";
+        const order =
+          typeof tierObj.order === "number" && Number.isFinite(tierObj.order)
+            ? tierObj.order
+            : idx;
+
+        replaced[tierId] = { name, icon, order };
+      });
+
+      setForm({ ...form, tiers: normalizeTiers(replaced) });
+      toast.success("Tiers replaced from clipboard");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Clipboard content is invalid";
+      toast.error("Replace failed", message);
+    }
   };
 
   return (
@@ -289,79 +356,99 @@ export default function CategoriesPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(_, d) => setDialogOpen(d.open)}>
-        <DialogSurface>
-          <DialogBody>
+        <DialogSurface className="w-[90vw]! max-w-6xl! max-h-[90vh]! h-160!">
+          <DialogBody className="flex h-full min-h-0 flex-col">
             <DialogTitle>
               {editingId ? t("editCategory") : t("newCategory")}
             </DialogTitle>
-            <DialogContent>
-              <div className="space-y-3 mt-2">
-                {!editingId && (
+            <DialogContent className="flex-1 overflow-y-auto">
+              <div className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+                <div className="space-y-3 lg:pr-6">
+                  {!editingId && (
+                    <div className="flex flex-col gap-1">
+                      <Label required>{t("categoryId")}</Label>
+                      <Input
+                        value={form.id}
+                        onChange={(_, d) => setForm({ ...form, id: d.value })}
+                        placeholder={t("categoryIdPlaceholder")}
+                      />
+                    </div>
+                  )}
                   <div className="flex flex-col gap-1">
-                    <Label required>{t("categoryId")}</Label>
+                    <Label required>{t("name")}</Label>
                     <Input
-                      value={form.id}
-                      onChange={(_, d) => setForm({ ...form, id: d.value })}
-                      placeholder={t("categoryIdPlaceholder")}
+                      value={form.name}
+                      onChange={(_, d) => setForm({ ...form, name: d.value })}
                     />
                   </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <Label required>{t("name")}</Label>
-                  <Input
-                    value={form.name}
-                    onChange={(_, d) => setForm({ ...form, name: d.value })}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Label>{tc("description")}</Label>
-                  <Textarea
-                    value={form.description}
-                    onChange={(_, d) =>
-                      setForm({ ...form, description: d.value })
-                    }
-                    rows={2}
-                    resize="vertical"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <Label>{t("icon")}</Label>
-                    <Input
-                      value={form.icon}
+                    <Label>{tc("description")}</Label>
+                    <Textarea
+                      value={form.description}
                       onChange={(_, d) =>
-                        setForm({ ...form, icon: d.value })
+                        setForm({ ...form, description: d.value })
                       }
-                      placeholder="minecraft:book"
+                      rows={2}
+                      resize="vertical"
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <Label>{t("order")}</Label>
-                    <Input
-                      type="number"
-                      value={String(form.order)}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <Label>{t("icon")}</Label>
+                      <Input
+                        value={form.icon}
+                        onChange={(_, d) =>
+                          setForm({ ...form, icon: d.value })
+                        }
+                        placeholder="minecraft:book"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label>{t("order")}</Label>
+                      <Input
+                        type="number"
+                        value={String(form.order)}
+                        onChange={(_, d) =>
+                          setForm({
+                            ...form,
+                            order: d.value === "" ? 0 : parseInt(d.value, 10) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={form.hidden}
                       onChange={(_, d) =>
-                        setForm({
-                          ...form,
-                          order: d.value === "" ? 0 : parseInt(d.value, 10) || 0,
-                        })
+                        setForm({ ...form, hidden: d.checked })
                       }
+                      label={tc("hidden")}
                     />
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.hidden}
-                    onChange={(_, d) =>
-                      setForm({ ...form, hidden: d.checked })
-                    }
-                    label={tc("hidden")}
-                  />
                 </div>
 
                 {/* Tiers */}
-                <div>
-                  <Label className="font-semibold">{t("tiers")}</Label>
+                <div className="border-t border-gray-200 pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="font-semibold">{t("tiers")}</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        appearance="secondary"
+                        icon={<CopyRegular />}
+                        onClick={copyTiersToClipboard}
+                      >
+                        Copy
+                      </Button>
+                      <Button
+                        appearance="secondary"
+                        icon={<ClipboardPasteRegular />}
+                        onClick={replaceTiersFromClipboard}
+                      >
+                        Paste
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-2 mt-2">
                     {Object.entries(form.tiers)
                       .sort(([, a], [, b]) => a.order - b.order)
@@ -452,7 +539,7 @@ export default function CategoriesPage() {
                 </div>
               </div>
             </DialogContent>
-            <DialogActions>
+            <DialogActions className="mt-4">
               <Button
                 onClick={() => setDialogOpen(false)}
                 appearance="secondary"

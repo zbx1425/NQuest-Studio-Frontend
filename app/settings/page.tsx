@@ -306,7 +306,7 @@ function MyRankingsSection({ mcUuid }: { mcUuid: string | null }) {
         <StatCard
           icon={<TrophyRegular />}
           value={profile.qpBalance.toLocaleString()}
-          label={t("qp")}
+          label={t("qpBalance")}
           iconBg="bg-amber-100 text-amber-600"
           valueClassName={profile.qpBalance < 0 ? "text-red-600" : undefined}
         />

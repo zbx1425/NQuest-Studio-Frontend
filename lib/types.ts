@@ -67,6 +67,17 @@ export interface RideLineToStationCriterion {
   stationName: string;
 }
 
+export interface RideFromStationCriterion {
+  type: "RideFromStationCriterion";
+  stationName: string;
+}
+
+export interface RideLineFromStationCriterion {
+  type: "RideLineFromStationCriterion";
+  lineName: string;
+  stationName: string;
+}
+
 export interface ConstantCriterion {
   type: "ConstantCriterion";
   value: boolean;
@@ -95,6 +106,11 @@ export interface NotCriterion {
   description: string;
 }
 
+export interface SequenceCriterion {
+  type: "SequenceCriterion";
+  criteria: Criterion[];
+}
+
 export interface LatchingCriterion {
   type: "LatchingCriterion";
   base: Criterion;
@@ -113,6 +129,8 @@ export type Criterion =
   | VisitStationCriterion
   | RideToStationCriterion
   | RideLineToStationCriterion
+  | RideFromStationCriterion
+  | RideLineFromStationCriterion
   | ConstantCriterion
   | OverSpeedCriterion
   | TeleportDetectCriterion
@@ -120,28 +138,11 @@ export type Criterion =
   | AndCriterion
   | OrCriterion
   | NotCriterion
+  | SequenceCriterion
   | LatchingCriterion
   | RisingEdgeAndConditionCriterion;
 
 export type CriterionType = Criterion["type"];
-
-export const CRITERION_TYPES: CriterionType[] = [
-  "RideLineCriterion",
-  "VisitStationCriterion",
-  "RideToStationCriterion",
-  "RideLineToStationCriterion",
-  "ManualTriggerCriterion",
-  "InBoundsCriterion",
-  "OverSpeedCriterion",
-  "TeleportDetectCriterion",
-  "ConstantCriterion",
-  "Descriptor",
-  "AndCriterion",
-  "OrCriterion",
-  "NotCriterion",
-  "LatchingCriterion",
-  "RisingEdgeAndConditionCriterion",
-];
 
 // ─── Quest ───
 

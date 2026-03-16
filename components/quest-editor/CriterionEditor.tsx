@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect } from "react";
 import {
-  Dropdown,
-  Option,
   Input,
   Label,
   Button,
@@ -14,10 +12,10 @@ import { DeleteRegular, AddRegular } from "@fluentui/react-icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/lib/store";
 import type { Criterion, CriterionType } from "@/lib/types";
-import { CRITERION_TYPES } from "@/lib/types";
-import { createDefaultCriterion, criterionTypeLabel } from "@/lib/criterion";
+import { createDefaultCriterion } from "@/lib/criterion";
 import { Vec3dInput } from "./Vec3dInput";
 import { AutocompleteInput } from "./AutocompleteInput";
+import { CriterionTypePicker } from "./CriterionTypePicker";
 import { useTranslations } from "next-intl";
 
 const BORDER_COLORS = [
@@ -86,19 +84,10 @@ export function CriterionEditor({
     <div className={`border-l-3 ${borderColor} pl-3 py-2 space-y-2`}>
       {/* Header: type selector + delete */}
       <div className="flex items-center gap-2">
-        <Dropdown
-          size="small"
-          value={criterionTypeLabel(value.type)}
-          selectedOptions={[value.type]}
-          onOptionSelect={(_, d) => handleTypeChange(d.optionValue ?? "")}
-          className="min-w-[180px]"
-        >
-          {CRITERION_TYPES.map((t) => (
-            <Option key={t} value={t}>
-              {criterionTypeLabel(t)}
-            </Option>
-          ))}
-        </Dropdown>
+        <CriterionTypePicker
+          value={value.type}
+          onChange={(nextType) => handleTypeChange(nextType)}
+        />
 
         <div className="flex-1" />
 
@@ -147,6 +136,37 @@ export function CriterionEditor({
       )}
 
       {value.type === "RideLineToStationCriterion" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <AutocompleteInput
+            label={t("lineName")}
+            value={value.lineName}
+            onChange={(v) => update({ lineName: v })}
+            items={routeItems}
+            placeholder={t("selectRoute")}
+          />
+          <AutocompleteInput
+            label={t("stationName")}
+            value={value.stationName}
+            onChange={(v) => update({ stationName: v })}
+            items={stationItems}
+            placeholder={t("selectStation")}
+            displayMap={stationDisplayMap}
+          />
+        </div>
+      )}
+
+      {value.type === "RideFromStationCriterion" && (
+        <AutocompleteInput
+          label={t("stationName")}
+          value={value.stationName}
+          onChange={(v) => update({ stationName: v })}
+          items={stationItems}
+          placeholder={t("selectStation")}
+          displayMap={stationDisplayMap}
+        />
+      )}
+
+      {value.type === "RideLineFromStationCriterion" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <AutocompleteInput
             label={t("lineName")}
@@ -227,11 +247,7 @@ export function CriterionEditor({
         </div>
       )}
 
-      {value.type === "TeleportDetectCriterion" && (
-        <Text size={200} className="text-gray-500">
-          {t("teleportDesc")}
-        </Text>
-      )}
+      {value.type === "TeleportDetectCriterion" && <></>}
 
       {value.type === "ManualTriggerCriterion" && (
         <>
@@ -289,7 +305,7 @@ export function CriterionEditor({
         </>
       )}
 
-      {(value.type === "AndCriterion" || value.type === "OrCriterion") && (
+      {(value.type === "AndCriterion" || value.type === "OrCriterion" || value.type === "SequenceCriterion") && (
         <div className="space-y-2">
           <Label size="small">{t("conditions")}</Label>
           {value.criteria.map((child, index) => (
