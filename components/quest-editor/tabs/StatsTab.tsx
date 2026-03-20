@@ -79,7 +79,7 @@ export function StatsTab({ questId }: StatsTabProps) {
             <Switch
               checked={useRanked}
               onChange={(e, data) => setUseRanked(data.checked)}
-              label={tr("rankedTime")}
+              label={tr("rankingTime")}
               labelPosition="before"
             />
           )}

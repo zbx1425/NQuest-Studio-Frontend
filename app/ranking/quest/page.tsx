@@ -106,17 +106,9 @@ export default function QuestLeaderboardPage() {
 
   const columns: ColumnDef[] = [
     {
-      label: quest?.excludeFirstStep ? t("rankedTime") : t("time"),
+      label: t("time"),
       className: "font-mono",
     },
-    ...(quest?.excludeFirstStep
-      ? [
-          {
-            label: t("totalTime"),
-            className: "font-mono text-gray-500 text-xs",
-          },
-        ]
-      : []),
     { label: "" },
     { label: "" },
   ];
@@ -128,9 +120,6 @@ export default function QuestLeaderboardPage() {
     playerName: e.playerName,
     cells: [
       <DurationDisplay key="t" ms={e.rankingDurationMillis} />,
-      ...(quest?.excludeFirstStep
-        ? [<DurationDisplay key="tt" ms={e.durationMillis} />]
-        : []),
       <span key="d" className="text-gray-500 text-xs">
         {formatDistanceToNow(new Date(e.completionTime), {
           addSuffix: true,
@@ -297,13 +286,6 @@ export default function QuestLeaderboardPage() {
                     ms={wrEntry.rankingDurationMillis}
                     className="text-lg font-bold text-amber-900 leading-none"
                   />
-                  {quest?.excludeFirstStep &&
-                    wrEntry.durationMillis !==
-                      wrEntry.rankingDurationMillis && (
-                      <span className="text-xs text-amber-700/70 mt-0.5">
-                        (<DurationDisplay ms={wrEntry.durationMillis} />)
-                      </span>
-                    )}
                 </div>
                 <span className="text-xs text-amber-600 ml-auto">
                   {formatDistanceToNow(new Date(wrEntry.completionTime), {

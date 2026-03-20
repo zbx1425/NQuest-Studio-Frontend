@@ -181,7 +181,7 @@
     "completionDisqualified": "任務記錄已取消記錄",
     "disqualifiedBody": "已扣除 {qpDeducted} QP。新餘額：{newBalance}",
     "alreadyDisqualified": "已取消記錄",
-    "rankedTime": "排名時間",
+    "rankingTime": "排名時間",
     "totalTime": "總時間",
     "findQuestLeaderboard": "任務速通排行榜",
     "questsCompleted": "完成任務數",

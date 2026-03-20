@@ -181,7 +181,7 @@
     "completionDisqualified": "任务记录已取消记录",
     "disqualifiedBody": "已扣除 {qpDeducted} QP。新余额：{newBalance}",
     "alreadyDisqualified": "已取消记录",
-    "rankedTime": "排名时间",
+    "rankingTime": "排名时间",
     "totalTime": "总时间",
     "findQuestLeaderboard": "任务速通排行榜",
     "questsCompleted": "完成任务数",
@@ -403,7 +403,7 @@
     "excludeFirstStepHint4": "一个 “乘车离站” 或 “乘指定线路离站” 条件。",
     "recalcProgress": "正在重新计算排行榜...",
     "recalcFailed": "重新计算失败",
-    "rankedTime": "排名时间",
+    "rankingTime": "排名时间",
     "stepFailureOverridesGlobal": "步骤的失败条件会替代全局失败条件",
     "criterionTypePicker": "选择条件类型",
     "criterionTypeGroup": {

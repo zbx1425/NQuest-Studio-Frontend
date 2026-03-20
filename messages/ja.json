@@ -181,7 +181,7 @@
     "completionDisqualified": "記録を失格にしました",
     "disqualifiedBody": "{qpDeducted} QP を控除しました。新残高: {newBalance}",
     "alreadyDisqualified": "すでに失格済みです",
-    "rankedTime": "ランク時間",
+    "rankingTime": "ランク時間",
     "totalTime": "総時間",
     "findQuestLeaderboard": "クエストスピードランリーダーボード",
     "questsCompleted": "クエスト完了数",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Dialog,
@@ -13,9 +13,7 @@ import {
 import { ChevronDownRegular } from "@fluentui/react-icons";
 import { useTranslations } from "next-intl";
 import type { CriterionType } from "@/lib/types";
-import {
-  getGroupedCriterionTypes,
-} from "@/lib/criterion";
+import { GROUPED_ORDERED_CRITERION_TYPES } from "@/lib/criterion";
 
 interface CriterionTypePickerProps {
   value: CriterionType;
@@ -26,19 +24,18 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
   const [open, setOpen] = useState(false);
   const t = useTranslations("editor");
   const tc = useTranslations("common");
-  const groupedTypes = useMemo(() => getGroupedCriterionTypes(), []);
 
   const selectedTitle = t("criterionType." + value);
 
   const renderPickerContent = (
     <div className="space-y-4">
-      {groupedTypes.map(({ group, types }) => (
-        <section key={group} className="space-y-2">
+      {GROUPED_ORDERED_CRITERION_TYPES.map(({ type, children }) => (
+        <section key={type} className="space-y-2">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-            {t(`criterionTypeGroup.${group}`)}
+            {t(`criterionTypeGroup.${type}`)}
           </h4>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-            {types.map((type) => {
+            {children.map((type) => {
               const title = t("criterionType." + type);
               const desc = t("criterionType." + type + "Desc");
               const selected = value === type;
@@ -58,7 +55,10 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
                     setOpen(false);
                   }}
                 >
-                  <div className="text-sm font-medium">{title}</div>
+                  <div className="text-sm flex items-baseline flex-row">
+                    <span className="flex-1 font-semibold whitespace-nowrap">{title}</span>
+                    <span className="text-gray-500 font-normal text-xs ms-2 truncate">{type.replace("Criterion", "")}</span>
+                  </div>
                   {desc ? (
                     <div className="mt-1 text-xs leading-5 text-gray-500">{desc}</div>
                   ) : null}

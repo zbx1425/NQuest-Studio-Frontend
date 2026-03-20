@@ -89,11 +89,6 @@ function OverviewSection({ uuid }: { uuid: string }) {
               <span className="font-semibold text-gray-700">
                 {formatDurationShort(a.rankingDurationMillis)}
               </span>
-              {a.rankingDurationMillis !== a.durationMillis && (
-                <span className="ml-1 text-[10px] opacity-80">
-                  ({formatDurationShort(a.durationMillis)})
-                </span>
-              )}
               <span className="mx-1.5 opacity-50">&middot;</span>
               {formatDistanceToNow(new Date(a.completionTime), {
                 addSuffix: true,

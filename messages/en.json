@@ -181,7 +181,7 @@
     "completionDisqualified": "Completion disqualified",
     "disqualifiedBody": "Deducted {qpDeducted} QP. New balance: {newBalance}",
     "alreadyDisqualified": "Already disqualified",
-    "rankedTime": "Ranked Time",
+    "rankingTime": "Ranking Time",
     "totalTime": "Total Time",
     "findQuestLeaderboard": "Quest Speedrun Leaderboard",
     "questsCompleted": "Quests Completed",
@@ -403,7 +403,7 @@
     "excludeFirstStepHint4": "A \"Depart from Station\" or \"Depart on Specific Line\" condition.",
     "recalcProgress": "Recalculating Leaderboard...",
     "recalcFailed": "Recalculation Failed",
-    "rankedTime": "Ranked Time",
+    "rankingTime": "Ranking Time",
     "criterionTypePicker": "Select criterion type",
     "criterionTypeGroup": {
       "mtr": "MTR",

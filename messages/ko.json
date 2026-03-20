@@ -181,7 +181,7 @@
     "completionDisqualified": "기록이 실격 처리되었습니다",
     "disqualifiedBody": "{qpDeducted} QP가 차감되었습니다. 새 잔액: {newBalance}",
     "alreadyDisqualified": "이미 실격 처리되었습니다",
-    "rankedTime": "순위 시간",
+    "rankingTime": "순위 시간",
     "totalTime": "총 시간",
     "findQuestLeaderboard": "퀘스트 스피드런 리더보드",
     "questsCompleted": "완료한 퀘스트 수",

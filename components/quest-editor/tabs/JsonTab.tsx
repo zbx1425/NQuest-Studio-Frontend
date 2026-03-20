@@ -29,6 +29,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
       category: form.category || undefined,
       tier: form.tier || undefined,
       questPoints: form.questPoints,
+      excludeFirstStep: form.excludeFirstStep,
       defaultCriteria: form.defaultCriteria
         ? { failureCriteria: form.defaultCriteria }
         : undefined,
@@ -50,7 +51,7 @@ export function JsonTab({ form, setForm }: JsonTabProps) {
         questPoints: parsed.questPoints ?? 0,
         steps: parsed.steps ?? [],
         defaultCriteria: parsed.defaultCriteria?.failureCriteria ?? null,
-        excludeFirstStep: false
+        excludeFirstStep: parsed.excludeFirstStep ?? true
       });
       toast.success(t("questImported"));
       setImportText("");

@@ -77,7 +77,7 @@ function createNewFormState(): QuestFormState {
     category: "",
     tier: "",
     questPoints: 0,
-    excludeFirstStep: false,
+    excludeFirstStep: true,
     steps: [createDefaultStep()],
     defaultCriteria: null,
   };
