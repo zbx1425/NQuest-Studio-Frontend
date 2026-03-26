@@ -27,6 +27,7 @@ import {
   ArrowUpRegular,
   ChevronDownRegular,
   MapRegular,
+  WarningRegular,
 } from "@fluentui/react-icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -71,6 +72,7 @@ export function QuestToolbar({
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
 
   const systemMap = useSelector((state: RootState) => state.systemMap);
+  const needsMtrData = !systemMap.data && !systemMap.loading;
 
   const [updateStatus] = useUpdateQuestStatusMutation();
   const [promote] = usePromoteQuestMutation();
@@ -209,17 +211,41 @@ export function QuestToolbar({
         )}
         
         <ToolbarDivider />
-        <Tooltip content={systemMap.data
-          ? t("mtrDataTooltip", { stations: systemMap.data.stationNames.length, routes: systemMap.data.routeNames.length })
-          : t("mtrNoDataTooltip")} relationship="description">
-          <ToolbarButton
-            icon={systemMap.loading ? <Spinner size="tiny" /> : <MapRegular />}
-            onClick={handleRefreshSystemMap}
-            disabled={systemMap.loading}
+        <div
+          className={
+            needsMtrData
+              ? "flex shrink-0 items-center gap-2 rounded-md border border-amber-400/80 bg-amber-50 ps-2 pe-0.5 py-0.5 shadow-sm ring-1 ring-amber-300/50 dark:border-amber-500/55 dark:bg-amber-950/45 dark:ring-amber-600/40"
+              : "contents"
+          }
+        >
+          {needsMtrData && (
+            <WarningRegular
+              className="shrink-0 text-amber-600 dark:text-amber-400"
+              aria-hidden
+              style={{ fontSize: 18 }}
+            />
+          )}
+          <Tooltip
+            content={
+              systemMap.data
+                ? t("mtrDataTooltip", {
+                    stations: systemMap.data.stationNames.length,
+                    routes: systemMap.data.routeNames.length,
+                  })
+                : t("mtrNoDataTooltip")
+            }
+            relationship="description"
           >
-            {systemMap.data ? t("reloadMtrData") : t("loadMtrData")}
-          </ToolbarButton>
-        </Tooltip>
+            <ToolbarButton
+              appearance={needsMtrData ? "primary" : "subtle"}
+              icon={systemMap.loading ? <Spinner size="tiny" /> : <MapRegular />}
+              onClick={handleRefreshSystemMap}
+              disabled={systemMap.loading}
+            >
+              {systemMap.data ? t("reloadMtrData") : t("loadMtrData")}
+            </ToolbarButton>
+          </Tooltip>
+        </div>
       </Toolbar>
 
       {quest?.hasPendingDraft && quest.status === "PUBLIC" && (

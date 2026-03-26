@@ -6,9 +6,8 @@ import {
   Label,
   Button,
   Switch,
-  Text,
 } from "@fluentui/react-components";
-import { DeleteRegular, AddRegular } from "@fluentui/react-icons";
+import { DeleteRegular, AddRegular, CopyRegular } from "@fluentui/react-icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/lib/store";
 import type { Criterion, CriterionType } from "@/lib/types";
@@ -17,6 +16,7 @@ import { Vec3dInput } from "./Vec3dInput";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { CriterionTypePicker } from "./CriterionTypePicker";
 import { useTranslations } from "next-intl";
+import { useAppToast } from "@/lib/hooks/useAppToast";
 
 const BORDER_COLORS = [
   "border-l-blue-400",
@@ -41,6 +41,7 @@ export function CriterionEditor({
 }: CriterionEditorProps) {
   const systemMap = useSelector((state: RootState) => state.systemMap.data);
   const t = useTranslations("editor");
+  const toast = useAppToast();
   const stationItems = systemMap?.stationNamesAndIds ?? [];
   const routeItems = systemMap?.routeNames ?? [];
   const stationDisplayMap = systemMap?.stationIdToName ?? {};
@@ -251,9 +252,58 @@ export function CriterionEditor({
 
       {value.type === "ManualTriggerCriterion" && (
         <>
-          <Text size={200}>
-            ID: <code className="bg-gray-100 px-1 rounded text-xs">{value.id}</code>
-          </Text>
+          <div className="flex flex-col gap-1">
+            <Label size="small">ID</Label>
+            <Input
+              size="small"
+              value={value.id}
+              onChange={(_, d) => update({ id: d.value })}
+              placeholder="nquest_id"
+              pattern="[a-z0-9_-]+"
+              className="flex-1"
+            />
+          </div>
+
+          
+          <div className="flex items-center gap-2">
+            <pre className="flex-1 bg-gray-100 px-3 py-2 rounded font-mono text-xs whitespace-pre-wrap break-all">
+              <code>{`/nquest quest trigger @p ${value.id}`}</code>
+            </pre>
+            
+            <Button
+                size="small"
+                appearance="subtle"
+                icon={<CopyRegular />}
+                onClick={async () => {
+                  const cmd = `/nquest quest trigger @p ${value.id}`;
+
+                  try {
+                    if (navigator.clipboard?.writeText) {
+                      await navigator.clipboard.writeText(cmd);
+                    } else {
+                      const textarea = document.createElement("textarea");
+                      textarea.value = cmd;
+                      textarea.style.position = "fixed";
+                      textarea.style.left = "-9999px";
+                      textarea.style.top = "-9999px";
+                      document.body.appendChild(textarea);
+                      textarea.focus();
+                      textarea.select();
+                      const ok = document.execCommand("copy");
+                      document.body.removeChild(textarea);
+                      if (!ok) throw new Error("Copy command failed");
+                    }
+
+                    toast.success(t("copiedToClipboard"));
+                  } catch {
+                    toast.error(t("failedToCopy"), t("failedToCopyBody"));
+                  }
+                }}
+                disabled={!/^[a-z0-9_-]+$/.test(value.id ?? "")}
+                title="Copy Minecraft command"
+              />
+          </div>
+
           <div className="flex flex-col gap-1">
             <Label size="small">{t("descriptionLabel")}</Label>
             <Input

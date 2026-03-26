@@ -91,7 +91,6 @@ export const api = createApi({
         description?: string | null;
         category?: string | null;
         tier?: string | null;
-        questPoints?: number;
         excludeFirstStep?: boolean;
         steps?: Quest["dataDraft"]["steps"];
         defaultCriteria?: Quest["dataDraft"]["defaultCriteria"];

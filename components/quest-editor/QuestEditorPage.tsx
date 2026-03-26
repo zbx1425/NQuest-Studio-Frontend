@@ -186,7 +186,6 @@ export function QuestEditorPage() {
           description: form.description || null,
           category: form.category || null,
           tier: form.tier || null,
-          questPoints: form.questPoints,
           excludeFirstStep: form.excludeFirstStep,
           steps: form.steps,
           defaultCriteria: form.defaultCriteria
@@ -204,7 +203,24 @@ export function QuestEditorPage() {
     }
   };
 
+  const handleSaveRef = React.useRef(handleSave);
+  handleSaveRef.current = handleSave;
+
   const isSaving = isCreating || isUpdating;
+  const canSave = isLoggedIn && (isNew || permissions.canEdit);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const isCtrlS = (e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S");
+      if (!isCtrlS) return;
+      if (!canSave) return;
+      e.preventDefault();
+      if (isSaving) return;
+      void handleSaveRef.current();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [canSave, isSaving]);
 
   if (!isNew && isLoading) {
     return (
@@ -283,7 +299,7 @@ export function QuestEditorPage() {
           isNew={isNew}
           isSaving={isSaving}
           onSave={handleSave}
-          canSave={isLoggedIn && (isNew || permissions.canEdit)}
+          canSave={canSave}
           onNavigateToReview={() => setActiveTab("review")}
         />
 
@@ -331,7 +347,7 @@ export function QuestEditorPage() {
               <StatsTab questId={questId} />
             )}
             {activeTab === "qp-adjust" && questData && (
-              <QpAdjustmentTab quest={questData} />
+              <QpAdjustmentTab form={form} updateForm={updateForm} quest={questData} />
             )}
           </div>
         </div>

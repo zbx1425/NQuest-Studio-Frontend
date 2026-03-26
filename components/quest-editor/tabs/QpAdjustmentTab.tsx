@@ -22,12 +22,15 @@ import { useAppToast, extractApiError } from "@/lib/hooks/useAppToast";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import type { Quest } from "@/lib/types";
+import type { QuestFormState } from "../QuestEditorPage";
 
 interface QpAdjustmentTabProps {
+  form: QuestFormState;
+  updateForm: (updates: Partial<QuestFormState>) => void;
   quest: Quest;
 }
 
-export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
+export function QpAdjustmentTab({ updateForm, quest }: QpAdjustmentTabProps) {
   const toast = useAppToast();
   const { isAdmin } = useAuth();
   const t = useTranslations("editor");
@@ -96,6 +99,8 @@ export function QpAdjustmentTab({ quest }: QpAdjustmentTabProps) {
         newQuestPoints: newQp,
         reason,
       }).unwrap();
+
+      updateForm({ questPoints: newQp });
 
       setJobId(result.jobId);
       setJobProgress({

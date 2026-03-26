@@ -39,7 +39,7 @@ export const GROUPED_ORDERED_CRITERION_TYPES: CriterionTypeGroup[] = [
 export function createDefaultCriterion(type: CriterionType): Criterion {
   switch (type) {
     case "ManualTriggerCriterion":
-      return { type: "ManualTriggerCriterion", id: uuidv4(), description: "" };
+      return { type: "ManualTriggerCriterion", id: "choose-a-meaningful-name-" + uuidv4().substring(0, 8), description: "" };
     case "OverSpeedCriterion":
       return { type: "OverSpeedCriterion", maxSpeedMps: 0 };
     case "TeleportDetectCriterion":

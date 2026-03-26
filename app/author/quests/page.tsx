@@ -23,6 +23,7 @@ import {
   WarningRegular,
   SearchRegular,
   DismissRegular,
+  PreviewLinkRegular,
 } from "@fluentui/react-icons";
 import { useGetQuestsQuery, useGetCategoriesQuery } from "@/lib/store/api";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -41,6 +42,7 @@ export default function QuestListPage() {
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("status");
   const tNav = useTranslations("nav");
+  const tQuests = useTranslations("quests");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [pendingOnly, setPendingOnly] = useState(false);
@@ -105,11 +107,18 @@ export default function QuestListPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">{tNav("quests")}</h1>
         {isLoggedIn && isAuthor && (
-          <Link href="/author/editor">
-            <Button appearance="primary" icon={<AddRegular />}>
-              {t("newQuest")}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/quests">
+              <Button appearance="secondary" icon={<PreviewLinkRegular />}>
+                {tQuests("questCatalog")}
+              </Button>
+            </Link>
+            <Link href="/author/editor">
+              <Button appearance="primary" icon={<AddRegular />}>
+                {t("newQuest")}
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
