@@ -39,7 +39,7 @@ export interface InBoundsCriterion {
 
 export interface OverSpeedCriterion {
   type: "OverSpeedCriterion";
-  maxSpeedMps: number;
+  maxSpeedKmph: number;
 }
 
 export interface TeleportDetectCriterion {

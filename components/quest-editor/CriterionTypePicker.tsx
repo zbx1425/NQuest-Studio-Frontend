@@ -44,7 +44,7 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
                   key={type}
                   type="button"
                   className={[
-                    "w-full border p-3 text-left transition-colors rounded-none",
+                    "w-full border p-3 text-left transition-colors rounded",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
                     selected
                       ? "border-blue-500 bg-blue-50"
@@ -77,7 +77,7 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
       size="small"
       icon={<ChevronDownRegular />}
       iconPosition="after"
-      className="min-w-[280px] justify-between rounded-none"
+      className="min-w-[280px] justify-between rounded"
       title={selectedTitle}
       aria-label={t("criterionTypePicker")}
       onClick={() => setOpen(true)}
@@ -90,7 +90,7 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
     <>
       {triggerButton}
       <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
-        <DialogSurface className="max-h-[calc(100vh-1rem)]! w-280! max-w-[calc(100vw-1rem)]! rounded-none">
+        <DialogSurface className="max-h-[calc(100vh-1rem)]! w-280! max-w-[calc(100vw-1rem)]! rounded">
           <DialogBody className="min-h-0">
             <DialogTitle>{t("criterionTypePicker")}</DialogTitle>
             <DialogContent className="min-h-0 overflow-y-auto pr-1">
@@ -99,7 +99,7 @@ export function CriterionTypePicker({ value, onChange }: CriterionTypePickerProp
             <DialogActions>
               <Button
                 appearance="secondary"
-                className="rounded-none"
+                className="rounded"
                 onClick={() => setOpen(false)}
               >
                 {tc("cancel")}

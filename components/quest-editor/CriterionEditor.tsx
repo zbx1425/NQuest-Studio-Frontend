@@ -240,9 +240,9 @@ export function CriterionEditor({
           <Input
             size="small"
             type="number"
-            value={String(value.maxSpeedMps)}
+            value={String(value.maxSpeedKmph)}
             onChange={(_, d) =>
-              update({ maxSpeedMps: parseFloat(d.value) || 0 })
+              update({ maxSpeedKmph: parseFloat(d.value) || 0 })
             }
           />
         </div>

@@ -249,7 +249,7 @@ export function QuestToolbar({
       </Toolbar>
 
       {quest?.hasPendingDraft && quest.status === "PUBLIC" && (
-        <MessageBar intent="warning" className="rounded-none">
+        <MessageBar intent="warning" className="rounded">
           <MessageBarBody className="flex items-center gap-2 flex-wrap">
             <span>
               {permissions.isAdmin

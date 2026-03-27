@@ -41,7 +41,7 @@ export function createDefaultCriterion(type: CriterionType): Criterion {
     case "ManualTriggerCriterion":
       return { type: "ManualTriggerCriterion", id: "choose-a-meaningful-name-" + uuidv4().substring(0, 8), description: "" };
     case "OverSpeedCriterion":
-      return { type: "OverSpeedCriterion", maxSpeedMps: 0 };
+      return { type: "OverSpeedCriterion", maxSpeedKmph: 0 };
     case "TeleportDetectCriterion":
       return { type: "TeleportDetectCriterion" };
     case "InBoundsCriterion":

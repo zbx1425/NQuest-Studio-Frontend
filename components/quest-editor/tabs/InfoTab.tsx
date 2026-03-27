@@ -160,7 +160,7 @@ export function InfoTab({ form, updateForm, quest, isNew }: InfoTabProps) {
           />
           {form.excludeFirstStep && (
             <div className="pl-4 pr-2 py-2 mt-1 bg-yellow-50 text-yellow-900 text-sm rounded-md border border-yellow-200">
-              <p className="font-semibold mb-1">{t("excludeFirstStepHint1")}</p>
+              <p className="font-semibold mb-1">{t("excludeFirstStep")}:<br/>{t("excludeFirstStepHint1")}</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>{t("excludeFirstStepHint4")}</li>
                 <li>{t("excludeFirstStepHint2")}</li>

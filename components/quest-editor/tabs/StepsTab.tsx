@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Label } from "@fluentui/react-components";
-import { AddRegular } from "@fluentui/react-icons";
+import { AddRegular, ShieldAddRegular } from "@fluentui/react-icons";
 import type { Step, Criterion } from "@/lib/types";
 import { createDefaultStep, createDefaultCriterion } from "@/lib/criterion";
 import { StepEditor } from "../StepEditor";
@@ -64,7 +64,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
         ) : (
           <Button
             appearance="subtle"
-            icon={<AddRegular />}
+            icon={<ShieldAddRegular />}
             onClick={() =>
               updateForm({
                 defaultCriteria: createDefaultCriterion(
@@ -79,7 +79,7 @@ export function StepsTab({ form, updateForm }: StepsTabProps) {
       </section>
 
       {/* Steps */}
-      <section className="space-y-4">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">
           {t("stepsCount", { count: form.steps.length })}
         </h2>
