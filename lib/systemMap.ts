@@ -38,7 +38,7 @@ export function parseMtrName(rawName: string): string {
   const relevantPart = rawName.split("||")[0];
   const parts = relevantPart
     .split("|")
-    .filter((part) => part.trim() && !/[\u4E00-\u9FA5]/.test(part))
+    .filter((part) => part.trim() && !/[\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/.test(part))
     .map((part) => part.trim());
   return parts.join(" ");
 }
@@ -68,27 +68,31 @@ export async function fetchSystemMapData(
     .map((r) => parseMtrName(r.name))
     .filter(Boolean);
 
-  const stationNameToId = json.data.stations.reduce(
-    (acc, station) => {
-      acc[parseMtrName(station.name)] = station.id;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
-
+  const stationIdToFullName = new Map<string, string>();
   const stationIdToName: Record<string, string> = {};
-  for (const [name, id] of Object.entries(stationNameToId)) {
-    stationIdToName[id] = name;
-  }
+  const stationNameToId: Record<string, string> = {};
 
-  const stationNamesAndIds = [
-    ...new Set(Object.values(stationNameToId)),
-  ];
+  for (const station of json.data.stations) {
+    const mtrName = parseMtrName(station.name);
+    stationIdToFullName.set(station.id, station.name);
+    if (stationNameToId.hasOwnProperty(mtrName)) {
+      // Well we have a duplicate, use full name instead of just mtrName
+      // Also re-connect the previous entry
+      const prevStationId = stationNameToId[mtrName];
+      stationIdToName[prevStationId] = stationIdToFullName.get(prevStationId)!;
+      stationIdToName[station.id] = station.name;
+      stationNameToId[stationIdToFullName.get(prevStationId)!] = prevStationId;
+      stationNameToId[station.name] = station.id;
+    } else {
+      stationIdToName[station.id] = mtrName;
+      stationNameToId[parseMtrName(station.name)] = station.id;
+    }
+  }
 
   return {
     stationNames: [...new Set(stationNames)],
     routeNames: [...new Set(routeNames)],
-    stationNamesAndIds: [...new Set(stationNamesAndIds)],
+    stationIds: [...Object.keys(stationIdToName)],
     stationNameToId,
     stationIdToName,
   };

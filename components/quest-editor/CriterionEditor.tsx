@@ -42,7 +42,7 @@ export function CriterionEditor({
   const systemMap = useSelector((state: RootState) => state.systemMap.data);
   const t = useTranslations("editor");
   const toast = useAppToast();
-  const stationItems = systemMap?.stationNamesAndIds ?? [];
+  const stationItems = systemMap?.stationIds ?? [];
   const routeItems = systemMap?.routeNames ?? [];
   const stationDisplayMap = systemMap?.stationIdToName ?? {};
 

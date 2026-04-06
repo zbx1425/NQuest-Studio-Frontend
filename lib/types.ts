@@ -233,7 +233,7 @@ export interface MeResponse {
 export interface SystemMapData {
   stationNames: string[];
   routeNames: string[];
-  stationNamesAndIds: string[];
+  stationIds: string[];
   stationNameToId: Record<string, string>;
   stationIdToName: Record<string, string>;
 }
