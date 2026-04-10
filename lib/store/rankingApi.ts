@@ -114,4 +114,5 @@ export const {
   useGetPublicQuestsQuery,
   useGetPublicCategoriesQuery,
   useSearchPlayersQuery,
+  useLazySearchPlayersQuery,
 } = rankingApi;

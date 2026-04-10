@@ -13,6 +13,15 @@ import type {
   QuestStatsResponse,
   DisqualifyResponse,
   QpOperationResponse,
+  BanRequest,
+  BanResponse,
+  PardonResponse,
+  ListBansResponse,
+  ActiveBansResponse,
+  AdminPlayerSearchResponse,
+  InfractionsResponse,
+  AuditLogResponse,
+  AuditLogQuery,
 } from "../types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api/v1";
@@ -29,7 +38,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Quest", "QuestList", "Category", "Acl", "Me"],
+  tagTypes: ["Quest", "QuestList", "Category", "Acl", "Me", "PlayerBans"],
   endpoints: (builder) => ({
     // ─── Auth ───
     getMe: builder.query<MeResponse, void>({
@@ -262,6 +271,83 @@ export const api = createApi({
         body,
       }),
     }),
+
+    // ─── Admin: Ban / Pardon ───
+    banPlayer: builder.mutation<BanResponse, { uuid: string } & BanRequest>({
+      query: ({ uuid, ...body }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/ban`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_r, _e, { uuid }) => [
+        { type: "PlayerBans", id: uuid },
+      ],
+    }),
+    pardonPlayer: builder.mutation<
+      PardonResponse,
+      { uuid: string; reason: string }
+    >({
+      query: ({ uuid, reason }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/pardon`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: (_r, _e, { uuid }) => [
+        { type: "PlayerBans", id: uuid },
+      ],
+    }),
+    getPlayerBans: builder.query<
+      ListBansResponse,
+      { uuid: string; limit?: number; offset?: number; active?: boolean }
+    >({
+      query: ({ uuid, ...params }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/bans`,
+        params,
+      }),
+      providesTags: (_r, _e, { uuid }) => [{ type: "PlayerBans", id: uuid }],
+    }),
+    getPlayerInfractions: builder.query<
+      InfractionsResponse,
+      { uuid: string; limit?: number; offset?: number }
+    >({
+      query: ({ uuid, ...params }) => ({
+        url: `/admin/players/${encodeURIComponent(uuid)}/infractions`,
+        params,
+      }),
+      providesTags: (_r, _e, { uuid }) => [{ type: "PlayerBans", id: uuid }],
+    }),
+    getAdminBans: builder.query<
+      ActiveBansResponse,
+      { search?: string; limit?: number; offset?: number }
+    >({
+      query: (params) => ({
+        url: "/admin/bans",
+        params: Object.fromEntries(
+          Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
+        ),
+      }),
+      providesTags: ["PlayerBans"],
+    }),
+    searchAdminPlayers: builder.query<
+      AdminPlayerSearchResponse,
+      { name: string; limit?: number }
+    >({
+      query: (params) => ({
+        url: "/admin/players/search",
+        params,
+      }),
+      keepUnusedDataFor: 30,
+    }),
+
+    // ─── Admin: Audit Log ───
+    getAuditLog: builder.query<AuditLogResponse, AuditLogQuery>({
+      query: (params) => ({
+        url: "/admin/audit-log",
+        params: Object.fromEntries(
+          Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
+        ),
+      }),
+    }),
   }),
 });
 
@@ -289,4 +375,11 @@ export const {
   useDisqualifyCompletionMutation,
   useAdminGrantQpMutation,
   useAdminDeductQpMutation,
+  useBanPlayerMutation,
+  usePardonPlayerMutation,
+  useGetPlayerBansQuery,
+  useGetPlayerInfractionsQuery,
+  useGetAdminBansQuery,
+  useLazySearchAdminPlayersQuery,
+  useGetAuditLogQuery,
 } = api;

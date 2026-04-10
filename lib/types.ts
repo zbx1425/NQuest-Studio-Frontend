@@ -258,6 +258,8 @@ export interface PublicQuestListItem {
   tier?: string | null;
   totalRuns?: number;
   uniqueRunners?: number;
+  createdBy?: { discordUserId: string; username: string };
+  lastModifiedAt?: number;
 }
 
 export interface PublicQuestListResponse {
@@ -478,4 +480,149 @@ export interface JobStatusResponse {
   progress: { processed: number; total: number };
   createdAt: number;
   completedAt: number | null;
+}
+
+// ─── Ban System ───
+
+export type BanType = "TEMP" | "PERM";
+
+export interface BanRequest {
+  banType: BanType;
+  reason: string;
+  durationMinutes?: number;
+}
+
+export interface BanResponse {
+  banId: number;
+  playerUuid: string;
+  banType: BanType;
+  reason: string;
+  issuedAt: number;
+  expiresAt: number | null;
+}
+
+export interface PardonResponse {
+  pardonedCount: number;
+  playerUuid: string;
+}
+
+export interface BanEntry {
+  id: number;
+  banType: BanType;
+  reason: string;
+  issuedBy: string;
+  issuedAt: number;
+  expiresAt: number | null;
+  pardonedAt: number | null;
+  pardonedBy: string | null;
+  pardonReason: string | null;
+  active: boolean;
+}
+
+export interface ListBansResponse {
+  entries: BanEntry[];
+  total: number;
+}
+
+export interface ActiveBanEntry {
+  id: number;
+  playerUuid: string;
+  playerName: string | null;
+  banType: BanType;
+  reason: string;
+  issuedBy: string;
+  issuedAt: number;
+  expiresAt: number | null;
+}
+
+export interface ActiveBansResponse {
+  entries: ActiveBanEntry[];
+  total: number;
+}
+
+export interface AdminPlayerSearchResponse {
+  results: PlayerSearchResult[];
+}
+
+// ─── Infractions ───
+
+export interface BanInfractionDetails {
+  banId: number;
+  banType: BanType;
+  reason: string;
+  issuedBy: string;
+  expiresAt: number | null;
+  pardonedAt: number | null;
+  pardonedBy: string | null;
+  pardonReason: string | null;
+}
+
+export interface DqInfractionDetails {
+  completionId: number;
+  questId: string;
+  questName: string;
+  reason: string;
+  disqualifiedBy: string;
+}
+
+export interface InfractionEntry {
+  type: "BAN" | "DQ";
+  timestamp: number;
+  details: BanInfractionDetails | DqInfractionDetails;
+}
+
+export interface InfractionsResponse {
+  entries: InfractionEntry[];
+  total: number;
+}
+
+// ─── Audit Log ───
+
+export type AuditAction =
+  | "QUEST_CREATE"
+  | "QUEST_UPDATE"
+  | "QUEST_DELETE"
+  | "QUEST_STATUS_CHANGE"
+  | "QUEST_PROMOTE"
+  | "CATEGORY_CREATE"
+  | "CATEGORY_UPDATE"
+  | "CATEGORY_DELETE"
+  | "ACL_UPDATE"
+  | "QP_ADJUST"
+  | "COMPLETION_DQ"
+  | "ADMIN_GRANT"
+  | "ADMIN_DEDUCT"
+  | "PLAYER_BAN"
+  | "PLAYER_PARDON"
+  | "COMPLETION_SUBMIT";
+
+export type AuditTargetType = "quest" | "category" | "player" | "completion";
+
+export interface AuditLogEntry {
+  id: number;
+  action: AuditAction;
+  actorType: "USER" | "API_KEY";
+  actorId: string;
+  targetType: AuditTargetType;
+  targetId: string;
+  snapshot: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: number;
+}
+
+export interface AuditLogResponse {
+  entries: AuditLogEntry[];
+  total: number;
+}
+
+export interface AuditLogQuery {
+  targetType?: AuditTargetType;
+  targetId?: string;
+  action?: AuditAction;
+  actorId?: string;
+  since?: number;
+  until?: number;
+  search?: string;
+  limit?: number;
+  offset?: number;
 }

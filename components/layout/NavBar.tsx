@@ -51,6 +51,11 @@ export function NavBar() {
     (state: RootState) => state.locale.locale
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  const adminMenuItems = [
+    { value: "/admin/categories", label: "Categories" },
+    { value: "/admin/user", label: "Players" },
+    { value: "/admin/audit", label: "Audit Log" },
+  ];
 
   const tabs = [
     { value: "/ranking", label: t("leaderboards") },
@@ -58,9 +63,6 @@ export function NavBar() {
       value: isAuthor ? "/author/quests" : "/quests",
       label: t("quests"),
     },
-    ...(isAdmin
-      ? [{ value: "/admin/categories", label: t("categories") }]
-      : []),
     ...(isLoggedIn
       ? [{ value: "/settings", label: t("settings") }]
       : []),
@@ -105,6 +107,26 @@ export function NavBar() {
                 <Tab value={tab.value}>{tab.label}</Tab>
               </Link>
             ))}
+            {isAdmin && (
+              <Menu>
+                <MenuTrigger disableButtonEnhancement>
+                  <Tab value="admin">{tc("admin")}</Tab>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    {adminMenuItems.map((item) => (
+                      <Link
+                        key={item.value}
+                        href={item.value}
+                        className="no-underline"
+                      >
+                        <MenuItem>{item.label}</MenuItem>
+                      </Link>
+                    ))}
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            )}
           </TabList>
 
           {/* Spacer on mobile */}
@@ -242,6 +264,27 @@ export function NavBar() {
                   {tab.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <>
+                  <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    {tc("admin")}
+                  </div>
+                  {adminMenuItems.map((item) => (
+                    <Link
+                      key={item.value}
+                      href={item.value}
+                      onClick={() => setMobileOpen(false)}
+                      className={`block px-3 py-2.5 rounded-lg text-sm no-underline transition-colors ${
+                        pathname === item.value
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         )}

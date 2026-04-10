@@ -36,7 +36,7 @@ type StatusFilter = "" | "PRIVATE" | "STAGING" | "PUBLIC";
 
 export default function QuestListPage() {
   const router = useRouter();
-  const { isLoggedIn, isAuthor, isAdmin } = useAuth();
+  const { user, isLoggedIn, isAuthor, isAdmin } = useAuth();
   const dateLocale = useDateLocale();
   const t = useTranslations("quests");
   const tCommon = useTranslations("common");
@@ -46,6 +46,7 @@ export default function QuestListPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [mineOnly, setMineOnly] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -62,42 +63,55 @@ export default function QuestListPage() {
 
   const {
     data: authData,
-    isLoading: authLoading,
-    isFetching: authFetching,
+    isLoading,
+    isFetching,
   } = useGetQuestsQuery(
-    {
-      status: statusFilter || undefined,
-      category: categoryFilter || undefined,
-      page,
-      size: pageSize,
-    },
+    { size: 9999 },
     { skip: !isAuthor }
   );
-
-  const isLoading = authLoading;
-  const isFetching = authFetching;
 
   const categoryEntries = categories
     ? Object.entries(categories).sort(([, a], [, b]) => a.order - b.order)
     : [];
 
-  let authItems = authData?.items ?? [];
-  if (pendingOnly) {
-    authItems = authItems.filter((q) => q.hasPendingDraft);
+  let filteredItems = authData?.items ?? [];
+
+  if (mineOnly && user?.discordUserId) {
+    const myId = user.discordUserId;
+    filteredItems = filteredItems.filter(
+      (q) =>
+        q.createdBy.discordUserId === myId ||
+        q.acl.some((entry) => entry.discordUserId === myId)
+    );
   }
+
+  if (statusFilter) {
+    filteredItems = filteredItems.filter((q) => q.status === statusFilter);
+  }
+
+  if (categoryFilter) {
+    filteredItems = filteredItems.filter((q) => q.category === categoryFilter);
+  }
+
+  if (pendingOnly) {
+    filteredItems = filteredItems.filter((q) => q.hasPendingDraft);
+  }
+
   if (searchQuery.trim()) {
     const query = searchQuery.trim().toLowerCase();
-    authItems = authItems.filter(
+    filteredItems = filteredItems.filter(
       (q) =>
         q.name.toLowerCase().includes(query) ||
         q.id.toLowerCase().includes(query)
     );
   }
-  const isClientFiltered = pendingOnly || !!searchQuery.trim();
-  const totalItems = isClientFiltered
-    ? authItems.length
-    : (authData?.total ?? 0);
+
+  const totalItems = filteredItems.length;
   const totalPages = Math.ceil(totalItems / pageSize);
+  const displayItems = filteredItems.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   if (!isAuthor) return null;
 
@@ -181,18 +195,26 @@ export default function QuestListPage() {
           ))}
         </Dropdown>
 
+        <div className="self-stretch w-px bg-gray-200" />
+
+        <Checkbox
+          label={t("onlyMine")}
+          checked={mineOnly}
+          onChange={(_, d) => {
+            setMineOnly(!!d.checked);
+            setPage(1);
+          }}
+        />
+
         {isAdmin && (
-          <>
-            <div className="self-stretch w-px bg-gray-200" />
-            <Checkbox
-              label={t("pendingReviewOnly")}
-              checked={pendingOnly}
-              onChange={(_, d) => {
-                setPendingOnly(!!d.checked);
-                setPage(1);
-              }}
-            />
-          </>
+          <Checkbox
+            label={t("pendingReviewOnly")}
+            checked={pendingOnly}
+            onChange={(_, d) => {
+              setPendingOnly(!!d.checked);
+              setPage(1);
+            }}
+          />
         )}
       </div>
 
@@ -217,18 +239,20 @@ export default function QuestListPage() {
                 </tr>
               </thead>
               <tbody>
-                {authItems.length === 0 && (
+                {displayItems.length === 0 && (
                   <tr>
                     <td colSpan={7} className="text-center py-12 text-gray-500">
                       {searchQuery.trim()
                         ? t("noQuestsMatch")
                         : pendingOnly
                           ? t("noQuestsPending")
-                          : t("noQuestsFoundEmpty")}
+                          : mineOnly
+                            ? t("noQuestsMine")
+                            : t("noQuestsFoundEmpty")}
                     </td>
                   </tr>
                 )}
-                {authItems.map((quest) => {
+                {displayItems.map((quest) => {
                   const catName = quest.category && categories
                     ? categories[quest.category]?.name ?? quest.category
                     : "—";
